@@ -3,6 +3,7 @@ import { GameCanvas } from './renderer/GameCanvas'
 import { UIOverlay } from './components/UIOverlay'
 import { GatheringUI } from './components/GatheringUI'
 import { CraftingUI } from './components/CraftingUI'
+import { GMPanel } from './components/GMPanel'
 import { useGameStore } from './stores/gameStore'
 import { NetworkManager } from './network/NetworkManager'
 import { combatSystem } from './systems/CombatSystem'
@@ -90,6 +91,9 @@ function App() {
       
       {/* 制造 UI */}
       <CraftingUI />
+      
+      {/* GM 工具面板 */}
+      <GMPanel />
     </div>
   )
 }
