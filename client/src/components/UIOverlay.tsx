@@ -4,6 +4,7 @@ import { SkillBar } from './SkillBar'
 import { MiniMap } from './MiniMap'
 import { ChatBox } from './ChatBox'
 import { MenuBar } from './MenuBar'
+import { Inventory } from './Inventory'
 import './UIOverlay.css'
 
 /**
@@ -55,19 +56,10 @@ export function UIOverlay() {
         </div>
       </div>
 
-      {/* 弹窗窗口 */}
-      {showInventory && (
-        <div className="ui-window">
-          <div className="window-header">
-            <span>背包</span>
-            <button onClick={() => setShowInventory(false)}>×</button>
-          </div>
-          <div className="window-content">
-            <p>背包功能开发中...</p>
-          </div>
-        </div>
-      )}
+      {/* 背包按钮 */}
+      <Inventory />
 
+      {/* 弹窗窗口 */}
       {showCharacter && (
         <div className="ui-window">
           <div className="window-header">
