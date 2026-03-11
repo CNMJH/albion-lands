@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as PIXI from 'pixi.js'
 import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
+import { CombatRenderer } from './CombatRenderer'
 
 /**
  * 游戏画布组件
@@ -10,6 +11,7 @@ import { GameRenderer } from '../renderer/GameRenderer'
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const rendererRef = useRef<GameRenderer | null>(null)
+  const combatRendererRef = useRef<CombatRenderer | null>(null)
   const { player } = useGameStore()
 
   useEffect(() => {
@@ -28,6 +30,15 @@ export function GameCanvas() {
     // 初始化 Pixi 应用
     renderer.init(containerRef.current)
 
+    // 创建战斗渲染器
+    const combatRenderer = new CombatRenderer(renderer)
+    combatRendererRef.current = combatRenderer
+
+    // 创建玩家精灵
+    setTimeout(() => {
+      combatRenderer.createPlayerSprite()
+    }, 1000)
+
     // 处理窗口大小变化
     const handleResize = () => {
       renderer.resize(window.innerWidth, window.innerHeight)
@@ -41,6 +52,9 @@ export function GameCanvas() {
     // 清理
     return () => {
       window.removeEventListener('resize', handleResize)
+      if (combatRendererRef.current) {
+        combatRendererRef.current.clear()
+      }
       renderer.destroy()
       rendererRef.current = null
     }
@@ -50,6 +64,11 @@ export function GameCanvas() {
   useEffect(() => {
     if (rendererRef.current && player) {
       rendererRef.current.setCameraTarget(player.x, player.y)
+      
+      // 更新玩家精灵位置
+      if (combatRendererRef.current) {
+        combatRendererRef.current.updatePlayerPosition(player.x, player.y)
+      }
     }
   }, [player?.x, player?.y])
 

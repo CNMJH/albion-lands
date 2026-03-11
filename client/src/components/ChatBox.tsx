@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useGameStore } from '../stores/gameStore'
 import './ChatBox.css'
 
 interface ChatMessage {
@@ -18,10 +19,26 @@ export function ChatBox() {
     { id: '1', channel: 'system', sender: '系统', content: '欢迎来到呼噜大陆！', timestamp: Date.now() },
     { id: '2', channel: 'system', sender: '系统', content: '按 Enter 打开聊天框，使用 /help 查看帮助', timestamp: Date.now() },
   ])
+  const combatLog = useGameStore(state => state.combatLog)
   const [input, setInput] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // 监听战斗日志
+  useEffect(() => {
+    if (combatLog.length > 0) {
+      const lastLog = combatLog[combatLog.length - 1]
+      const newMessage: ChatMessage = {
+        id: Date.now().toString(),
+        channel: 'combat',
+        sender: '战斗',
+        content: lastLog,
+        timestamp: Date.now(),
+      }
+      setMessages(prev => [...prev, newMessage])
+    }
+  }, [combatLog])
 
   // 自动滚动到底部
   useEffect(() => {
@@ -78,6 +95,7 @@ export function ChatBox() {
       case 'party': return '#3498db'
       case 'guild': return '#9b59b6'
       case 'trade': return '#2ecc71'
+      case 'combat': return '#e74c3c'
       default: return '#ffffff'
     }
   }

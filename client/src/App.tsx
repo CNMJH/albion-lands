@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { GameCanvas } from './renderer/GameCanvas'
 import { UIOverlay } from './components/UIOverlay'
 import { useGameStore } from './stores/gameStore'
 import { NetworkManager } from './network/NetworkManager'
+import { combatSystem } from './systems/CombatSystem'
+import { monsterAI } from './systems/MonsterAI'
 import './App.css'
 
 function App() {
   const [loading, setLoading] = useState(true)
   const [loadingProgress, setLoadingProgress] = useState(0)
-  const { initialize } = useGameStore()
+  const { initialize, setPlayer, addMonster, updateMonster, removeMonster } = useGameStore()
+  const gameLoopRef = useRef<number>()
 
   useEffect(() => {
     // 初始化游戏
@@ -27,7 +30,11 @@ function App() {
         await loadResources()
         setLoadingProgress(80)
 
-        // 4. 启动游戏循环
+        // 4. 设置网络消息处理器
+        setupNetworkHandlers()
+        
+        // 5. 启动游戏循环
+        startGameLoop()
         setLoadingProgress(100)
         
         // 延迟移除加载界面
@@ -41,6 +48,13 @@ function App() {
     }
 
     initGame()
+
+    // 清理
+    return () => {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current)
+      }
+    }
   }, [])
 
   if (loading) {
@@ -70,6 +84,115 @@ function App() {
       <UIOverlay />
     </div>
   )
+}
+
+// 设置网络消息处理器
+function setupNetworkHandlers() {
+  const network = NetworkManager.getInstance()
+  const { setPlayer, addMonster, updateMonster, removeMonster, addCombatLog, updatePlayerHP } = useGameStore.getState()
+
+  // 监听欢迎消息
+  network.onMessage('welcome', (data) => {
+    console.log('连接到服务器:', data)
+  })
+
+  // 监听玩家更新
+  network.onMessage('playerUpdate', (data) => {
+    console.log('玩家更新:', data)
+    if (data.exp || data.silver) {
+      addCombatLog(`获得 ${data.exp || 0} 经验，${data.silver || 0} 银币`)
+    }
+  })
+
+  // 监听怪物列表
+  network.onMessage('monsterList', (data) => {
+    console.log('收到怪物列表:', data)
+    if (data.monsters) {
+      data.monsters.forEach((m: any) => {
+        addMonster({
+          id: m.id,
+          templateId: m.templateId,
+          name: m.name || '怪物',
+          level: m.level || 1,
+          hp: m.hp || 50,
+          maxHp: m.maxHp || 50,
+          x: m.x || 0,
+          y: m.y || 0,
+          zoneId: m.zoneId || 'zone_1',
+        })
+      })
+    }
+  })
+
+  // 监听怪物生成
+  network.onMessage('monsterSpawn', (data) => {
+    console.log('怪物生成:', data)
+    addMonster({
+      id: data.id,
+      templateId: data.templateId,
+      name: data.name || '怪物',
+      level: data.level || 1,
+      hp: data.hp || 50,
+      maxHp: data.maxHp || 50,
+      x: data.x || 0,
+      y: data.y || 0,
+      zoneId: data.zoneId || 'zone_1',
+    })
+  })
+
+  // 监听怪物死亡
+  network.onMessage('monsterDeath', (data) => {
+    console.log('怪物死亡:', data)
+    removeMonster(data.monsterId)
+    addCombatLog(`击败了 ${data.monsterId}, 获得 ${data.expGained} 经验`)
+  })
+
+  // 监听玩家 HP 更新
+  network.onMessage('playerHP', (data) => {
+    updatePlayerHP(data.hp)
+  })
+
+  // 模拟玩家数据（临时）
+  setTimeout(() => {
+    setPlayer({
+      id: 'player_1',
+      name: '测试角色',
+      level: 10,
+      exp: 1000,
+      maxExp: 1500,
+      hp: 100,
+      maxHp: 100,
+      mp: 50,
+      maxMp: 50,
+      x: 400,
+      y: 300,
+      zoneId: 'zone_1',
+      isBot: false,
+    })
+  }, 1000)
+}
+
+// 启动游戏循环
+function startGameLoop() {
+  let lastTime = performance.now()
+
+  const gameLoop = (currentTime: number) => {
+    const deltaTime = (currentTime - lastTime) / 1000
+    lastTime = currentTime
+
+    // 更新战斗系统
+    combatSystem.update(deltaTime)
+
+    // 更新怪物 AI
+    const state = useGameStore.getState()
+    if (state.player) {
+      monsterAI.update(deltaTime, { x: state.player.x, y: state.player.y })
+    }
+
+    gameLoopRef.current = requestAnimationFrame(gameLoop)
+  }
+
+  gameLoopRef.current = requestAnimationFrame(gameLoop)
 }
 
 // 模拟资源加载
