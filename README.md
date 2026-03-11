@@ -1,148 +1,184 @@
-# 🎮 阿尔比恩大陆 (Albion Lands)
+# Albion Lands 🗡️
 
-**2D MMORPG 浏览器游戏 - 类阿尔比恩 + OpenClaw AI 支持**
+一个类阿尔比恩的 2D MMORPG 浏览器游戏，支持真人玩家与 OpenClaw AI 代理共同游戏。
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-development-yellow.svg)
+## 🎮 游戏特色
 
----
-
-## 📖 项目简介
-
-《阿尔比恩大陆》是一款受 Albion Online 启发的 2D 上帝视角 MMORPG 浏览器游戏。
-
-**核心特色：**
-- 🎯 **玩家驱动经济**：所有装备由玩家制造，所有资源由玩家采集
-- ⚔️ **全物品掉落**：危险区域死亡掉落全部装备
-- 🔄 **无职业限制**：装备决定能力，自由搭配
-- 🤖 **AI 代理支持**：OpenClaw 自动化，真人玩家与 AI 平衡共存
-
----
-
-## 🎮 核心玩法
-
-```
-采集资源 → 生产制造 → 装备角色 → 战斗/副本 → 获取奖励
-     ↑                                        │
-     └────────────── 市场交易 ←───────────────┘
-```
-
-### 游戏特色
-
-| 系统 | 描述 |
-|------|------|
-| 🗺️ 世界地图 | 9 个区域，从安全新手村到危险深渊 |
-| ⚔️ 战斗系统 | 实时战斗，技能组合，PVP/PVE |
-| 💰 经济系统 | 玩家驱动市场，自由交易 |
-| 🏰 社交系统 | 组队、公会、好友、聊天 |
-| 🤖 OpenClaw | AI 代理自动化，有限 API 保证平衡 |
-
----
+- **自由经济体系** - 玩家驱动的市场，所有物品可交易
+- **安全区/危险区** - 9 个区域从新手村到深渊区
+- **PVP/PVE 混合** - 安全区外可自由 PK，掉落装备
+- **AI 代理共存** - OpenClaw AI 玩家与真人共同游戏（收益 8 折，操作延迟模拟真人）
+- **世界 BOSS** - 随机事件和精英怪物
+- **公会系统** - 组队、公会战、领土争夺
 
 ## 🏗️ 技术架构
 
-### 客户端 (H5)
-- **渲染引擎**: Pixi.js v7
-- **UI 框架**: React 18 + TypeScript
-- **状态管理**: Zustand
-- **网络通信**: WebSocket + Protocol Buffers
-
-### 服务端
-- **运行环境**: Node.js 20 + TypeScript
-- **Web 框架**: Fastify
-- **数据库**: PostgreSQL + Redis
-- **消息队列**: RabbitMQ
-
-### AI 集成
-- **框架**: OpenClaw
-- **API**: 有限制 WebSocket API
-- **平衡**: AI 收益 8 折，操作延迟模拟真人
-
----
+```
+┌─────────────────────────────────────────────────────────┐
+│                     客户端 (Client)                      │
+│  Pixi.js v7 + React 18 + TypeScript + Zustand          │
+└─────────────────────────────────────────────────────────┘
+                          │ WebSocket
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                     服务端 (Server)                      │
+│  Node.js 20 + Fastify + PostgreSQL + Prisma + Redis    │
+└─────────────────────────────────────────────────────────┘
+                          │ API
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│                   OpenClaw SDK                          │
+│  AI 代理框架 - 支持多种行为模式 (战斗/采集/探索)            │
+└─────────────────────────────────────────────────────────┘
+```
 
 ## 📁 项目结构
 
 ```
 albion-lands/
-├── docs/                    # 设计文档
-│   └── GDD.md              # 游戏设计文档
-├── client/                  # H5 客户端
+├── client/              # H5 客户端
 │   ├── src/
-│   │   ├── components/     # UI 组件
-│   │   ├── systems/        # 游戏系统
-│   │   ├── network/        # 网络通信
-│   │   └── renderer/       # 渲染引擎
+│   │   ├── renderer/    # Pixi.js 渲染器
+│   │   ├── components/  # React UI 组件
+│   │   ├── stores/      # Zustand 状态管理
+│   │   └── network/     # WebSocket 通信
 │   └── package.json
-├── server/                  # 服务端
+├── server/              # 服务端
 │   ├── src/
-│   │   ├── gateway/        # 网关服务
-│   │   ├── game/           # 游戏逻辑
-│   │   ├── database/       # 数据库
-│   │   └── openclaw/       # OpenClaw API
+│   │   ├── websocket/   # WebSocket 服务器
+│   │   └── routes/      # HTTP API 路由
+│   ├── prisma/          # 数据库 Schema
 │   └── package.json
-├── openclaw/               # OpenClaw SDK
-│   └── src/
-├── configs/                # 游戏配置
-│   ├── items.json          # 物品配置
-│   ├── monsters.json       # 怪物配置
-│   └── zones.json          # 区域配置
-└── scripts/                # 工具脚本
+├── openclaw/            # OpenClaw SDK
+│   ├── src/
+│   │   ├── OpenClawClient.ts  # API 客户端
+│   │   ├── agent.ts           # AI 代理
+│   │   └── types.ts           # 类型定义
+│   └── package.json
+├── protocol/            # Protocol Buffers 协议
+├── configs/             # 游戏配置
+└── docs/                # 设计文档
 ```
 
----
+## 🚀 快速开始
 
-## 🚀 开发计划
+### 前置要求
 
-| 阶段 | 时间 | 内容 |
+- Node.js 20+
+- PostgreSQL 14+
+- Redis 6+
+
+### 安装依赖
+
+```bash
+# 客户端
+cd client && npm install
+
+# 服务端
+cd server && npm install
+
+# OpenClaw SDK
+cd openclaw && npm install
+```
+
+### 配置数据库
+
+```bash
+cd server
+cp .env.example .env
+# 编辑 .env 配置数据库连接
+npx prisma migrate dev
+```
+
+### 启动服务
+
+```bash
+# 启动服务端
+cd server && npm run dev
+
+# 启动客户端
+cd client && npm run dev
+
+# 运行 AI 代理示例
+cd openclaw && npm run dev
+```
+
+## 📖 API 文档
+
+### WebSocket 消息类型
+
+| 类型 | 描述 |
+|------|------|
+| `auth` | 认证 |
+| `move` | 移动 |
+| `chat` | 聊天 |
+| `action` | 动作 (攻击/技能/物品) |
+| `game_state` | 游戏状态更新 |
+
+### HTTP API
+
+- `POST /api/v1/auth/register` - 注册
+- `POST /api/v1/auth/login` - 登录
+- `GET /api/v1/characters` - 角色列表
+- `GET /api/v1/items` - 物品列表
+- `GET /api/v1/market/orders` - 市场订单
+
+## 🤖 OpenClaw SDK 使用
+
+```typescript
+import { createAIAgent, AIBehavior } from 'albion-lands-openclaw'
+
+// 创建 AI 代理
+const agent = createAIAgent({
+  agentId: 'my-bot-1',
+  agentToken: 'your-token',
+  serverUrl: 'ws://localhost:3000/ws',
+  behavior: AIBehavior.Active, // 主动战斗模式
+})
+
+// 启动
+await agent.start()
+
+// 手动控制
+agent.move(100, 200)
+agent.useSkill('fireball', targetX, targetY)
+agent.pickUpItem(itemId)
+```
+
+### 行为模式
+
+| 模式 | 描述 |
+|------|------|
+| `Passive` | 被动，只防御 |
+| `Active` | 主动攻击怪物 |
+| `Gatherer` | 采集资源 |
+| `Explorer` | 探索地图 |
+| `Trader` | 交易 |
+
+## 📝 开发计划
+
+| 阶段 | 内容 | 状态 |
 |------|------|------|
-| 阶段 1 | 4 周 | 核心框架（渲染、网络、数据库） |
-| 阶段 2 | 6 周 | 核心玩法（战斗、背包、经济） |
-| 阶段 3 | 4 周 | 多人联机（组队、公会、聊天） |
-| 阶段 4 | 8 周 | 内容扩展（地图、怪物、副本） |
-| 阶段 5 | 4 周 | OpenClaw 集成 |
-| 阶段 6 | 4 周 | 测试优化 |
+| 阶段 1 | 核心框架（渲染、网络、数据库） | 🔄 进行中 |
+| 阶段 2 | 核心玩法（战斗、背包、经济） | ⏳ 待开始 |
+| 阶段 3 | 多人联机（组队、公会、聊天） | ⏳ 待开始 |
+| 阶段 4 | 内容扩展（地图、怪物、副本） | ⏳ 待开始 |
+| 阶段 5 | OpenClaw 集成 | ⏳ SDK 已完成 |
+| 阶段 6 | 测试优化 | ⏳ 待开始 |
 
-**预计总周期：** 30 周
+## 🎨 美术资源
 
----
-
-## 📖 文档
-
-- [游戏设计文档](./docs/GDD.md) - 完整的游戏设计文档
-- [API 文档](./docs/api.md) - 服务端 API 接口（待创建）
-- [OpenClaw SDK](./openclaw/README.md) - AI 代理开发指南（待创建）
-
----
-
-## 🤝 参与贡献
-
-欢迎贡献！请查看：
-1. Fork 本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
----
+使用豆包 AI 生成游戏美术概念图（角色/场景/物品）。
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](./LICENSE) 文件了解详情
-
----
+MIT License
 
 ## 👥 团队
 
-- **开发者**: CNMJH
-- **AI 助手**: 波波
+- **阿米大王** - 游戏开发者
+- **波波** - AI 开发搭档
 
 ---
 
-## 📞 联系方式
-
-- **GitHub**: [@CNMJH](https://github.com/CNMJH)
-- **项目地址**: https://github.com/CNMJH/albion-lands
-
----
-
-_⚔️ 愿你在阿尔比恩大陆书写自己的传奇！_
+_阿尔比恩大陆等待你的探索！_ ⚔️
