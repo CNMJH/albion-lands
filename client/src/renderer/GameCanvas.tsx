@@ -1,0 +1,68 @@
+import { useEffect, useRef } from 'react'
+import * as PIXI from 'pixi.js'
+import { useGameStore } from '../stores/gameStore'
+import { GameRenderer } from '../renderer/GameRenderer'
+
+/**
+ * 游戏画布组件
+ * 负责初始化和运行 Pixi.js 渲染器
+ */
+export function GameCanvas() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const rendererRef = useRef<GameRenderer | null>(null)
+  const { player } = useGameStore()
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    // 创建游戏渲染器
+    const renderer = new GameRenderer({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      resolution: window.devicePixelRatio,
+      backgroundColor: 0x1a1a2e,
+    })
+
+    rendererRef.current = renderer
+
+    // 初始化 Pixi 应用
+    renderer.init(containerRef.current)
+
+    // 处理窗口大小变化
+    const handleResize = () => {
+      renderer.resize(window.innerWidth, window.innerHeight)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    // 启动游戏循环
+    renderer.start()
+
+    // 清理
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      renderer.destroy()
+      rendererRef.current = null
+    }
+  }, [])
+
+  // 当玩家位置更新时，更新摄像机
+  useEffect(() => {
+    if (rendererRef.current && player) {
+      rendererRef.current.setCameraTarget(player.x, player.y)
+    }
+  }, [player?.x, player?.y])
+
+  return (
+    <div 
+      ref={containerRef} 
+      id="game-canvas"
+      style={{ 
+        width: '100%', 
+        height: '100%',
+        outline: 'none',
+      }}
+      tabIndex={0}
+    />
+  )
+}

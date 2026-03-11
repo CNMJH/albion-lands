@@ -1,0 +1,76 @@
+.character-info {
+  background: rgba(22, 33, 62, 0.9);
+  border: 2px solid #4a5568;
+  border-radius: 8px;
+  padding: 12px 20px;
+  min-width: 250px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.level-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, #f39c12, #e74c3c);
+  color: white;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.character-name {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.bot-tag {
+  background: #9b59b6;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.status-bar {
+  position: relative;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.hp-bar .bar-fill {
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+
+.mp-bar .bar-fill {
+  background: linear-gradient(90deg, #3498db, #2980b9);
+}
+
+.exp-bar .bar-fill {
+  background: linear-gradient(90deg, #f39c12, #f1c40f);
+}
+
+.bar-text {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  line-height: 20px;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
