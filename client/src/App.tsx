@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { GameCanvas } from './renderer/GameCanvas'
 import { UIOverlay } from './components/UIOverlay'
+import { GatheringUI } from './components/GatheringUI'
+import { CraftingUI } from './components/CraftingUI'
 import { useGameStore } from './stores/gameStore'
 import { NetworkManager } from './network/NetworkManager'
 import { combatSystem } from './systems/CombatSystem'
@@ -82,6 +84,12 @@ function App() {
       
       {/* UI 覆盖层 */}
       <UIOverlay />
+      
+      {/* 采集 UI */}
+      <GatheringUI />
+      
+      {/* 制造 UI */}
+      <CraftingUI />
     </div>
   )
 }

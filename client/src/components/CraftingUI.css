@@ -1,0 +1,286 @@
+/* 制造 UI */
+.crafting-ui-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.crafting-ui {
+  background: linear-gradient(135deg, rgba(30, 30, 40, 0.98), rgba(20, 20, 30, 0.98));
+  border: 2px solid #8B7355;
+  border-radius: 12px;
+  width: 800px;
+  max-height: 600px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.crafting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 2px solid #555;
+}
+
+.crafting-header h2 {
+  margin: 0;
+  color: #FFD700;
+  font-size: 24px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #A0A0A0;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+/* 筛选按钮 */
+.crafting-filters {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #444;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #555;
+  color: #A0A0A0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.filter-btn.active {
+  background: rgba(255, 215, 0, 0.3);
+  border-color: #FFD700;
+  color: #FFD700;
+}
+
+/* 内容区域 */
+.crafting-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 配方列表 */
+.recipe-list {
+  width: 250px;
+  border-right: 2px solid #555;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.recipe-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recipe-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #666;
+}
+
+.recipe-item.selected {
+  background: rgba(255, 215, 0, 0.2);
+  border-color: #FFD700;
+}
+
+.recipe-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.recipe-level {
+  color: #A0A0A0;
+  font-size: 12px;
+}
+
+.missing-materials {
+  color: #FF6B6B;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* 配方详情 */
+.recipe-details {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.recipe-details h3 {
+  color: #FFD700;
+  margin: 0 0 15px 0;
+  font-size: 20px;
+}
+
+.recipe-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.recipe-info div {
+  color: #C0C0C0;
+  font-size: 13px;
+}
+
+.recipe-materials,
+.recipe-output {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.recipe-materials h4,
+.recipe-output h4 {
+  color: #A0A0A0;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.material-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  color: #C0C0C0;
+  font-size: 13px;
+}
+
+.material-item.missing {
+  color: #FF6B6B;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.output-item {
+  color: #4CAF50;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* 制造按钮 */
+.craft-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+
+.craft-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5CBF60, #56b559);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.craft-btn:disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* 进度条 */
+.craft-progress-bar {
+  width: 100%;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #555;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  transition: width 0.1s linear;
+  border-radius: 10px;
+}
+
+.no-selection {
+  color: #666;
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+}
+
+/* 滚动条 */
+.recipe-list::-webkit-scrollbar,
+.recipe-details::-webkit-scrollbar {
+  width: 8px;
+}
+
+.recipe-list::-webkit-scrollbar-track,
+.recipe-details::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.recipe-list::-webkit-scrollbar-thumb,
+.recipe-details::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.recipe-list::-webkit-scrollbar-thumb:hover,
+.recipe-details::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}

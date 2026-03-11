@@ -63,6 +63,9 @@ export class WebSocketServer {
     // 生成初始怪物
     this.spawnInitialMonsters()
 
+    // 初始化资源节点
+    this.initializeResourceNodes()
+
     this.fastify.log.info('WebSocket 服务器已启动')
   }
 
@@ -111,6 +114,28 @@ export class WebSocketServer {
     ws.on('pong', () => {
       client.isAlive = true
     })
+
+    // 发送资源节点列表（临时）
+    setTimeout(() => {
+      const nodes = GatheringService.getZoneNodes('zone_1')
+      this.send(clientId, {
+        type: 'resourceNodes',
+        payload: {
+          nodes: nodes.map(n => ({
+            id: n.id,
+            type: n.type,
+            name: n.name,
+            level: n.level,
+            x: n.x,
+            y: n.y,
+            zoneId: n.zoneId,
+            hitsRemaining: n.hitsRemaining,
+            maxHits: n.maxHits,
+            toolRequired: n.toolRequired,
+          })),
+        },
+      })
+    }, 2000)
   }
 
   /**
@@ -621,6 +646,17 @@ export class WebSocketServer {
     }
 
     this.fastify.log.info(`生成了 ${this.monsters.size} 个初始怪物`)
+  }
+
+  /**
+   * 初始化资源节点
+   */
+  private initializeResourceNodes(): void {
+    // 初始化 zone_1 的资源节点
+    GatheringService.initializeZoneNodes('zone_1')
+    
+    const nodes = GatheringService.getZoneNodes('zone_1')
+    this.fastify.log.info(`初始化了 ${nodes.length} 个资源节点`)
   }
 
   /**
