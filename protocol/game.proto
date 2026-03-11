@@ -1,0 +1,461 @@
+syntax = "proto3";
+
+package albion_lands;
+
+// ==================== 基础消息 ====================
+
+// 消息头
+message MessageHeader {
+  uint64 sequence = 1;
+  uint64 timestamp = 2;
+  string message_id = 3;
+}
+
+// 通用响应
+message Response {
+  bool success = 1;
+  string error_code = 2;
+  string error_message = 3;
+}
+
+// ==================== 认证 ====================
+
+// 登录请求
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+  string platform = 3; // web, ios, android
+}
+
+// 登录响应
+message LoginResponse {
+  Response response = 1;
+  string token = 2;
+  PlayerInfo player = 3;
+}
+
+// 登出请求
+message LogoutRequest {
+  string token = 1;
+}
+
+// ==================== 玩家信息 ====================
+
+message PlayerInfo {
+  string id = 1;
+  string name = 2;
+  int32 level = 3;
+  int64 exp = 4;
+  int64 hp = 5;
+  int64 max_hp = 6;
+  int64 mp = 7;
+  int64 max_mp = 8;
+  string zone_id = 9;
+  float x = 10;
+  float y = 11;
+  bool is_bot = 12;
+  repeated EquipmentSlot equipment = 13;
+}
+
+message EquipmentSlot {
+  string slot = 1; // main_hand, chest, etc.
+  ItemInstance item = 2;
+}
+
+message ItemInstance {
+  string id = 1;
+  string item_id = 2;
+  string name = 3;
+  int32 level = 4;
+  int32 durability = 5;
+  int32 max_durability = 6;
+  int32 enchant_level = 7;
+  map<string, int32> stats = 8;
+}
+
+// ==================== 移动 ====================
+
+// 移动请求
+message MoveRequest {
+  string token = 1;
+  float target_x = 2;
+  float target_y = 3;
+  bool is_running = 4;
+}
+
+// 移动响应
+message MoveResponse {
+  Response response = 1;
+  float x = 2;
+  float y = 3;
+}
+
+// 移动广播
+message MoveBroadcast {
+  string player_id = 1;
+  float x = 2;
+  float y = 3;
+  float rotation = 4;
+  bool is_running = 5;
+}
+
+// ==================== 战斗 ====================
+
+// 攻击请求
+message AttackRequest {
+  string token = 1;
+  string target_id = 2;
+  int32 skill_id = 3; // 0 = 普通攻击
+}
+
+// 攻击响应
+message AttackResponse {
+  Response response = 1;
+  int32 damage = 2;
+  bool is_critical = 3;
+  bool is_dodge = 4;
+}
+
+// 伤害广播
+message DamageBroadcast {
+  string source_id = 1;
+  string target_id = 2;
+  int32 damage = 3;
+  bool is_critical = 4;
+  string skill_id = 5;
+}
+
+// 死亡广播
+message DeathBroadcast {
+  string player_id = 1;
+  string killer_id = 2;
+  string zone_id = 3;
+}
+
+// 复活请求
+message ResurrectRequest {
+  string token = 1;
+  bool use_item = 2; // 是否使用道具复活
+}
+
+// ==================== 技能 ====================
+
+// 技能列表请求
+message SkillListRequest {
+  string token = 1;
+}
+
+// 技能列表响应
+message SkillListResponse {
+  Response response = 1;
+  repeated SkillInfo skills = 2;
+}
+
+message SkillInfo {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  int32 level = 4;
+  int64 exp = 5;
+  int32 cooldown = 6;
+  int32 mana_cost = 7;
+  string icon = 8;
+}
+
+// 使用技能请求
+message UseSkillRequest {
+  string token = 1;
+  string skill_id = 2;
+  float target_x = 3;
+  float target_y = 4;
+  string target_id = 5;
+}
+
+// ==================== 物品 ====================
+
+// 背包列表请求
+message InventoryRequest {
+  string token = 1;
+}
+
+// 背包列表响应
+message InventoryResponse {
+  Response response = 1;
+  repeated ItemInstance items = 2;
+  int32 capacity = 3;
+}
+
+// 使用物品请求
+message UseItemRequest {
+  string token = 1;
+  string item_id = 2;
+}
+
+// 拾取物品请求
+message PickupItemRequest {
+  string token = 1;
+  string item_id = 2;
+}
+
+// 丢弃物品请求
+message DropItemRequest {
+  string token = 1;
+  string item_id = 2;
+  int32 quantity = 3;
+  float x = 4;
+  float y = 5;
+}
+
+// 装备物品请求
+message EquipItemRequest {
+  string token = 1;
+  string item_id = 2;
+}
+
+// ==================== 聊天 ====================
+
+// 聊天消息
+message ChatMessage {
+  string channel = 1; // local, party, guild, trade, whisper
+  string sender_id = 2;
+  string sender_name = 3;
+  string content = 4;
+  uint64 timestamp = 5;
+  string target_id = 6; // 私聊目标
+}
+
+// 发送聊天请求
+message SendChatRequest {
+  string token = 1;
+  string channel = 2;
+  string content = 3;
+  string target_id = 4;
+}
+
+// ==================== 交易 ====================
+
+// 交易请求
+message TradeRequest {
+  string token = 1;
+  string target_id = 2;
+}
+
+// 交易响应
+message TradeResponse {
+  Response response = 1;
+  string trade_id = 2;
+}
+
+// 交易物品
+message TradeItem {
+  string item_id = 1;
+  int32 quantity = 2;
+}
+
+// 添加交易物品
+message AddTradeItemRequest {
+  string token = 1;
+  string trade_id = 2;
+  TradeItem item = 3;
+  int64 gold = 4;
+}
+
+// 确认交易
+message ConfirmTradeRequest {
+  string token = 1;
+  string trade_id = 2;
+}
+
+// ==================== 组队 ====================
+
+// 组队请求
+message PartyRequest {
+  string token = 1;
+  string target_id = 2;
+}
+
+// 组队响应
+message PartyResponse {
+  Response response = 1;
+  string party_id = 2;
+}
+
+// 组队信息
+message PartyInfo {
+  string id = 1;
+  string leader_id = 2;
+  repeated PartyMember members = 3;
+}
+
+message PartyMember {
+  string id = 1;
+  string name = 2;
+  int32 level = 3;
+  string zone_id = 4;
+  bool is_online = 5;
+}
+
+// 离开队伍
+message LeavePartyRequest {
+  string token = 1;
+}
+
+// 踢出队伍
+message KickPartyMemberRequest {
+  string token = 1;
+  string member_id = 2;
+}
+
+// ==================== 市场 ====================
+
+// 市场订单列表
+message MarketOrdersRequest {
+  string token = 1;
+  string item_id = 2; // 可选，过滤物品
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+message MarketOrdersResponse {
+  Response response = 1;
+  repeated MarketOrder orders = 2;
+  int32 total = 3;
+}
+
+message MarketOrder {
+  string id = 1;
+  string seller_id = 2;
+  string seller_name = 3;
+  ItemInstance item = 4;
+  int32 quantity = 5;
+  int64 unit_price = 6;
+  uint64 created_at = 7;
+}
+
+// 创建订单
+message CreateOrderRequest {
+  string token = 1;
+  string item_id = 2;
+  int32 quantity = 3;
+  int64 unit_price = 4;
+}
+
+// 取消订单
+message CancelOrderRequest {
+  string token = 1;
+  string order_id = 2;
+}
+
+// 购买订单
+message PurchaseOrderRequest {
+  string token = 1;
+  string order_id = 2;
+  int32 quantity = 3;
+}
+
+// ==================== 任务 ====================
+
+// 任务列表
+message QuestListRequest {
+  string token = 1;
+}
+
+message QuestListResponse {
+  Response response = 1;
+  repeated QuestInfo quests = 2;
+}
+
+message QuestInfo {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string status = 4; // not_started, in_progress, completed
+  repeated QuestObjective objectives = 5;
+  repeated QuestReward rewards = 6;
+}
+
+message QuestObjective {
+  string id = 1;
+  string description = 2;
+  int32 target = 3;
+  int32 current = 4;
+  bool completed = 5;
+}
+
+message QuestReward {
+  string type = 1; // item, exp, gold
+  string item_id = 2;
+  int32 amount = 3;
+  int64 exp = 4;
+  int64 gold = 5;
+}
+
+// 接受任务
+message AcceptQuestRequest {
+  string token = 1;
+  string quest_id = 2;
+}
+
+// 放弃任务
+message AbandonQuestRequest {
+  string token = 1;
+  string quest_id = 2;
+}
+
+// 提交任务
+message SubmitQuestRequest {
+  string token = 1;
+  string quest_id = 2;
+}
+
+// ==================== 世界状态 ====================
+
+// 世界状态广播
+message WorldStateBroadcast {
+  uint64 timestamp = 1;
+  string zone_id = 2;
+  repeated PlayerInfo players = 3;
+  repeated MonsterInfo monsters = 4;
+  repeated WorldItem items = 5;
+  repeated NPCInfo npcs = 6;
+}
+
+message MonsterInfo {
+  string id = 1;
+  string name = 2;
+  int32 level = 3;
+  int64 hp = 4;
+  int64 max_hp = 5;
+  float x = 6;
+  float y = 7;
+  bool is_aggressive = 8;
+  bool is_elite = 9;
+  string target_id = 10;
+}
+
+message WorldItem {
+  string id = 1;
+  string item_id = 2;
+  string name = 3;
+  string rarity = 4;
+  float x = 5;
+  float y = 6;
+  int32 quantity = 7;
+}
+
+message NPCInfo {
+  string id = 1;
+  string name = 2;
+  string type = 3;
+  float x = 4;
+  float y = 5;
+  repeated string services = 6;
+}
+
+// ==================== WebSocket 消息包装 ====================
+
+message WSMessage {
+  MessageHeader header = 1;
+  string type = 2; // 消息类型
+  bytes payload = 3; // Protobuf 序列化的具体消息
+}

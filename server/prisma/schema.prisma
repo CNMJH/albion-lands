@@ -1,0 +1,341 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== 用户系统 ====================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String   // 加密存储
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  character Character?
+}
+
+// ==================== 角色系统 ====================
+
+model Character {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  
+  name      String
+  level     Int      @default(1)
+  exp       BigInt   @default(0)
+  
+  // 基础属性
+  strength    Int @default(10)
+  agility     Int @default(10)
+  intelligence Int @default(10)
+  vitality    Int @default(10)
+  
+  // 战斗属性
+  hp        BigInt @default(100)
+  maxHp     BigInt @default(100)
+  mp        BigInt @default(50)
+  maxMp     BigInt @default(50)
+  
+  // 位置
+  zoneId    String
+  x         Float  @default(0)
+  y         Float  @default(0)
+  
+  // 状态
+  isOnline  Boolean @default(false)
+  isBot     Boolean @default(false) // 是否为 AI 角色
+  lastLoginAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inventory InventoryItem[]
+  skills    CharacterSkill[]
+}
+
+// ==================== 物品系统 ====================
+
+model Item {
+  id          String   @id @default(uuid())
+  name        String
+  type        ItemType
+  rarity      ItemRarity @default(Common)
+  description String?
+  icon        String?
+  
+  // 属性
+  stats       Json? // { strength: 5, agility: 3 }
+  
+  // 装备相关
+  slot        EquipmentSlot?
+  minLevel    Int @default(1)
+  
+  // 资源相关
+  stackSize   Int @default(1)
+  
+  // 经济
+  basePrice   Int @default(0)
+  
+  createdAt   DateTime @default(now())
+
+  inventoryItems InventoryItem[]
+  marketOrders   MarketOrder[]
+}
+
+enum ItemType {
+  Weapon
+  Armor
+  Accessory
+  Consumable
+  Material
+  Tool
+  Misc
+}
+
+enum ItemRarity {
+  Common
+  Uncommon
+  Rare
+  Epic
+  Legendary
+  Artifact
+}
+
+enum EquipmentSlot {
+  MainHand
+  OffHand
+  Head
+  Chest
+  Legs
+  Feet
+  Gloves
+  Necklace
+  Ring
+}
+
+model InventoryItem {
+  id         String   @id @default(uuid())
+  characterId String
+  character  Character @relation(fields: [characterId], references: [id])
+  itemId     String
+  item       Item     @relation(fields: [itemId], references: [id])
+  
+  quantity   Int      @default(1)
+  slot       Int?     // 背包格子位置
+  
+  // 装备状态
+  isEquipped Boolean  @default(false)
+  
+  // 耐久度
+  durability Int?
+  maxDurability Int?
+  
+  // 附魔/强化
+  enchantLevel Int @default(0)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([characterId, slot])
+}
+
+// ==================== 技能系统 ====================
+
+model Skill {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        SkillType
+  icon        String?
+  
+  // 效果
+  damage      Int?
+  healing     Int?
+  duration    Int? // 毫秒
+  cooldown    Int  @default(0) // 毫秒
+  manaCost    Int  @default(0)
+  
+  // 要求
+  minLevel    Int @default(1)
+  requiredStat String? // 属性要求
+  
+  createdAt   DateTime @default(now())
+
+  characterSkills CharacterSkill[]
+}
+
+enum SkillType {
+  Active
+  Passive
+}
+
+model CharacterSkill {
+  id         String   @id @default(uuid())
+  characterId String
+  character  Character @relation(fields: [characterId], references: [id])
+  skillId    String
+  skill      Skill    @relation(fields: [skillId], references: [id])
+  
+  level      Int      @default(1)
+  exp        BigInt   @default(0)
+  
+  // 快捷栏位置
+  slot       Int?
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([characterId, skillId])
+}
+
+// ==================== 经济系统 ====================
+
+model MarketOrder {
+  id          String   @id @default(uuid())
+  sellerId    String
+  itemId      String
+  item        Item     @relation(fields: [itemId], references: [id])
+  
+  quantity    Int
+  unitPrice   Int
+  totalAmount Int
+  
+  status      OrderStatus @default(Pending)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum OrderStatus {
+  Pending
+  Completed
+  Cancelled
+  Expired
+}
+
+// ==================== 地图系统 ====================
+
+model Zone {
+  id          String   @id @default(uuid())
+  name        String
+  type        ZoneType
+  description String?
+  
+  // 安全等级
+  safetyLevel Int @default(5) // 0-10, 0=最危险
+  
+  // 传送点
+  portals     Json? // [{ toZoneId: "...", x: 100, y: 100 }]
+  
+  // 资源点
+  resources   Json? // [{ type: "ore", x: 50, y: 60, respawn: 300 }]
+  
+  // 怪物
+  monsters    Json? // [{ type: "wolf", x: 200, y: 150, level: 5 }]
+  
+  createdAt   DateTime @default(now())
+}
+
+enum ZoneType {
+  City
+  Village
+  Field
+  Dungeon
+  Arena
+  Special
+}
+
+// ==================== 社交系统 ====================
+
+model Party {
+  id        String   @id @default(uuid())
+  leaderId  String
+  name      String?
+  
+  members   PartyMember[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PartyMember {
+  id        String   @id @default(uuid())
+  partyId   String
+  party     Party    @relation(fields: [partyId], references: [id])
+  characterId String
+  
+  role      PartyRole @default(Member)
+  
+  joinedAt  DateTime @default(now())
+
+  @@unique([partyId, characterId])
+}
+
+enum PartyRole {
+  Leader
+  Member
+}
+
+model Guild {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  leaderId    String
+  description String?
+  level       Int      @default(1)
+  exp         BigInt   @default(0)
+  
+  members     GuildMember[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GuildMember {
+  id        String   @id @default(uuid())
+  guildId   String
+  guild     Guild    @relation(fields: [guildId], references: [id])
+  characterId String
+  
+  role      GuildRole @default(Member)
+  
+  joinedAt  DateTime @default(now())
+
+  @@unique([guildId, characterId])
+}
+
+enum GuildRole {
+  Leader
+  Officer
+  Elder
+  Member
+}
+
+// ==================== 日志系统 ====================
+
+model GameLog {
+  id        String   @id @default(uuid())
+  type      LogType
+  message   String
+  data      Json?
+  
+  characterId String?
+  
+  createdAt DateTime @default(now())
+}
+
+enum LogType {
+  Login
+  Logout
+  Combat
+  Trade
+  Chat
+  System
+  Error
+}
