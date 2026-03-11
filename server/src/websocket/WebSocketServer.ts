@@ -2,6 +2,8 @@ import { FastifyInstance, FastifyRequest } from 'fastify'
 import { WebSocket } from 'ws'
 import { v4 as uuidv4 } from 'uuid'
 import { CombatService } from '../services/CombatService'
+import { GatheringService } from '../services/GatheringService'
+import { CraftingService } from '../services/CraftingService'
 
 interface Client {
   id: string
@@ -158,6 +160,32 @@ export class WebSocketServer {
           this.send(clientId, { type: 'pong', timestamp: Date.now() })
           break
 
+        // 采集相关
+        case 'gatherStart':
+          this.handleGatherStart(clientId, message.data)
+          break
+
+        case 'gatherComplete':
+          this.handleGatherComplete(clientId, message.data)
+          break
+
+        case 'gatherStop':
+          this.handleGatherStop(clientId, message.data)
+          break
+
+        // 制造相关
+        case 'craft':
+          this.handleCraft(clientId, message.data)
+          break
+
+        case 'craftMultiple':
+          this.handleCraftMultiple(clientId, message.data)
+          break
+
+        case 'getRecipes':
+          this.handleGetRecipes(clientId, message.data)
+          break
+
         default:
           this.fastify.log.warn(`未知消息类型：${message.type}`)
       }
@@ -312,6 +340,150 @@ export class WebSocketServer {
   private handleAction(clientId: string, data: any): void {
     // TODO: 实现动作逻辑
     this.fastify.log.info(`动作 [${clientId}]:`, data.action)
+  }
+
+  /**
+   * 处理采集开始
+   */
+  private async handleGatherStart(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const result = await GatheringService.startGathering(
+      client.characterId,
+      data.nodeId
+    )
+
+    if (result.success) {
+      // 通知客户端可以开始采集
+      this.send(clientId, {
+        type: 'gatherStart',
+        payload: {
+          nodeId: data.nodeId,
+        },
+      })
+    } else {
+      this.send(clientId, {
+        type: 'gatherFail',
+        payload: {
+          nodeId: data.nodeId,
+          reason: result.reason,
+        },
+      })
+    }
+  }
+
+  /**
+   * 处理采集完成
+   */
+  private async handleGatherComplete(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const result = await GatheringService.completeGathering(
+      client.characterId,
+      data.nodeId
+    )
+
+    if (result.success) {
+      // 发送采集成功
+      this.send(clientId, {
+        type: 'gatherSuccess',
+        payload: {
+          nodeId: data.nodeId,
+          itemId: result.itemId,
+          quantity: result.quantity,
+          exp: result.exp,
+        },
+      })
+    } else {
+      this.send(clientId, {
+        type: 'gatherFail',
+        payload: {
+          nodeId: data.nodeId,
+          reason: result.reason,
+        },
+      })
+    }
+  }
+
+  /**
+   * 处理停止采集
+   */
+  private handleGatherStop(clientId: string, data: any): void {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    GatheringService.stopGathering(client.characterId, data.nodeId)
+  }
+
+  /**
+   * 处理制造
+   */
+  private async handleCraft(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const result = await CraftingService.craftItem(
+      client.characterId,
+      data.recipeId
+    )
+
+    if (result.success) {
+      this.send(clientId, {
+        type: 'craftSuccess',
+        payload: {
+          recipeId: data.recipeId,
+          itemId: result.itemId,
+          quantity: result.quantity,
+          exp: result.exp,
+        },
+      })
+    } else {
+      this.send(clientId, {
+        type: 'craftFail',
+        payload: {
+          recipeId: data.recipeId,
+          reason: result.reason,
+        },
+      })
+    }
+  }
+
+  /**
+   * 处理批量制造
+   */
+  private async handleCraftMultiple(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const results = await CraftingService.craftMultiple(
+      client.characterId,
+      data.recipeId,
+      data.quantity
+    )
+
+    this.send(clientId, {
+      type: 'craftMultipleResult',
+      payload: {
+        recipeId: data.recipeId,
+        results,
+      },
+    })
+  }
+
+  /**
+   * 处理获取配方
+   */
+  private handleGetRecipes(clientId: string, data: any): void {
+    const recipes = CraftingService.getAllRecipes()
+    
+    this.send(clientId, {
+      type: 'recipes',
+      payload: {
+        recipes,
+      },
+    })
   }
 
   /**
