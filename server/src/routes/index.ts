@@ -4,6 +4,7 @@ import usersRoutes from './users'
 import charactersRoutes from './characters'
 import itemsRoutes from './items'
 import marketRoutes from './market'
+import gmRoutes from './gm'
 
 /**
  * 注册所有 HTTP 路由
@@ -37,4 +38,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 市场路由
   fastify.register(marketRoutes, { prefix: '/api/v1/market' })
+  
+  // GM 工具路由
+  fastify.register(gmRoutes, { prefix: '/api/v1/gm' })
 }

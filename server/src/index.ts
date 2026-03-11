@@ -1,9 +1,11 @@
 import Fastify from 'fastify'
 import fastifyCors from '@fastify/cors'
 import fastifyWebSocket from '@fastify/websocket'
+import fastifyStatic from '@fastify/static'
 import { WebSocketServer } from './websocket/WebSocketServer'
 import { registerRoutes } from './routes'
 import dotenv from 'dotenv'
+import path from 'path'
 
 dotenv.config()
 
@@ -26,6 +28,12 @@ async function registerPlugins() {
     options: {
       maxPayload: 1024 * 1024, // 1MB
     },
+  })
+
+  // 静态文件服务（GM 工具）
+  await fastify.register(fastifyStatic, {
+    root: path.join(__dirname, '../public'),
+    prefix: '/gm/',
   })
 }
 
