@@ -29,6 +29,19 @@ export interface Item {
   slot?: number
 }
 
+// 怪物接口
+export interface Monster {
+  id: string
+  templateId: string
+  name: string
+  level: number
+  hp: number
+  maxHp: number
+  x: number
+  y: number
+  zoneId: string
+}
+
 // 游戏状态接口
 interface GameState {
   // 玩家信息
@@ -52,6 +65,10 @@ interface GameState {
   guild: any | null
   friends: any[]
   
+  // 战斗
+  monsters: Monster[]
+  combatLog: string[]
+  
   // 动作
   initialize: () => void
   setPlayer: (player: Partial<Player>) => void
@@ -61,6 +78,14 @@ interface GameState {
   addSkill: (skillId: string) => void
   setParty: (party: any) => void
   addFriend: (friend: any) => void
+  
+  // 战斗相关
+  addMonster: (monster: Monster) => void
+  updateMonster: (id: string, updates: Partial<Monster>) => void
+  removeMonster: (id: string) => void
+  addCombatLog: (message: string) => void
+  updatePlayerHP: (hp: number) => void
+  updateMonsterHP: (id: string, hp: number) => void
 }
 
 // 初始玩家数据
@@ -95,6 +120,8 @@ export const useGameStore = create<GameState>()(
     party: null,
     guild: null,
     friends: [],
+    monsters: [],
+    combatLog: [],
     
     // 初始化
     initialize: () => {
@@ -164,6 +191,58 @@ export const useGameStore = create<GameState>()(
         friends: [...state.friends, friend],
       }))
     },
+    
+    // 添加怪物
+    addMonster: (monster) => {
+      set((state) => ({
+        monsters: [...state.monsters, monster],
+      }))
+    },
+    
+    // 更新怪物
+    updateMonster: (id, updates) => {
+      set((state) => ({
+        monsters: state.monsters.map(m => 
+          m.id === id ? { ...m, ...updates } : m
+        ),
+      }))
+    },
+    
+    // 移除怪物
+    removeMonster: (id) => {
+      set((state) => ({
+        monsters: state.monsters.filter(m => m.id !== id),
+      }))
+    },
+    
+    // 添加战斗日志
+    addCombatLog: (message) => {
+      set((state) => ({
+        combatLog: [...state.combatLog, `[${new Date().toLocaleTimeString()}] ${message}`].slice(-50),
+      }))
+    },
+    
+    // 更新玩家 HP
+    updatePlayerHP: (hp) => {
+      set((state) => {
+        if (!state.player) return state
+        return {
+          player: {
+            ...state.player,
+            hp: Math.max(0, Math.min(hp, state.player.maxHp)),
+          },
+        }
+      })
+    },
+    
+    // 更新怪物 HP
+    updateMonsterHP: (id, hp) => {
+      set((state) => ({
+        monsters: state.monsters.map(m =>
+          m.id === id ? { ...m, hp: Math.max(0, hp), maxHp: m.maxHp } : m
+        ),
+      }))
+    },
   }))
 )
 
@@ -172,3 +251,5 @@ export const selectPlayer = (state: GameState) => state.player
 export const selectInventory = (state: GameState) => state.inventory
 export const selectSkills = (state: GameState) => state.skills
 export const selectParty = (state: GameState) => state.party
+export const selectMonsters = (state: GameState) => state.monsters
+export const selectCombatLog = (state: GameState) => state.combatLog

@@ -1,13 +1,29 @@
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import { WebSocket } from 'ws'
 import { v4 as uuidv4 } from 'uuid'
+import { CombatService } from '../services/CombatService'
 
 interface Client {
   id: string
   ws: WebSocket
   characterId?: string
+  userId?: string
   isAlive: boolean
   lastPing: number
+  position?: { x: number; y: number; zoneId: string }
+}
+
+interface Monster {
+  id: string
+  templateId: string
+  name: string
+  level: number
+  hp: number
+  maxHp: number
+  x: number
+  y: number
+  zoneId: string
+  state: 'idle' | 'patrol' | 'chase' | 'attack'
 }
 
 /**
@@ -16,8 +32,10 @@ interface Client {
  */
 export class WebSocketServer {
   private clients: Map<string, Client> = new Map()
+  private monsters: Map<string, Monster> = new Map()
   private fastify: FastifyInstance
   private heartbeatInterval: NodeJS.Timeout | null = null
+  private monsterAIInterval: NodeJS.Timeout | null = null
 
   constructor(fastify: FastifyInstance) {
     this.fastify = fastify
@@ -36,6 +54,12 @@ export class WebSocketServer {
 
     // 启动心跳检测
     this.startHeartbeat()
+
+    // 启动怪物 AI
+    this.startMonsterAI()
+
+    // 生成初始怪物
+    this.spawnInitialMonsters()
 
     this.fastify.log.info('WebSocket 服务器已启动')
   }
@@ -114,12 +138,24 @@ export class WebSocketServer {
           this.handleMove(clientId, message.data)
           break
 
+        case 'attack':
+          this.handleAttack(clientId, message.data)
+          break
+
+        case 'skill':
+          this.handleSkill(clientId, message.data)
+          break
+
         case 'chat':
           this.handleChat(clientId, message.data)
           break
 
         case 'action':
           this.handleAction(clientId, message.data)
+          break
+
+        case 'ping':
+          this.send(clientId, { type: 'pong', timestamp: Date.now() })
           break
 
         default:
@@ -149,19 +185,117 @@ export class WebSocketServer {
    * 处理移动
    */
   private handleMove(clientId: string, data: any): void {
-    // TODO: 实现移动逻辑
     const client = this.clients.get(clientId)
-    if (client && client.characterId) {
-      // 广播移动到其他玩家
-      this.broadcast({
-        type: 'player_move',
-        data: {
-          characterId: client.characterId,
-          x: data.x,
-          y: data.y,
-        },
-      }, clientId)
+    if (!client || !client.position) return
+
+    // 更新位置
+    client.position.x += data.dx || 0
+    client.position.y += data.dy || 0
+
+    // 发送确认
+    this.send(clientId, {
+      type: 'move',
+      payload: {
+        x: client.position.x,
+        y: client.position.y,
+      },
+    })
+  }
+
+  /**
+   * 处理攻击
+   */
+  private async handleAttack(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId || !client.position) return
+
+    // 查找最近的怪物
+    const targetMonster = this.findNearestMonster(client.position)
+    if (!targetMonster) {
+      this.send(clientId, { type: 'error', message: '附近没有可攻击的怪物' })
+      return
     }
+
+    // 检查距离
+    const distance = Math.sqrt(
+      Math.pow(targetMonster.x - client.position.x, 2) + 
+      Math.pow(targetMonster.y - client.position.y, 2)
+    )
+    
+    if (distance > 100) {
+      this.send(clientId, { type: 'error', message: '目标太远' })
+      return
+    }
+
+    // 执行攻击
+    const result = await CombatService.playerAttackMonster(
+      client.characterId,
+      targetMonster.id,
+      data.type || 'basic'
+    )
+
+    if (result.success) {
+      // 发送攻击结果
+      this.send(clientId, {
+        type: 'attack',
+        payload: {
+          targetId: targetMonster.id,
+          damage: result.damage,
+          type: data.type || 'basic',
+        },
+      })
+
+      // 发送怪物 HP
+      this.send(clientId, {
+        type: 'monsterHP',
+        payload: {
+          monsterId: targetMonster.id,
+          hp: result.monsterHP,
+        },
+      })
+
+      // 怪物死亡
+      if (result.monsterDead) {
+        this.send(clientId, {
+          type: 'monsterDeath',
+          payload: {
+            monsterId: targetMonster.id,
+            expGained: result.expGained,
+            silverGained: result.silverGained,
+          },
+        })
+
+        // 更新玩家状态
+        this.send(clientId, {
+          type: 'playerUpdate',
+          payload: {
+            exp: result.expGained,
+            silver: result.silverGained,
+          },
+        })
+
+        // 移除怪物
+        this.monsters.delete(targetMonster.id)
+      }
+    }
+  }
+
+  /**
+   * 处理技能
+   */
+  private handleSkill(clientId: string, data: any): void {
+    const client = this.clients.get(clientId)
+    if (!client) return
+
+    this.fastify.log.info(`玩家 ${clientId} 使用技能 ${data.skillIndex}`)
+
+    this.send(clientId, {
+      type: 'skill',
+      payload: {
+        skillIndex: data.skillIndex,
+        timestamp: data.timestamp,
+      },
+    })
   }
 
   /**
@@ -264,6 +398,88 @@ export class WebSocketServer {
         client.ws.ping()
       })
     }, 30000) // 30 秒
+  }
+
+  /**
+   * 启动怪物 AI
+   */
+  private startMonsterAI(): void {
+    this.monsterAIInterval = setInterval(() => {
+      this.updateMonsterAI()
+    }, 1000) // 每秒更新一次
+  }
+
+  /**
+   * 更新怪物 AI
+   */
+  private updateMonsterAI(): void {
+    this.monsters.forEach((monster) => {
+      // 简单的 AI 逻辑
+      if (monster.state === 'idle' && Math.random() < 0.1) {
+        monster.state = 'patrol'
+      }
+    })
+  }
+
+  /**
+   * 生成初始怪物
+   */
+  private spawnInitialMonsters(): void {
+    // 新手村庄生成一些史莱姆
+    const templates = [
+      { id: 'slime_t1', name: '绿色史莱姆', level: 2, hp: 50, maxHp: 50 },
+      { id: 'slime_t2', name: '蓝色史莱姆', level: 5, hp: 80, maxHp: 80 },
+    ]
+
+    for (let i = 0; i < 10; i++) {
+      const template = templates[Math.floor(Math.random() * templates.length)]
+      const monster: Monster = {
+        id: `monster_${Date.now()}_${i}`,
+        templateId: template.id,
+        name: template.name,
+        level: template.level,
+        hp: template.hp,
+        maxHp: template.maxHp,
+        x: Math.random() * 400 + 50,
+        y: Math.random() * 400 + 50,
+        zoneId: 'zone_1',
+        state: 'idle',
+      }
+      this.monsters.set(monster.id, monster)
+    }
+
+    this.fastify.log.info(`生成了 ${this.monsters.size} 个初始怪物`)
+  }
+
+  /**
+   * 查找最近的怪物
+   */
+  private findNearestMonster(position: { x: number; y: number; zoneId: string }): Monster | null {
+    let nearest: Monster | null = null
+    let minDistance = Infinity
+
+    this.monsters.forEach((monster) => {
+      if (monster.zoneId !== position.zoneId) return
+
+      const distance = Math.sqrt(
+        Math.pow(monster.x - position.x, 2) + 
+        Math.pow(monster.y - position.y, 2)
+      )
+
+      if (distance < minDistance) {
+        minDistance = distance
+        nearest = monster
+      }
+    })
+
+    return nearest
+  }
+
+  /**
+   * 获取区域怪物列表
+   */
+  public getMonstersInZone(zoneId: string): Monster[] {
+    return Array.from(this.monsters.values()).filter(m => m.zoneId === zoneId)
   }
 
   /**

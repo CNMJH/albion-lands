@@ -20,7 +20,7 @@ function App() {
 
         // 2. 初始化网络
         const network = NetworkManager.getInstance()
-        await network.connect('ws://localhost:4000/ws')
+        await network.connect('ws://localhost:3002/ws')
         setLoadingProgress(40)
 
         // 3. 加载资源配置

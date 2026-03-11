@@ -1,4 +1,9 @@
 import { FastifyInstance } from 'fastify'
+import authRoutes from './auth'
+import usersRoutes from './users'
+import charactersRoutes from './characters'
+import itemsRoutes from './items'
+import marketRoutes from './market'
 
 /**
  * 注册所有 HTTP 路由
@@ -19,17 +24,17 @@ export function registerRoutes(fastify: FastifyInstance): void {
   })
 
   // 认证路由
-  fastify.register(require('./routes/auth'), { prefix: '/api/v1/auth' })
+  fastify.register(authRoutes, { prefix: '/api/v1/auth' })
   
   // 用户路由
-  fastify.register(require('./routes/users'), { prefix: '/api/v1/users' })
+  fastify.register(usersRoutes, { prefix: '/api/v1/users' })
   
   // 角色路由
-  fastify.register(require('./routes/characters'), { prefix: '/api/v1/characters' })
+  fastify.register(charactersRoutes, { prefix: '/api/v1/characters' })
   
   // 物品路由
-  fastify.register(require('./routes/items'), { prefix: '/api/v1/items' })
+  fastify.register(itemsRoutes, { prefix: '/api/v1/items' })
   
   // 市场路由
-  fastify.register(require('./routes/market'), { prefix: '/api/v1/market' })
+  fastify.register(marketRoutes, { prefix: '/api/v1/market' })
 }
