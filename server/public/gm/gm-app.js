@@ -27,6 +27,9 @@ function loadPanelData(panelId) {
     case 'players':
       loadPlayers()
       break
+    case 'social':
+      // 社交管理面板
+      break
     case 'items':
       loadItems()
       break
@@ -436,6 +439,184 @@ async function loadServerStatus() {
     }
   } catch (error) {
     console.error('加载服务器状态失败:', error)
+  }
+}
+
+// ==================== 社交管理功能 ====================
+
+// 加载社交信息
+async function loadSocialInfo() {
+  const playerId = document.getElementById('socialPlayerId').value
+  if (!playerId) {
+    alert('请输入玩家 ID')
+    return
+  }
+
+  try {
+    // 加载好友
+    const friendsRes = await fetch(`/api/v1/gm/players/${playerId}/friends`)
+    const friendsData = await friendsRes.json()
+    
+    if (friendsData.success) {
+      const friends = friendsData.data.friends || []
+      const friendsHtml = friends.map(f => {
+        const friendInfo = f.characterId === playerId ? f.friend : f.character
+        return `
+          <tr>
+            <td>${friendInfo.name}</td>
+            <td>${friendInfo.level}</td>
+            <td class="${friendInfo.isOnline ? 'status-online' : 'status-offline'}">
+              ${friendInfo.isOnline ? '在线' : '离线'}
+            </td>
+            <td>${f.status}</td>
+          </tr>
+        `
+      }).join('')
+      
+      document.getElementById('friendsTable').innerHTML = friendsHtml || '<tr><td colspan="4">暂无好友</td></tr>'
+    }
+
+    // 加载队伍
+    const partyRes = await fetch(`/api/v1/gm/players/${playerId}/party`)
+    const partyData = await partyRes.json()
+    
+    const partyDiv = document.getElementById('partyInfo')
+    if (partyData.success && partyData.data.party) {
+      const party = partyData.data.party
+      const membersHtml = party.members.map(m => `
+        <div style="padding: 8px; background: rgba(255,255,255,0.05); margin-bottom: 5px; border-radius: 4px;">
+          <strong>${m.role === 'Leader' ? '👑' : ''}${m.character.name}</strong>
+          Lv.${m.character.level} 
+          <span class="${m.character.isOnline ? 'status-online' : 'status-offline'}">
+            ${m.character.isOnline ? '在线' : '离线'}
+          </span>
+          - ${m.character.zoneId}
+        </div>
+      `).join('')
+      
+      partyDiv.innerHTML = `
+        <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 6px; margin-bottom: 10px;">
+          <strong>队伍：${party.name || '未命名'}</strong> (${party.members.length}/${party.maxMembers}人)
+        </div>
+        ${membersHtml}
+      `
+    } else {
+      partyDiv.innerHTML = '<div class="loading">未加入队伍</div>'
+    }
+
+    document.getElementById('socialInfo').style.display = 'block'
+  } catch (error) {
+    console.error('加载社交信息失败:', error)
+    alert('加载失败：' + error.message)
+  }
+}
+
+// 加载聊天记录
+async function loadChatHistory() {
+  const type = document.getElementById('chatType').value
+  const query = type ? `?type=${type}` : ''
+  
+  try {
+    const res = await fetch(`/api/v1/gm/chat/history${query}`)
+    const data = await res.json()
+    
+    if (data.success) {
+      const messages = data.data.messages || []
+      const html = messages.map(msg => `
+        <tr>
+          <td>${msg.sender.name} (Lv.${msg.sender.level})</td>
+          <td>${msg.type}</td>
+          <td>${msg.content}</td>
+          <td>${new Date(msg.createdAt).toLocaleString('zh-CN')}</td>
+          <td>
+            <button class="btn btn-danger" onclick="deleteChatMessage('${msg.id}')">删除</button>
+          </td>
+        </tr>
+      `).join('')
+      
+      document.getElementById('chatTable').innerHTML = html || '<tr><td colspan="5">暂无聊天记录</td></tr>'
+    }
+  } catch (error) {
+    console.error('加载聊天记录失败:', error)
+  }
+}
+
+// 删除聊天消息
+async function deleteChatMessage(messageId) {
+  if (!confirm('确定删除这条消息吗？')) return
+  
+  try {
+    const res = await fetch(`/api/v1/gm/chat/${messageId}`, { method: 'DELETE' })
+    const data = await res.json()
+    
+    if (data.success) {
+      alert('消息已删除')
+      loadChatHistory()
+    } else {
+      alert('删除失败：' + data.error)
+    }
+  } catch (error) {
+    console.error('删除消息失败:', error)
+    alert('删除失败：' + error.message)
+  }
+}
+
+// 给予大喇叭
+async function giveWorldHorn() {
+  const playerId = document.getElementById('giveHornPlayerId').value
+  const quantity = parseInt(document.getElementById('giveHornQuantity').value)
+  
+  if (!playerId) {
+    alert('请输入玩家 ID')
+    return
+  }
+  
+  try {
+    const res = await fetch(`/api/v1/gm/players/${playerId}/give-horn`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quantity }),
+    })
+    const data = await res.json()
+    
+    if (data.success) {
+      alert(data.message)
+    } else {
+      alert('给予失败：' + data.error)
+    }
+  } catch (error) {
+    console.error('给予大喇叭失败:', error)
+    alert('给予失败：' + error.message)
+  }
+}
+
+// 加载大喇叭统计
+async function loadHornStats() {
+  try {
+    const res = await fetch(`/api/v1/gm/items/world-horn/stats`)
+    const data = await res.json()
+    
+    if (data.success) {
+      const { totalHorns, playerCount, distribution } = data.data
+      const distHtml = distribution.slice(0, 20).map(d => `
+        <div style="padding: 5px 0; border-bottom: 1px solid #333;">
+          <span>${d.characterId}</span>: <strong>${d.quantity}</strong> 个
+        </div>
+      `).join('')
+      
+      document.getElementById('hornStats').innerHTML = `
+        <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 6px; margin-bottom: 10px;">
+          <strong>全服大喇叭统计</strong><br>
+          拥有玩家数：${playerCount} 人<br>
+          总数量：${totalHorns} 个
+        </div>
+        <div style="max-height: 300px; overflow-y: auto;">
+          ${distHtml || '<div class="loading">暂无数据</div>'}
+        </div>
+      `
+    }
+  } catch (error) {
+    console.error('加载大喇叭统计失败:', error)
   }
 }
 

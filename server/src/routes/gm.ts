@@ -14,7 +14,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取 GM 面板数据
    */
-  fastify.get('/api/gm/dashboard', async (request, reply) => {
+  fastify.get('/dashboard', async (request, reply) => {
     try {
       const [
         playerCount,
@@ -52,7 +52,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取所有玩家列表
    */
-  fastify.get('/api/gm/players', async (request, reply) => {
+  fastify.get('/players', async (request, reply) => {
     try {
       const players = await prisma.character.findMany({
         include: {
@@ -88,7 +88,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取玩家详情
    */
-  fastify.get('/api/gm/players/:id', async (request, reply) => {
+  fastify.get('/players/:id', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
       
@@ -126,7 +126,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 修改玩家等级
    */
-  fastify.post('/api/gm/players/:id/level', async (request, reply) => {
+  fastify.post('/players/:id/level', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
       const { level } = request.body as { level: number }
@@ -171,7 +171,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 给予玩家物品
    */
-  fastify.post('/api/gm/players/:id/items', async (request, reply) => {
+  fastify.post('/players/:id/items', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
       const { itemId, quantity = 1 } = request.body as { 
@@ -224,7 +224,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 给予玩家货币
    */
-  fastify.post('/api/gm/players/:id/currency', async (request, reply) => {
+  fastify.post('/players/:id/currency', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
       const { silver = 0, gold = 0 } = request.body as {
@@ -270,7 +270,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 传送玩家
    */
-  fastify.post('/api/gm/players/:id/teleport', async (request, reply) => {
+  fastify.post('/players/:id/teleport', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
       const { zoneId, x, y } = request.body as {
@@ -311,7 +311,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取所有物品列表
    */
-  fastify.get('/api/gm/items', async (request, reply) => {
+  fastify.get('/items', async (request, reply) => {
     try {
       const items = await prisma.item.findMany({
         orderBy: {
@@ -334,7 +334,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 创建新物品
    */
-  fastify.post('/api/gm/items', async (request, reply) => {
+  fastify.post('/items', async (request, reply) => {
     try {
       const {
         name,
@@ -393,7 +393,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取市场订单
    */
-  fastify.get('/api/gm/market', async (request, reply) => {
+  fastify.get('/market', async (request, reply) => {
     try {
       const orders = await prisma.marketOrder.findMany({
         include: {
@@ -420,7 +420,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取游戏日志
    */
-  fastify.get('/api/gm/logs', async (request, reply) => {
+  fastify.get('/logs', async (request, reply) => {
     try {
       const { type, limit = 100 } = request.query as {
         type?: string
@@ -437,7 +437,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         orderBy: {
           createdAt: 'desc',
         },
-        take: limit,
+        take: limitNum,
       })
 
       reply.send({
@@ -455,7 +455,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取资源节点状态
    */
-  fastify.get('/api/gm/resources', async (request, reply) => {
+  fastify.get('/resources', async (request, reply) => {
     try {
       const nodes = GatheringService.getAllActiveNodes()
 
@@ -474,7 +474,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取配方列表
    */
-  fastify.get('/api/gm/recipes', async (request, reply) => {
+  fastify.get('/recipes', async (request, reply) => {
     try {
       const recipes = CraftingService.getAllRecipes()
 
@@ -493,7 +493,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 全服广播消息
    */
-  fastify.post('/api/gm/broadcast', async (request, reply) => {
+  fastify.post('/broadcast', async (request, reply) => {
     try {
       const { message } = request.body as { message: string }
 
@@ -521,7 +521,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 重置玩家背包
    */
-  fastify.post('/api/gm/players/:id/inventory/reset', async (request, reply) => {
+  fastify.post('/players/:id/inventory/reset', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
 
@@ -554,7 +554,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 删除玩家
    */
-  fastify.delete('/api/gm/players/:id', async (request, reply) => {
+  fastify.delete('/players/:id', async (request, reply) => {
     try {
       const { id } = request.params as { id: string }
 
@@ -592,7 +592,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
   /**
    * 获取服务器状态
    */
-  fastify.get('/api/gm/server/status', async (request, reply) => {
+  fastify.get('/server/status', async (request, reply) => {
     try {
       const uptime = process.uptime()
       const memoryUsage = process.memoryUsage()
@@ -609,8 +609,306 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
           nodeVersion: process.version,
         },
       })
-    } catch (error) {
-      fastify.log.error('获取服务器状态失败:', error)
+    } catch (error: any) {
+      console.error('获取服务器状态失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  /**
+   * 社交系统管理
+   */
+
+  // 获取玩家好友列表
+  fastify.get('/players/:id/friends', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string }
+      
+      const friends = await prisma.friend.findMany({
+        where: {
+          OR: [
+            { characterId: id },
+            { friendId: id },
+          ],
+        },
+        include: {
+          character: {
+            select: {
+              id: true,
+              name: true,
+              level: true,
+              isOnline: true,
+            },
+          },
+          friend: {
+            select: {
+              id: true,
+              name: true,
+              level: true,
+              isOnline: true,
+            },
+          },
+        },
+      })
+
+      reply.send({
+        success: true,
+        data: {
+          friends: friends.map(f => ({
+            id: f.id,
+            characterId: f.characterId,
+            friendId: f.friendId,
+            status: f.status,
+            character: f.character,
+            friend: f.friend,
+          })),
+        },
+      })
+    } catch (error: any) {
+      console.error('获取玩家好友失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  // 获取玩家队伍信息
+  fastify.get('/players/:id/party', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string }
+      
+      const partyMember = await prisma.partyMember.findFirst({
+        where: {
+          characterId: id,
+        },
+        include: {
+          party: {
+            include: {
+              members: {
+                include: {
+                  character: {
+                    select: {
+                      id: true,
+                      name: true,
+                      level: true,
+                      isOnline: true,
+                      zoneId: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+
+      reply.send({
+        success: true,
+        data: {
+          party: partyMember?.party || null,
+        },
+      })
+    } catch (error: any) {
+      console.error('获取玩家队伍失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  // 获取聊天记录
+  fastify.get('/chat/history', async (request, reply) => {
+    try {
+      const { type, characterId, limit } = request.query as {
+        type?: string
+        characterId?: string
+        limit?: string
+      }
+
+      const limitNum = limit ? parseInt(limit, 10) : 100
+
+      const where: any = {}
+      if (type) {
+        where.type = type
+      }
+      if (characterId) {
+        where.OR = [
+          { senderId: characterId },
+          { receiverId: characterId },
+        ]
+      }
+
+      const messages = await prisma.chatMessage.findMany({
+        where,
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              level: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: limitNum,
+      })
+
+      reply.send({
+        success: true,
+        data: {
+          messages,
+        },
+      })
+    } catch (error: any) {
+      console.error('获取聊天记录失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  // 删除聊天消息
+  fastify.delete('/chat/:id', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string }
+      
+      await prisma.chatMessage.delete({
+        where: { id },
+      })
+
+      reply.send({
+        success: true,
+        message: '消息已删除',
+      })
+    } catch (error: any) {
+      console.error('删除聊天消息失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  // 禁言玩家
+  fastify.post('/players/:id/mute', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string }
+      const { duration } = request.body as { duration: number } // 分钟
+      
+      // TODO: 添加禁言逻辑（需要添加 muteUntil 字段到 Character）
+      // 临时实现：记录到 GameLog
+      await prisma.gameLog.create({
+        data: {
+          type: 'mute',
+          message: `玩家被禁言 ${duration} 分钟`,
+          characterId: id,
+          data: JSON.stringify({ duration }),
+        },
+      })
+
+      reply.send({
+        success: true,
+        message: `玩家已禁言 ${duration} 分钟`,
+      })
+    } catch (error: any) {
+      console.error('禁言玩家失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  /**
+   * 道具管理
+   */
+
+  // 给予玩家大喇叭
+  fastify.post('/players/:id/give-horn', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string }
+      const { quantity = 10 } = request.body as { quantity?: number }
+      
+      // 检查物品是否存在
+      const horn = await prisma.item.findUnique({
+        where: { id: 'world_horn' },
+      })
+
+      if (!horn) {
+        reply.status(404).send({
+          success: false,
+          error: '大喇叭物品不存在',
+        })
+        return
+      }
+
+      // 检查玩家是否已有大喇叭
+      const existing = await prisma.inventoryItem.findFirst({
+        where: {
+          characterId: id,
+          itemId: 'world_horn',
+        },
+      })
+
+      if (existing) {
+        // 增加数量
+        await prisma.inventoryItem.update({
+          where: { id: existing.id },
+          data: {
+            quantity: existing.quantity + quantity,
+          },
+        })
+      } else {
+        // 创建新物品
+        await prisma.inventoryItem.create({
+          data: {
+            characterId: id,
+            itemId: 'world_horn',
+            quantity,
+          },
+        })
+      }
+
+      // 记录日志
+      await prisma.gameLog.create({
+        data: {
+          type: 'gm_give_item',
+          message: `GM 给予玩家 ${quantity} 个大喇叭`,
+          characterId: id,
+          data: JSON.stringify({ itemId: 'world_horn', quantity }),
+        },
+      })
+
+      reply.send({
+        success: true,
+        message: `已给予玩家 ${quantity} 个大喇叭`,
+      })
+    } catch (error: any) {
+      console.error('给予大喇叭失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  // 获取全服大喇叭统计
+  fastify.get('/items/world-horn/stats', async (request, reply) => {
+    try {
+      // 统计大喇叭分布
+      const stats = await prisma.inventoryItem.groupBy({
+        by: ['characterId'],
+        where: {
+          itemId: 'world_horn',
+        },
+        _sum: {
+          quantity: true,
+        },
+      })
+
+      const totalHorns = stats.reduce((sum, s) => sum + (s._sum.quantity || 0), 0)
+      const playerCount = stats.length
+
+      reply.send({
+        success: true,
+        data: {
+          totalHorns,
+          playerCount,
+          distribution: stats.map(s => ({
+            characterId: s.characterId,
+            quantity: s._sum.quantity || 0,
+          })),
+        },
+      })
+    } catch (error: any) {
+      console.error('获取大喇叭统计失败:', error)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })

@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { CombatService } from '../services/CombatService'
 import { GatheringService } from '../services/GatheringService'
 import { CraftingService } from '../services/CraftingService'
+import { ChatService } from '../services/ChatService'
+import { PartyService } from '../services/PartyService'
+import { FriendService } from '../services/FriendService'
 
 interface Client {
   id: string
@@ -211,6 +214,39 @@ export class WebSocketServer {
           this.handleGetRecipes(clientId, message.data)
           break
 
+        // 社交相关
+        case 'friendRequest':
+          this.handleFriendRequest(clientId, message.data)
+          break
+
+        case 'friendAccept':
+          this.handleFriendAccept(clientId, message.data)
+          break
+
+        case 'friendReject':
+          this.handleFriendReject(clientId, message.data)
+          break
+
+        case 'friendRemove':
+          this.handleFriendRemove(clientId, message.data)
+          break
+
+        case 'partyCreate':
+          this.handlePartyCreate(clientId, message.data)
+          break
+
+        case 'partyJoin':
+          this.handlePartyJoin(clientId, message.data)
+          break
+
+        case 'partyLeave':
+          this.handlePartyLeave(clientId, message.data)
+          break
+
+        case 'partyKick':
+          this.handlePartyKick(clientId, message.data)
+          break
+
         default:
           this.fastify.log.warn(`未知消息类型：${message.type}`)
       }
@@ -354,9 +390,160 @@ export class WebSocketServer {
   /**
    * 处理聊天
    */
-  private handleChat(clientId: string, data: any): void {
-    // TODO: 实现聊天逻辑
-    this.fastify.log.info(`聊天消息 [${clientId}]:`, data.message)
+  private async handleChat(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const { type, content, receiverId, partyId, zoneId } = data
+
+    let result
+    switch (type) {
+      case 'whisper':
+        if (!receiverId) {
+          this.send(clientId, {
+            type: 'chatError',
+            payload: { error: '私聊需要指定接收者' },
+          })
+          return
+        }
+        result = await ChatService.sendWhisper(client.characterId, receiverId, content)
+        if (result.success) {
+          // 发送给接收者（如果在线）
+          const receiverClient = Array.from(this.clients.values()).find(
+            c => c.characterId === receiverId
+          )
+          if (receiverClient) {
+            this.send(receiverClient.id, {
+              type: 'chatMessage',
+              payload: {
+                type: 'whisper',
+                senderId: client.characterId,
+                senderName: client.characterId,
+                content,
+                isReceived: true,
+              },
+            })
+          }
+          // 确认发送者
+          this.send(clientId, {
+            type: 'chatMessage',
+            payload: {
+              type: 'whisper',
+              senderId: client.characterId,
+              receiverId,
+              content,
+              isReceived: false,
+            },
+          })
+        } else {
+          this.send(clientId, {
+            type: 'chatError',
+            payload: { error: result.error },
+          })
+        }
+        break
+
+      case 'party':
+        if (!partyId) {
+          this.send(clientId, {
+            type: 'chatError',
+            payload: { error: '队伍聊天需要指定队伍 ID' },
+          })
+          return
+        }
+        result = await ChatService.sendPartyMessage(client.characterId, partyId, content)
+        if (result.success) {
+          // 广播给队伍成员
+          const party = await PartyService.getPartyInfo(partyId)
+          for (const member of party.members) {
+            const memberClient = Array.from(this.clients.values()).find(
+              c => c.characterId === member.characterId
+            )
+            if (memberClient) {
+              this.send(memberClient.id, {
+                type: 'chatMessage',
+                payload: {
+                  type: 'party',
+                  senderId: client.characterId,
+                  senderName: client.characterId,
+                  content,
+                  partyId,
+                },
+              })
+            }
+          }
+        } else {
+          this.send(clientId, {
+            type: 'chatError',
+            payload: { error: result.error },
+          })
+        }
+        break
+
+      case 'zone':
+        if (!zoneId) {
+          this.send(clientId, {
+            type: 'chatError',
+            payload: { error: '区域聊天需要指定区域 ID' },
+          })
+          return
+        }
+        result = await ChatService.sendZoneMessage(client.characterId, zoneId, content)
+        if (result.success) {
+          // 广播给区域内所有玩家
+          this.clients.forEach((c) => {
+            if (c.position?.zoneId === zoneId && c.characterId) {
+              this.send(c.id, {
+                type: 'chatMessage',
+                payload: {
+                  type: 'zone',
+                  senderId: client.characterId,
+                  senderName: client.characterId,
+                  content,
+                  zoneId,
+                },
+              })
+            }
+          })
+        } else {
+          this.send(clientId, {
+            type: 'chatError',
+            payload: { error: result.error },
+          })
+        }
+        break
+
+      case 'global':
+        result = await ChatService.sendGlobalMessage(client.characterId, content)
+        if (result.success) {
+          // 广播给所有玩家
+          this.clients.forEach((c) => {
+            if (c.characterId) {
+              this.send(c.id, {
+                type: 'chatMessage',
+                payload: {
+                  type: 'global',
+                  senderId: client.characterId,
+                  senderName: client.characterId,
+                  content,
+                },
+              })
+            }
+          })
+        } else {
+          this.send(clientId, {
+            type: 'chatError',
+            payload: { error: result.error },
+          })
+        }
+        break
+
+      default:
+        this.send(clientId, {
+          type: 'chatError',
+          payload: { error: '未知的聊天类型' },
+        })
+    }
   }
 
   /**
@@ -657,6 +844,225 @@ export class WebSocketServer {
     
     const nodes = GatheringService.getZoneNodes('zone_1')
     this.fastify.log.info(`初始化了 ${nodes.length} 个资源节点`)
+  }
+
+  /**
+   * 处理好友请求
+   */
+  private async handleFriendRequest(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.userId) return
+
+    const { friendUserId } = data
+    const result = await FriendService.sendRequest(client.userId, friendUserId)
+
+    if (result.success) {
+      this.send(clientId, {
+        type: 'friendRequestSent',
+        payload: { friendUserId, message: '好友请求已发送' },
+      })
+    } else {
+      this.send(clientId, {
+        type: 'friendError',
+        payload: { error: result.error },
+      })
+    }
+  }
+
+  /**
+   * 处理接受好友
+   */
+  private async handleFriendAccept(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.userId) return
+
+    const { friendUserId } = data
+    const result = await FriendService.acceptRequest(client.userId, friendUserId)
+
+    if (result.success) {
+      this.send(clientId, {
+        type: 'friendAccepted',
+        payload: { friendUserId, message: '已添加为好友' },
+      })
+      // 通知对方
+      const friendClient = Array.from(this.clients.values()).find(
+        c => c.userId === friendUserId
+      )
+      if (friendClient) {
+        this.send(friendClient.id, {
+          type: 'friendAdded',
+          payload: { friendUserId: client.userId },
+        })
+      }
+    } else {
+      this.send(clientId, {
+        type: 'friendError',
+        payload: { error: result.error },
+      })
+    }
+  }
+
+  /**
+   * 处理拒绝好友
+   */
+  private async handleFriendReject(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.userId) return
+
+    const { friendUserId } = data
+    await FriendService.rejectRequest(client.userId, friendUserId)
+
+    this.send(clientId, {
+      type: 'friendRejected',
+      payload: { friendUserId },
+    })
+  }
+
+  /**
+   * 处理删除好友
+   */
+  private async handleFriendRemove(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.userId) return
+
+    const { friendUserId } = data
+    await FriendService.removeFriend(client.userId, friendUserId)
+
+    this.send(clientId, {
+      type: 'friendRemoved',
+      payload: { friendUserId },
+    })
+  }
+
+  /**
+   * 处理创建队伍
+   */
+  private async handlePartyCreate(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    try {
+      const party = await PartyService.createParty(
+        client.characterId,
+        data.name,
+        data.isPublic || false
+      )
+
+      this.send(clientId, {
+        type: 'partyCreated',
+        payload: { party },
+      })
+    } catch (error: any) {
+      this.send(clientId, {
+        type: 'partyError',
+        payload: { error: error.message },
+      })
+    }
+  }
+
+  /**
+   * 处理加入队伍
+   */
+  private async handlePartyJoin(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const { partyId } = data
+    const result = await PartyService.joinParty(partyId, client.characterId)
+
+    if (result.success) {
+      const party = await PartyService.getPartyInfo(partyId)
+      this.send(clientId, {
+        type: 'partyJoined',
+        payload: { party },
+      })
+      // 通知队长
+      const leaderClient = Array.from(this.clients.values()).find(
+        c => c.characterId === party.leaderId
+      )
+      if (leaderClient) {
+        this.send(leaderClient.id, {
+          type: 'partyMemberJoined',
+          payload: { partyId, memberId: client.characterId },
+        })
+      }
+    } else {
+      this.send(clientId, {
+        type: 'partyError',
+        payload: { error: result.error },
+      })
+    }
+  }
+
+  /**
+   * 处理离开队伍
+   */
+  private async handlePartyLeave(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const { partyId } = data
+    const result = await PartyService.leaveParty(partyId, client.characterId)
+
+    if (result.success) {
+      this.send(clientId, {
+        type: 'partyLeft',
+        payload: { partyId },
+      })
+      // 通知其他队员
+      const party = await PartyService.getPlayerParty(client.characterId)
+      if (party) {
+        party.members.forEach(member => {
+          const memberClient = Array.from(this.clients.values()).find(
+            c => c.characterId === member.characterId
+          )
+          if (memberClient) {
+            this.send(memberClient.id, {
+              type: 'partyMemberLeft',
+              payload: { partyId, memberId: client.characterId, newLeaderId: result.newLeaderId },
+            })
+          }
+        })
+      }
+    } else {
+      this.send(clientId, {
+        type: 'partyError',
+        payload: { error: result.error },
+      })
+    }
+  }
+
+  /**
+   * 处理踢出队伍
+   */
+  private async handlePartyKick(clientId: string, data: any): Promise<void> {
+    const client = this.clients.get(clientId)
+    if (!client || !client.characterId) return
+
+    const { partyId, targetId } = data
+    const result = await PartyService.kickMember(partyId, client.characterId, targetId)
+
+    if (result.success) {
+      this.send(clientId, {
+        type: 'partyMemberKicked',
+        payload: { partyId, targetId },
+      })
+      // 通知被踢者
+      const targetClient = Array.from(this.clients.values()).find(
+        c => c.characterId === targetId
+      )
+      if (targetClient) {
+        this.send(targetClient.id, {
+          type: 'partyKicked',
+          payload: { partyId },
+        })
+      }
+    } else {
+      this.send(clientId, {
+        type: 'partyError',
+        payload: { error: result.error },
+      })
+    }
   }
 
   /**

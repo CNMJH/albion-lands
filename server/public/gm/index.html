@@ -251,6 +251,7 @@
       <h1>🎮 GM 工具</h1>
       <div class="nav-item active" data-panel="dashboard">📊 仪表盘</div>
       <div class="nav-item" data-panel="players">👥 玩家管理</div>
+      <div class="nav-item" data-panel="social">💬 社交管理</div>
       <div class="nav-item" data-panel="items">🎒 物品管理</div>
       <div class="nav-item" data-panel="market">💰 市场监控</div>
       <div class="nav-item" data-panel="resources">🌲 资源节点</div>
@@ -399,6 +400,86 @@
             <tr><td colspan="3" class="loading">加载中...</td></tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- 社交管理 -->
+      <div id="social" class="panel">
+        <h2>💬 社交管理</h2>
+        
+        <div class="form-row" style="margin-bottom: 20px;">
+          <div class="form-group">
+            <label>查询玩家 ID</label>
+            <input type="text" id="socialPlayerId" placeholder="输入玩家 ID">
+          </div>
+          <div class="form-group" style="display: flex; align-items: flex-end;">
+            <button class="btn btn-primary" onclick="loadSocialInfo()">查询</button>
+          </div>
+        </div>
+
+        <div id="socialInfo" style="display: none;">
+          <h3>好友关系</h3>
+          <table class="data-table" style="margin-bottom: 20px;">
+            <thead>
+              <tr>
+                <th>好友名称</th>
+                <th>等级</th>
+                <th>状态</th>
+                <th>关系状态</th>
+              </tr>
+            </thead>
+            <tbody id="friendsTable">
+              <tr><td colspan="4" class="loading">加载中...</td></tr>
+            </tbody>
+          </table>
+
+          <h3>队伍信息</h3>
+          <div id="partyInfo" class="loading">未加入队伍</div>
+
+          <h3>聊天记录</h3>
+          <div class="form-row" style="margin-bottom: 10px;">
+            <div class="form-group">
+              <label>聊天类型</label>
+              <select id="chatType">
+                <option value="">全部</option>
+                <option value="zone">区域</option>
+                <option value="global">世界</option>
+                <option value="whisper">私聊</option>
+                <option value="party">队伍</option>
+              </select>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+              <button class="btn btn-primary" onclick="loadChatHistory()">查询</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>发送者</th>
+                <th>类型</th>
+                <th>内容</th>
+                <th>时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="chatTable">
+              <tr><td colspan="5" class="loading">加载中...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top: 30px;">大喇叭管理</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>给予玩家大喇叭</label>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="giveHornPlayerId" placeholder="玩家 ID" style="flex: 1;">
+              <input type="number" id="giveHornQuantity" value="10" min="1" max="99" style="width: 100px;">
+              <button class="btn btn-gold" onclick="giveWorldHorn()">给予</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="loadHornStats()">查看大喇叭统计</button>
+        <div id="hornStats" style="margin-top: 20px;"></div>
       </div>
 
       <!-- 服务器状态 -->

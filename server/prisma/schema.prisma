@@ -12,67 +12,71 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
-  
+
   character Character?
 }
 
 model Character {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  
-  name      String
-  level     Int      @default(1)
-  exp       Int      @default(0)
-  silver    Int      @default(0)
-  gold      Int      @default(0)
-  zoneId    String   @default("zone_1")
-  x         Float    @default(0)
-  y         Float    @default(0)
-  equipment String?  // JSON string
-  isOnline  Boolean  @default(false)
-  lastLoginAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  inventory InventoryItem[]
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  name            String
+  level           Int             @default(1)
+  exp             Int             @default(0)
+  silver          Int             @default(0)
+  gold            Int             @default(0)
+  zoneId          String          @default("zone_1")
+  x               Float           @default(0)
+  y               Float           @default(0)
+  equipment       String? // JSON string
+  isOnline        Boolean         @default(false)
+  lastLoginAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  inventory       InventoryItem[]
+  partyMembers    PartyMember[]
+  chatMessages    ChatMessage[]
+  friendsSent     Friend[]        @relation("CharacterFriendsSent")
+  friendsReceived Friend[]        @relation("CharacterFriendsReceived")
 }
 
 model Item {
-  id          String   @id @default(uuid())
-  name        String
-  type        String   // Weapon, Armor, Material...
-  rarity      String   // Common, Uncommon...
-  stats       String?  // JSON string
-  slot        String?  // MainHand, Armor...
-  minLevel    Int      @default(1)
-  stackSize   Int      @default(99)
-  basePrice   Int      @default(0)
-  createdAt   DateTime @default(now())
+  id             String          @id @default(uuid())
+  name           String
+  type           String // Weapon, Armor, Material...
+  rarity         String // Common, Uncommon...
+  stats          String? // JSON string
+  slot           String? // MainHand, Armor...
+  minLevel       Int             @default(1)
+  stackSize      Int             @default(99)
+  basePrice      Int             @default(0)
+  createdAt      DateTime        @default(now())
   inventoryItems InventoryItem[]
   marketOrders   MarketOrder[]
 }
 
 model InventoryItem {
-  id         String   @id @default(uuid())
+  id          String    @id @default(uuid())
   characterId String
-  character  Character @relation(fields: [characterId], references: [id])
-  itemId     String
-  item       Item     @relation(fields: [itemId], references: [id])
-  quantity   Int      @default(1)
-  isEquipped Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  character   Character @relation(fields: [characterId], references: [id])
+  itemId      String
+  item        Item      @relation(fields: [itemId], references: [id])
+  quantity    Int       @default(1)
+  isEquipped  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
 }
 
 model MarketOrder {
-  id          String   @id @default(uuid())
-  sellerId    String
-  itemId      String
-  item        Item     @relation(fields: [itemId], references: [id])
-  quantity    Int
-  unitPrice   Int
-  status      String   @default("Pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  sellerId  String
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id])
+  quantity  Int
+  unitPrice Int
+  status    String   @default("Pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Zone {
@@ -82,41 +86,63 @@ model Zone {
   minLevel    Int      @default(1)
   maxLevel    Int      @default(10)
   pvpEnabled  Boolean  @default(false)
-  portals     String?  // JSON string
+  portals     String? // JSON string
   createdAt   DateTime @default(now())
 }
 
 model Friend {
-  id        String   @id @default(uuid())
-  userId    String
-  friendId  String
-  createdAt DateTime @default(now())
-  @@unique([userId, friendId])
+  id          String   @id @default(uuid())
+  characterId String
+  friendId    String
+  status      String   @default("pending") // pending, accepted, blocked
+  createdAt   DateTime @default(now())
+
+  character Character @relation("CharacterFriendsSent", fields: [characterId], references: [id], onDelete: Cascade)
+  friend    Character @relation("CharacterFriendsReceived", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, friendId])
 }
 
 model Party {
-  id        String   @id @default(uuid())
-  leaderId  String
-  members   PartyMember[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String        @id @default(uuid())
+  leaderId   String
+  name       String?
+  maxMembers Int           @default(3)
+  isPublic   Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  members    PartyMember[]
 }
 
 model PartyMember {
-  id        String   @id @default(uuid())
-  partyId   String
-  party     Party    @relation(fields: [partyId], references: [id])
+  id          String    @id @default(uuid())
+  partyId     String
+  party       Party     @relation(fields: [partyId], references: [id], onDelete: Cascade)
   characterId String
-  role      String   @default("Member")
-  joinedAt  DateTime @default(now())
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  role        String    @default("Member") // Leader, Member
+  joinedAt    DateTime  @default(now())
+
   @@unique([partyId, characterId])
 }
 
+model ChatMessage {
+  id         String    @id @default(uuid())
+  type       String // whisper, party, zone, global
+  senderId   String
+  sender     Character @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String? // whisper 目标
+  partyId    String? // 队伍 ID
+  zoneId     String? // 区域 ID
+  content    String
+  createdAt  DateTime  @default(now())
+}
+
 model GameLog {
-  id        String   @id @default(uuid())
-  type      String
-  message   String
-  data      String?  // JSON string
+  id          String   @id @default(uuid())
+  type        String
+  message     String
+  data        String? // JSON string
   characterId String?
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 }

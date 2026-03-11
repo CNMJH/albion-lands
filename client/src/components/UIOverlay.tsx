@@ -5,6 +5,8 @@ import { MiniMap } from './MiniMap'
 import { ChatBox } from './ChatBox'
 import { MenuBar } from './MenuBar'
 import { Inventory } from './Inventory'
+import { FriendsUI } from './FriendsUI'
+import { ChatUI } from './ChatUI'
 import './UIOverlay.css'
 
 /**
@@ -52,9 +54,12 @@ export function UIOverlay() {
       <div className="ui-left">
         {/* 聊天框 */}
         <div className="ui-left-bottom">
-          <ChatBox />
+          <ChatUI />
         </div>
       </div>
+
+      {/* 好友和社交 */}
+      <FriendsUI />
 
       {/* 背包按钮 */}
       <Inventory />

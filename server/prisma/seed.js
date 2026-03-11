@@ -123,6 +123,19 @@ async function main() {
     prisma.item.create({
       data: { id: 'tool_sickle', name: '镰刀', type: 'Tool', rarity: 'Common', basePrice: 20, stats: JSON.stringify({ gatheringSpeed: 1 }) },
     }),
+    // 大喇叭道具
+    prisma.item.create({
+      data: { 
+        id: 'world_horn', 
+        name: '大喇叭', 
+        type: 'Consumable', 
+        rarity: 'Common', 
+        basePrice: 100, 
+        stackSize: 99,
+        description: '使用后可以进行全服喊话',
+        stats: JSON.stringify({ effect: 'global_chat', cooldown: 10 })
+      },
+    }),
   ])
   console.log(`✅ 创建 ${items.length} 个物品`)
 
@@ -146,16 +159,28 @@ async function main() {
             mainHand: 'item_sword_t1',
             armor: 'item_plate_armor_t1',
           }),
+          // 给予 10 个大喇叭用于测试
+          inventoryItems: {
+            create: {
+              itemId: 'world_horn',
+              quantity: 10,
+            },
+          },
         },
       },
     },
     include: {
-      character: true,
+      character: {
+        include: {
+          inventoryItems: true,
+        },
+      },
     },
   })
   console.log(`✅ 创建测试用户：${testUser.email}`)
   console.log(`   角色名：${testUser.character?.name}`)
   console.log(`   等级：${testUser.character?.level}`)
+  console.log(`   大喇叭：${testUser.character?.inventoryItems?.find(i => i.itemId === 'world_horn')?.quantity || 0} 个`)
 
   console.log('')
   console.log('🎉 播种完成！')
