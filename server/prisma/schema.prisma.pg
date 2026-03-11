@@ -1,20 +1,28 @@
+// 呼噜大陆 - 精简版数据库 Schema
+// 根据 GAME_DESIGN_LITE.md 设计
+// 版本：2.0 (H5 精简版)
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
+// ==================== 用户系统 ====================
 
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String
+  password  String   // 加密存储
   createdAt DateTime @default(now())
   
   character Character?
 }
+
+// ==================== 角色系统 ====================
 
 model Character {
   id        String   @id @default(uuid())
@@ -24,32 +32,81 @@ model Character {
   name      String
   level     Int      @default(1)
   exp       Int      @default(0)
-  silver    Int      @default(0)
-  gold      Int      @default(0)
-  zoneId    String   @default("zone_1")
+  
+  // 货币（简化为 2 种：银币 + 金币）
+  silver    Int      @default(0)  // 游戏货币
+  gold      Int      @default(0)  // 充值货币
+  
+  // 位置
+  zoneId    String   @default("zone_1") // 新手村
   x         Float    @default(0)
   y         Float    @default(0)
-  equipment String?  // JSON string
+  
+  // 装备（JSON 存储，简化）
+  equipment Json?    // { mainHand: "item_id", armor: "item_id" }
+  
+  // 状态
   isOnline  Boolean  @default(false)
   lastLoginAt DateTime?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   inventory InventoryItem[]
 }
+
+// ==================== 物品系统 ====================
 
 model Item {
   id          String   @id @default(uuid())
   name        String
-  type        String   // Weapon, Armor, Material...
-  rarity      String   // Common, Uncommon...
-  stats       String?  // JSON string
-  slot        String?  // MainHand, Armor...
+  type        ItemType
+  rarity      ItemRarity @default(Common)
+  
+  // 属性（简化）
+  stats       Json?    // { attack: 5, defense: 3 }
+  
+  // 装备相关
+  slot        EquipmentSlot?
   minLevel    Int      @default(1)
+  
+  // 资源/材料
   stackSize   Int      @default(99)
+  
+  // 价格
   basePrice   Int      @default(0)
+  
   createdAt   DateTime @default(now())
+
   inventoryItems InventoryItem[]
   marketOrders   MarketOrder[]
+}
+
+// 物品类型（精简为 6 种）
+enum ItemType {
+  Weapon      // 武器
+  Armor       // 防具
+  Material    // 材料
+  Consumable  // 消耗品（药水等）
+  Tool        // 工具（镐、斧等）
+  Misc        // 其他
+}
+
+// 稀有度（精简为 5 级）
+enum ItemRarity {
+  Common      // 普通（白色）
+  Uncommon    // 精良（绿色）
+  Rare        // 稀有（蓝色）
+  Epic        // 史诗（紫色）
+  Legendary   // 传说（橙色）
+}
+
+// 装备槽位（精简为 4 个）
+enum EquipmentSlot {
+  MainHand    // 主手（武器）
+  OffHand     // 副手（盾牌/副武器）
+  Armor       // 防具（衣服）
+  Accessory   // 饰品
 }
 
 model InventoryItem {
@@ -58,46 +115,80 @@ model InventoryItem {
   character  Character @relation(fields: [characterId], references: [id])
   itemId     String
   item       Item     @relation(fields: [itemId], references: [id])
+  
   quantity   Int      @default(1)
+  
+  // 装备状态
   isEquipped Boolean  @default(false)
+  
   createdAt  DateTime @default(now())
 }
+
+// ==================== 市场系统 ====================
 
 model MarketOrder {
   id          String   @id @default(uuid())
   sellerId    String
   itemId      String
   item        Item     @relation(fields: [itemId], references: [id])
+  
   quantity    Int
-  unitPrice   Int
-  status      String   @default("Pending")
+  unitPrice   Int      // 单价（银币）
+  
+  status      OrderStatus @default(Pending)
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
+enum OrderStatus {
+  Pending     // 待售
+  Completed   // 已售
+  Cancelled   // 取消
+}
+
+// ==================== 地图系统 ====================
+
 model Zone {
   id          String   @id @default(uuid())
   name        String
+  
+  // 安全等级（0-10，10 最安全）
   safetyLevel Int      @default(10)
+  
+  // 推荐等级
   minLevel    Int      @default(1)
   maxLevel    Int      @default(10)
+  
+  // PVP 规则
   pvpEnabled  Boolean  @default(false)
-  portals     String?  // JSON string
+  
+  // 传送点（简化）
+  portals     Json?    // [{ toZoneId: "zone_2", x: 100, y: 100 }]
+  
   createdAt   DateTime @default(now())
 }
 
+// ==================== 社交系统（精简）====================
+
+// 好友表
 model Friend {
   id        String   @id @default(uuid())
   userId    String
   friendId  String
+  
   createdAt DateTime @default(now())
+  
   @@unique([userId, friendId])
 }
 
+// 组队表（简化为 3 人队）
 model Party {
   id        String   @id @default(uuid())
   leaderId  String
+  
   members   PartyMember[]
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -107,16 +198,37 @@ model PartyMember {
   partyId   String
   party     Party    @relation(fields: [partyId], references: [id])
   characterId String
-  role      String   @default("Member")
+  
+  role      PartyRole @default(Member)
+  
   joinedAt  DateTime @default(now())
+
   @@unique([partyId, characterId])
 }
 
+enum PartyRole {
+  Leader
+  Member
+}
+
+// ==================== 日志系统 ====================
+
 model GameLog {
   id        String   @id @default(uuid())
-  type      String
+  type      LogType
   message   String
-  data      String?  // JSON string
+  data      Json?
+  
   characterId String?
+  
   createdAt DateTime @default(now())
+}
+
+enum LogType {
+  Login
+  Logout
+  Combat
+  Trade
+  System
+  Error
 }
