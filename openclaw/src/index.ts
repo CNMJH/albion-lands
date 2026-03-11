@@ -1,11 +1,11 @@
 /**
- * OpenClaw SDK for Albion Lands
+ * OpenClaw SDK for Hulu Lands
  * 
  * 用于创建 AI 代理的完整 SDK
  * 
  * @example
  * ```typescript
- * import { OpenClawClient } from 'albion-lands-openclaw'
+ * import { OpenClawClient } from 'hulu-lands-openclaw'
  * 
  * const client = new OpenClawClient({
  *   serverUrl: 'ws://localhost:3000/ws',

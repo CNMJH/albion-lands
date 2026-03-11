@@ -9,7 +9,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 async function main() {
-  console.log('🤖 Albion Lands AI Agent 示例')
+  console.log('🤖 呼噜大陆 AI Agent 示例')
   console.log('============================')
 
   // 创建 AI 代理

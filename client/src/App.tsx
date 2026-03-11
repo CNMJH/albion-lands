@@ -47,7 +47,8 @@ function App() {
     return (
       <div id="loading">
         <div className="loading-content">
-          <h1>阿尔比恩大陆</h1>
+          <h1>呼噜大陆</h1>
+          <p className="loading-subtitle">Hulu Lands</p>
           <p>正在加载游戏资源...</p>
           <div className="loading-bar">
             <div 

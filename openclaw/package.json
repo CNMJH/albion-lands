@@ -1,7 +1,7 @@
 {
-  "name": "albion-lands-openclaw",
+  "name": "hulu-lands-openclaw",
   "version": "0.1.0",
-  "description": "OpenClaw SDK for Albion Lands",
+  "description": "OpenClaw SDK for Hulu Lands",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

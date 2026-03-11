@@ -1,7 +1,7 @@
 {
-  "name": "albion-lands-server",
+  "name": "hulu-lands-server",
   "version": "0.1.0",
-  "description": "Albion Lands MMORPG Server",
+  "description": "Hulu Lands MMORPG Server",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

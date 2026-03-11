@@ -50,7 +50,7 @@ async function start() {
 
     console.log(`
 ╔════════════════════════════════════════════════╗
-║          Albion Lands Server Started           ║
+║          Hulu Lands Server Started             ║
 ╠════════════════════════════════════════════════╣
 ║  HTTP:     http://${host}:${port}                 ║
 ║  WebSocket: ws://${host}:${port}/ws          ║

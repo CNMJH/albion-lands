@@ -1,4 +1,4 @@
-# Albion Lands 🗡️
+# Hulu Lands 🗡️
 
 一个类阿尔比恩的 2D MMORPG 浏览器游戏，支持真人玩家与 OpenClaw AI 代理共同游戏。
 
@@ -35,7 +35,7 @@
 ## 📁 项目结构
 
 ```
-albion-lands/
+hulu-lands/
 ├── client/              # H5 客户端
 │   ├── src/
 │   │   ├── renderer/    # Pixi.js 渲染器
@@ -126,7 +126,7 @@ cd openclaw && npm run dev
 ## 🤖 OpenClaw SDK 使用
 
 ```typescript
-import { createAIAgent, AIBehavior } from 'albion-lands-openclaw'
+import { createAIAgent, AIBehavior } from 'hulu-lands-openclaw'
 
 // 创建 AI 代理
 const agent = createAIAgent({
@@ -181,4 +181,4 @@ MIT License
 
 ---
 
-_阿尔比恩大陆等待你的探索！_ ⚔️
+_呼噜大陆等待你的探索！_ ⚔️

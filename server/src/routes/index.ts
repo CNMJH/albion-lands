@@ -12,7 +12,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   // API 版本
   fastify.get('/api/v1', async (request, reply) => {
     return { 
-      name: 'Albion Lands API',
+      name: 'Hulu Lands API',
       version: '1.0.0',
       status: 'running'
     }

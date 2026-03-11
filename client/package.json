@@ -1,7 +1,7 @@
 {
-  "name": "albion-lands-client",
+  "name": "hulu-lands-client",
   "version": "0.1.0",
-  "description": "Albion Lands - 2D MMORPG Browser Game Client",
+  "description": "Hulu Lands - 2D MMORPG Browser Game Client",
   "private": true,
   "type": "module",
   "scripts": {

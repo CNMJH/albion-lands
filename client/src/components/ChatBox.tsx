@@ -15,7 +15,7 @@ interface ChatMessage {
  */
 export function ChatBox() {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: '1', channel: 'system', sender: '系统', content: '欢迎来到阿尔比恩大陆！', timestamp: Date.now() },
+    { id: '1', channel: 'system', sender: '系统', content: '欢迎来到呼噜大陆！', timestamp: Date.now() },
     { id: '2', channel: 'system', sender: '系统', content: '按 Enter 打开聊天框，使用 /help 查看帮助', timestamp: Date.now() },
   ])
   const [input, setInput] = useState('')
