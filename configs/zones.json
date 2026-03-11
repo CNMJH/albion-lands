@@ -1,0 +1,44 @@
+{
+  "_comment": "区域配置 - 定义所有游戏区域",
+  "zones": [
+    {
+      "id": "starter_village",
+      "name": "新手村",
+      "type": "safe",
+      "minLevel": 1,
+      "maxLevel": 10,
+      "size": { "width": 30, "height": 30 },
+      "connections": ["starter_plains"],
+      "resources": [
+        { "type": "copper_ore", "count": 20, "respawnTime": 300 },
+        { "type": "wood", "count": 30, "respawnTime": 180 },
+        { "type": "herb", "count": 25, "respawnTime": 180 }
+      ],
+      "monsters": [
+        { "id": "slime", "level": 1, "count": 50 },
+        { "id": "rabbit", "level": 2, "count": 40 },
+        { "id": "goblin_scout", "level": 3, "count": 30 }
+      ]
+    },
+    {
+      "id": "starter_plains",
+      "name": "起始平原",
+      "type": "beginner",
+      "minLevel": 5,
+      "maxLevel": 20,
+      "size": { "width": 50, "height": 50 },
+      "connections": ["starter_village", "central_plains", "falcon_town"],
+      "resources": [
+        { "type": "iron_ore", "count": 40, "respawnTime": 480 },
+        { "type": "oak_wood", "count": 50, "respawnTime": 300 },
+        { "type": "stone", "count": 25, "respawnTime": 600 }
+      ],
+      "monsters": [
+        { "id": "wolf", "level": 5, "count": 60 },
+        { "id": "goblin_warrior", "level": 8, "count": 50 },
+        { "id": "bandit", "level": 10, "count": 40 },
+        { "id": "bear", "level": 12, "count": 30 }
+      ]
+    }
+  ]
+}

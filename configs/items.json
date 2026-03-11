@@ -1,0 +1,55 @@
+{
+  "_comment": "物品配置 - 定义所有游戏物品",
+  "items": [
+    {
+      "id": "iron_sword",
+      "name": "铁剑",
+      "type": "weapon",
+      "subtype": "sword",
+      "rarity": "common",
+      "level": 5,
+      "stats": {
+        "attack": 25,
+        "durability": 100
+      },
+      "requirements": {
+        "level": 5,
+        "strength": 10
+      },
+      "value": 100,
+      "tradeable": true
+    },
+    {
+      "id": "wooden_bow",
+      "name": "木弓",
+      "type": "weapon",
+      "subtype": "bow",
+      "rarity": "common",
+      "level": 1,
+      "stats": {
+        "attack": 10,
+        "durability": 50
+      },
+      "requirements": {
+        "level": 1,
+        "agility": 5
+      },
+      "value": 25,
+      "tradeable": true
+    },
+    {
+      "id": "health_potion",
+      "name": "生命药水",
+      "type": "consumable",
+      "subtype": "potion",
+      "rarity": "common",
+      "level": 1,
+      "effects": {
+        "heal": 50
+      },
+      "stackSize": 99,
+      "value": 10,
+      "tradeable": true
+    }
+  ]
+}
