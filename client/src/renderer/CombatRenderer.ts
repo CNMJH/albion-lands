@@ -199,10 +199,16 @@ export class CombatRenderer {
   /**
    * 更新玩家位置
    */
-  public updatePlayerPosition(x: number, y: number): void {
+  public updatePlayerPosition(x: number, y: number, rotation?: number): void {
     if (this.playerSprite) {
       this.playerSprite.x = x
       this.playerSprite.y = y
+      
+      // 应用旋转角度（如果有）
+      if (rotation !== undefined) {
+        this.playerSprite.rotation = rotation
+        console.log('🔄 玩家旋转:', (rotation * 180 / Math.PI).toFixed(0) + '°')
+      }
       
       // 更新摄像机目标
       this.gameRenderer.setCameraTarget(x, y)

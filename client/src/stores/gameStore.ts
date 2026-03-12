@@ -14,6 +14,7 @@ export interface Player {
   maxMp: number
   x: number
   y: number
+  rotation?: number // 面向角度（弧度）
   zoneId: string
   isBot: boolean
   skills?: string[] // 技能栏 [skillId, skillId, ...]
@@ -102,6 +103,7 @@ const initialPlayer: Player = {
   maxMp: 50,
   x: 0,
   y: 0,
+  rotation: 0, // 初始面向右方（0 弧度）
   zoneId: 'starter_village',
   isBot: false,
 }

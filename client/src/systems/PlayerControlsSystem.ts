@@ -39,6 +39,13 @@ export class PlayerControlsSystem {
   private lastMoveSendTime: number = 0
   private moveBuffer: { dx: number; dy: number } | null = null
   
+  // 移动方向（用于角色旋转）
+  private lastMoveDirection: { x: number; y: number } | null = null
+  
+  // 冲刺状态
+  private isSprinting: boolean = false
+  private sprintMultiplier: number = 1.5 // 冲刺速度 1.5 倍
+  
   // UI 状态跟踪
   private uiState: {
     inventory: boolean
@@ -105,7 +112,11 @@ export class PlayerControlsSystem {
       if (!canvas) return
 
       if (e.button === 0) { // 左键 - 攻击
-        this.performAttack()
+        // 计算攻击目标位置（世界坐标）
+        const rect = canvas.getBoundingClientRect()
+        const worldX = e.clientX - rect.left
+        const worldY = e.clientY - rect.top
+        this.performAttack(worldX, worldY)
       } else if (e.button === 2) { // 右键 - 移动
         e.preventDefault()
         const rect = canvas.getBoundingClientRect()
@@ -197,7 +208,17 @@ export class PlayerControlsSystem {
   private handleKeyPress(code: string): void {
     // 攻击 - 空格键
     if (code === 'Space') {
-      this.performAttack()
+      // 使用最后移动方向作为攻击方向
+      const state = useGameStore.getState()
+      if (state.player && this.lastMoveDirection) {
+        const range = this.config.attackRange
+        const targetX = state.player.x + this.lastMoveDirection.x * range
+        const targetY = state.player.y + this.lastMoveDirection.y * range
+        this.performAttack(targetX, targetY)
+      } else {
+        // 没有移动方向，默认向右攻击
+        this.performAttack()
+      }
       return
     }
 
@@ -322,17 +343,32 @@ export class PlayerControlsSystem {
       dx += 1
     }
 
+    // 检查冲刺状态（Shift 键）
+    const isSprint = this.keysPressed.has('ShiftLeft') || this.keysPressed.has('ShiftRight')
+    if (isSprint !== this.isSprinting) {
+      this.isSprinting = isSprint
+      console.log(this.isSprinting ? '💨 开始冲刺' : '🚶 停止冲刺')
+    }
+
+    // 计算当前速度（考虑冲刺）
+    const currentSpeed = this.isSprinting 
+      ? this.config.moveSpeed * this.sprintMultiplier 
+      : this.config.moveSpeed
+
     // 如果有移动输入
     if (dx !== 0 || dy !== 0) {
-      console.log('🚶 移动输入:', { dx, dy, deltaTime })
+      console.log('🚶 移动输入:', { dx, dy, deltaTime, sprint: this.isSprinting })
       
       // 归一化对角线移动
       const length = Math.sqrt(dx * dx + dy * dy)
       dx /= length
       dy /= length
 
+      // 保存移动方向（用于角色旋转）
+      this.lastMoveDirection = { x: dx, y: dy }
+
       // 计算移动增量
-      const moveDistance = this.config.moveSpeed * deltaTime
+      const moveDistance = currentSpeed * deltaTime
       const moveDx = dx * moveDistance
       const moveDy = dy * moveDistance
 
@@ -341,7 +377,12 @@ export class PlayerControlsSystem {
       const newY = state.player.y + moveDy
       state.updatePlayer({ x: newX, y: newY })
       
+      // 更新玩家面向角度（弧度）
+      const angle = Math.atan2(dy, dx) // 返回 -PI 到 PI
+      state.updatePlayer({ rotation: angle })
+      
       console.log('📍 玩家位置更新:', { x: newX, y: newY })
+      console.log('🧭 玩家旋转角度:', { angle: angle.toFixed(2), degrees: (angle * 180 / Math.PI).toFixed(0) + '°' })
 
       // 缓冲移动增量
       if (this.moveBuffer) {
@@ -382,7 +423,7 @@ export class PlayerControlsSystem {
   /**
    * 执行攻击
    */
-  public performAttack(): void {
+  public performAttack(targetX?: number, targetY?: number): void {
     if (this.attackCooldown > 0) {
       console.log('⏳ 攻击冷却中')
       return
@@ -395,6 +436,18 @@ export class PlayerControlsSystem {
     this.isAttacking = true
     this.attackAnimationTime = 300 // 300ms 攻击动画
     this.attackCooldown = this.config.attackCooldown
+
+    // 如果有目标点，计算面向角度
+    if (targetX !== undefined && targetY !== undefined) {
+      const dx = targetX - state.player.x
+      const dy = targetY - state.player.y
+      const angle = Math.atan2(dy, dx)
+      
+      // 更新玩家面向
+      state.updatePlayer({ rotation: angle })
+      
+      console.log('⚔️ 攻击目标:', { x: targetX, y: targetY, angle: (angle * 180 / Math.PI).toFixed(0) + '°' })
+    }
 
     // 发送攻击指令到服务器
     network.send('attack', {
@@ -419,7 +472,7 @@ export class PlayerControlsSystem {
   /**
    * 执行交互（采集、NPC 对话等）
    */
-  public performInteract(): void {
+  public performInteract(targetX?: number, targetY?: number): void {
     const state = useGameStore.getState()
     if (!state.player) {
       console.warn('⚠️ 玩家数据不存在，无法交互')
@@ -429,6 +482,19 @@ export class PlayerControlsSystem {
     console.log('🤝 玩家尝试交互 (E 键)')
     console.log('📍 玩家位置:', { x: state.player.x, y: state.player.y })
     console.log('📏 交互范围:', this.config.interactRange)
+
+    // 如果有目标点，计算面向角度
+    if (targetX !== undefined && targetY !== undefined) {
+      const dx = targetX - state.player.x
+      const dy = targetY - state.player.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      
+      if (distance <= this.config.interactRange) {
+        const angle = Math.atan2(dy, dx)
+        state.updatePlayer({ rotation: angle })
+        console.log('🧭 面向交互目标:', { x: targetX, y: targetY, angle: (angle * 180 / Math.PI).toFixed(0) + '°' })
+      }
+    }
 
     // 发送交互指令
     network.send('interact', {

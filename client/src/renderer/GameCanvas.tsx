@@ -157,19 +157,19 @@ export function GameCanvas() {
     }
   }, []) // 空依赖数组，只运行一次
 
-  // 当玩家位置更新时，更新摄像机
+  // 当玩家位置更新时，更新摄像机和旋转
   useEffect(() => {
     if (rendererInstance.current && player) {
       console.log('📍 玩家位置更新:', { x: player.x, y: player.y })
       
       rendererInstance.current.setCameraTarget(player.x, player.y)
       
-      // 更新玩家精灵位置
+      // 更新玩家精灵位置和旋转
       if (combatRendererRef.current) {
-        combatRendererRef.current.updatePlayerPosition(player.x, player.y)
+        combatRendererRef.current.updatePlayerPosition(player.x, player.y, player.rotation)
       }
     }
-  }, [player?.x, player?.y])
+  }, [player?.x, player?.y, player?.rotation])
 
   return (
     <div 
