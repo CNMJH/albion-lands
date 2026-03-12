@@ -59,28 +59,42 @@ export class MapSystem {
   }
   
   /**
-   * 创建默认纹理（绿色背景）
+   * 创建默认纹理（深色网格背景）
    */
   private createDefaultTexture(): void {
-    console.log('MapSystem: 创建默认纹理')
+    console.log('MapSystem: 创建深色网格背景')
     const canvas = document.createElement('canvas')
     canvas.width = this.tileSize
     canvas.height = this.tileSize
     const ctx = canvas.getContext('2d')
     
     if (ctx) {
-      // 绘制绿色背景
-      ctx.fillStyle = '#2d5a27'
+      // 绘制深色背景
+      ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, this.tileSize, this.tileSize)
       
-      // 绘制一些细节
-      ctx.fillStyle = '#3d6a37'
-      for (let i = 0; i < 10; i++) {
-        const x = Math.random() * this.tileSize
-        const y = Math.random() * this.tileSize
-        const size = Math.random() * 3 + 1
-        ctx.fillRect(x, y, size, size)
-      }
+      // 绘制网格线（更明显）
+      ctx.strokeStyle = '#3a3a6e'
+      ctx.lineWidth = 2
+      
+      // 边框
+      ctx.strokeRect(0, 0, this.tileSize, this.tileSize)
+      
+      // 对角线（辅助看清移动方向）
+      ctx.strokeStyle = '#2a2a4e'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(this.tileSize, this.tileSize)
+      ctx.moveTo(this.tileSize, 0)
+      ctx.lineTo(0, this.tileSize)
+      ctx.stroke()
+      
+      // 中心点（红色，更明显）
+      ctx.fillStyle = '#ff4444'
+      ctx.beginPath()
+      ctx.arc(this.tileSize / 2, this.tileSize / 2, 3, 0, Math.PI * 2)
+      ctx.fill()
     }
     
     this.tileTexture = PIXI.Texture.from(canvas)

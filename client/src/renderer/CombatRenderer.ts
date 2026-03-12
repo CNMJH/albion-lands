@@ -159,14 +159,22 @@ export class CombatRenderer {
 
     const graphics = new PIXI.Graphics()
     
-    // 绘制玩家（蓝色圆形）
-    graphics.beginFill(0x0000FF)
+    // 绘制玩家（亮蓝色圆形，更明显）
+    graphics.beginFill(0x00BFFF) // 亮蓝色
     graphics.drawCircle(0, 0, 20)
     graphics.endFill()
 
-    // 添加轮廓
-    graphics.lineStyle(2, 0xFFFFFF)
+    // 添加白色轮廓（更粗）
+    graphics.lineStyle(3, 0xFFFFFF)
     graphics.drawCircle(0, 0, 20)
+    
+    // 添加方向指示（小三角形，显示面向）
+    graphics.beginFill(0xFFFFFF)
+    graphics.moveTo(0, -15)
+    graphics.lineTo(-8, -5)
+    graphics.lineTo(8, -5)
+    graphics.closePath()
+    graphics.endFill()
 
     const texture = app.renderer.generateTexture(graphics)
     this.playerSprite = new PIXI.Sprite(texture)
@@ -176,6 +184,8 @@ export class CombatRenderer {
     if (layer) {
       layer.addChild(this.playerSprite)
     }
+    
+    console.log('⚔️ 玩家精灵已创建（亮蓝色圆形 + 白色轮廓 + 方向指示）')
   }
 
   /**
