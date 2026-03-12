@@ -552,6 +552,7 @@ export class PlayerControlsSystem {
     shop: boolean
     scoreboard: boolean
     market: boolean
+    trade: boolean
   } = {
     inventory: false,
     crafting: false,
@@ -562,6 +563,7 @@ export class PlayerControlsSystem {
     shop: false,
     scoreboard: false,
     market: false,
+    trade: false,
   }
 
   /**

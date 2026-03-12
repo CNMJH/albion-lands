@@ -8,6 +8,7 @@ import { MapSystem } from '../systems/MapSystem'
 import { playerControls } from '../systems/PlayerControlsSystem'
 import { DeathSystem } from '../systems/DeathSystem'
 import { MarketSystem } from '../systems/MarketSystem'
+import { TradeSystem } from '../systems/TradeSystem'
 import './GameCanvas.css'
 
 /**
@@ -104,6 +105,11 @@ export function GameCanvas() {
     const marketSystem = new MarketSystem(characterId || 'unknown')
     useGameStore.getState().marketSystem = marketSystem
     console.log('🏪 市场系统已创建 (characterId:', characterId + ')')
+
+    // 初始化交易系统
+    const tradeSystem = new TradeSystem(characterId || 'unknown')
+    useGameStore.getState().tradeSystem = tradeSystem
+    console.log('🤝 交易系统已创建 (characterId:', characterId + ')')
 
     // 初始化玩家操作系统
     const controls = playerControls.init(renderer)

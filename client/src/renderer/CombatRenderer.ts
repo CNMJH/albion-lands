@@ -99,6 +99,30 @@ export class CombatRenderer {
         this.effectManager?.showDamage(state.player.x, state.player.y, payload.damage, true)
       }
     })
+
+    // 监听网络消息 - PVP 攻击
+    network.onMessage('pvpAttack', (payload) => {
+      console.log('🗡️ PVP 攻击', payload)
+      const state = useGameStore.getState()
+      
+      // 显示伤害数字
+      if (payload.targetId === state.player?.id) {
+        // 玩家受到 PVP 伤害
+        if (state.player) {
+          const newHP = state.player.hp - payload.damage
+          useGameStore.getState().updatePlayerHP(newHP)
+          this.effectManager?.showDamage(state.player.x, state.player.y, payload.damage, true)
+        }
+      } else {
+        // 其他玩家受到伤害（显示但不更新 HP）
+        this.effectManager?.showDamage(payload.targetX, payload.targetY, payload.damage, false)
+      }
+      
+      // 显示 PVP 提示
+      if (payload.killed) {
+        this.showPVPKillAnnouncement(payload.attackerName, payload.targetName)
+      }
+    })
   }
 
   /**
@@ -314,15 +338,16 @@ export class CombatRenderer {
 
     const animate = () => {
       const elapsed = Date.now() - startTime
-      const progress = elapsed / duration
 
-      if (progress >= 1) {
+      if (elapsed >= duration) {
         if (effect.parent) {
           effect.parent.removeChild(effect)
           effect.destroy()
         }
         return
       }
+
+      const progress = elapsed / duration
 
       // 缩放效果
       const scale = 1 + progress * 1.5
@@ -358,5 +383,70 @@ export class CombatRenderer {
       this.playerSprite.destroy()
       this.playerSprite = null
     }
+  }
+
+  /**
+   * 显示 PVP 击杀公告
+   */
+  private showPVPKillAnnouncement(attackerName: string, targetName: string): void {
+    const app = this.gameRenderer.getApp()
+    if (!app) return
+
+    const layer = this.gameRenderer.getLayer('ui-effects') || this.gameRenderer.getLayer('effects')
+    if (!layer) return
+
+    // 创建公告文本
+    const message = `⚔️ ${attackerName} 击杀了 ${targetName}!`
+    const text = new PIXI.Text(message, {
+      fontFamily: 'Arial',
+      fontSize: 24,
+      fontWeight: 'bold',
+      fill: 0xFF4444,
+      stroke: 0x000000,
+      strokeThickness: 4,
+      dropShadow: true,
+      dropShadowColor: 0x000000,
+      dropShadowBlur: 4,
+      dropShadowAngle: Math.PI / 6,
+      dropShadowDistance: 2,
+    })
+
+    text.anchor.set(0.5)
+    text.x = app.screen.width / 2
+    text.y = 100
+    text.alpha = 0
+
+    layer.addChild(text)
+
+    // 动画：淡入 + 显示 + 淡出
+    const startTime = Date.now()
+    const fadeInDuration = 500
+    const showDuration = 2000
+    const fadeOutDuration = 500
+    const totalDuration = fadeInDuration + showDuration + fadeOutDuration
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+
+      if (elapsed < fadeInDuration) {
+        // 淡入
+        text.alpha = elapsed / fadeInDuration
+      } else if (elapsed < fadeInDuration + showDuration) {
+        // 显示
+        text.alpha = 1
+      } else if (elapsed < totalDuration) {
+        // 淡出
+        text.alpha = 1 - (elapsed - fadeInDuration - showDuration) / fadeOutDuration
+      } else {
+        // 移除
+        layer.removeChild(text)
+        text.destroy()
+        return
+      }
+
+      requestAnimationFrame(animate)
+    }
+
+    animate()
   }
 }

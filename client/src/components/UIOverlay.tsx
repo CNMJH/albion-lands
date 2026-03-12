@@ -7,6 +7,7 @@ import { FriendsUI } from './FriendsUI'
 import { ChatUI } from './ChatUI'
 import { EquipmentPanel } from './EquipmentPanel'
 import { MarketPanel } from './MarketPanel'
+import { TradePanel } from './TradePanel'
 import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
 
@@ -72,6 +73,9 @@ export function UIOverlay() {
 
       {/* 拍卖行面板 */}
       {uiState.market && <MarketPanel />}
+
+      {/* 交易面板 */}
+      {uiState.trade && <TradePanel />}
 
       {/* 弹窗窗口 */}
       {showCharacter && (

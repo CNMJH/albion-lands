@@ -78,6 +78,9 @@ interface GameState {
   // 市场系统引用
   marketSystem: any | null
   
+  // 交易系统引用
+  tradeSystem: any | null
+  
   // UI 状态
   uiState: {
     inventory: boolean
@@ -89,6 +92,7 @@ interface GameState {
     shop: boolean
     scoreboard: boolean
     market: boolean
+    trade: boolean
   }
   
   // 动作
@@ -140,6 +144,7 @@ export const useGameStore = create<GameState>()(
     characterId: null,
     deathSystem: null,
     marketSystem: null,
+    tradeSystem: null,
     uiState: {
       inventory: false,
       crafting: false,
@@ -150,6 +155,7 @@ export const useGameStore = create<GameState>()(
       shop: false,
       scoreboard: false,
       market: false,
+      trade: false,
     },
     inventory: {
       slots: Array(50).fill(null),
