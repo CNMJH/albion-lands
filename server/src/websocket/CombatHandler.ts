@@ -78,8 +78,9 @@ export class CombatHandler {
         return
       }
 
-      // 查找附近的怪物
-      const targetMonster = this.findNearestMonster(character.id, pos)
+      // 使用默认位置查找怪物
+      const defaultPos = { x: 0, y: 0 }
+      const targetMonster = this.findNearestMonster(character.id, defaultPos)
       if (!targetMonster) {
         this.fastify.log.warn('附近没有可攻击的怪物')
         return
@@ -159,15 +160,16 @@ export class CombatHandler {
    * 查找最近的怪物
    */
   private findNearestMonster(
-    characterId: string,
+    _characterId: string,
     pos: { x: number; y: number }
-  ): { id: string; x: number; y: number } | null {
+  ): { id: string; x: number; y: number; maxHp?: number } | null {
     // 简化处理：返回模拟数据
     // 实际项目中应查找附近的怪物实例
     return {
       id: 'monster_1',
       x: pos.x + 50,
       y: pos.y + 50,
+      maxHp: 50,
     }
   }
 

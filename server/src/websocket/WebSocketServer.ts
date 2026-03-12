@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import { WebSocket } from 'ws'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 import { CombatService } from '../services/CombatService'
 import { GatheringService } from '../services/GatheringService'
 import { CraftingService } from '../services/CraftingService'
@@ -40,7 +40,6 @@ export class WebSocketServer {
   private monsters: Map<string, Monster> = new Map()
   private fastify: FastifyInstance
   private heartbeatInterval: NodeJS.Timeout | null = null
-  private monsterAIInterval: NodeJS.Timeout | null = null
 
   constructor(fastify: FastifyInstance) {
     this.fastify = fastify
@@ -75,8 +74,8 @@ export class WebSocketServer {
   /**
    * 处理新连接
    */
-  private handleConnection(ws: WebSocket, req: FastifyRequest): void {
-    const clientId = uuidv4()
+  private handleConnection(ws: WebSocket, _req: FastifyRequest): void {
+    const clientId = randomUUID()
     
     const client: Client = {
       id: clientId,
@@ -110,7 +109,7 @@ export class WebSocketServer {
 
     // 处理错误
     ws.on('error', (error) => {
-      this.fastify.log.error(`客户端错误 ${clientId}:`, error)
+      this.fastify.log.error(`客户端错误 ${clientId}: ${error.message}`)
     })
 
     // 心跳响应
@@ -250,25 +249,18 @@ export class WebSocketServer {
         default:
           this.fastify.log.warn(`未知消息类型：${message.type}`)
       }
-    } catch (error) {
-      this.fastify.log.error(`消息解析错误：`, error)
+    } catch (error: any) {
+      this.fastify.log.error(`消息解析错误：${error.message}`)
     }
   }
 
   /**
    * 处理认证
    */
-  private handleAuth(clientId: string, data: any): void {
+  private handleAuth(_clientId: string, _data: any): void {
     // 简化处理：暂时只记录日志
     // 实际项目中应实现 token 验证逻辑
-    this.fastify.log.info(`客户端认证：${clientId}`)
-    
-    this.send(clientId, {
-      type: 'auth_success',
-      data: {
-        authenticated: true,
-      },
-    })
+    this.fastify.log.info(`客户端认证`)
   }
 
   /**
@@ -689,7 +681,7 @@ export class WebSocketServer {
   /**
    * 处理获取配方
    */
-  private handleGetRecipes(clientId: string, data: any): void {
+  private handleGetRecipes(clientId: string, _data: any): void {
     const recipes = CraftingService.getAllRecipes()
     
     this.send(clientId, {
@@ -748,7 +740,7 @@ export class WebSocketServer {
   /**
    * 广播到指定区域
    */
-  broadcastToZone(zoneId: string, message: any, excludeClientId?: string): void {
+  broadcastToZone(_zoneId: string, message: any, excludeClientId?: string): void {
     // 简化处理：广播给所有客户端
     // 实际项目中应只发送给指定区域的客户端
     this.broadcast(message, excludeClientId)
@@ -791,7 +783,7 @@ export class WebSocketServer {
    * 启动怪物 AI
    */
   private startMonsterAI(): void {
-    this.monsterAIInterval = setInterval(() => {
+    setInterval(() => {
       this.updateMonsterAI()
     }, 1000) // 每秒更新一次
   }

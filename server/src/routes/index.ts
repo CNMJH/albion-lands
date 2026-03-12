@@ -13,12 +13,12 @@ import { socialRoutes } from './social'
  */
 export function registerRoutes(fastify: FastifyInstance): void {
   // 健康检查
-  fastify.get('/health', async (request, reply) => {
+  fastify.get('/health', async () => {
     return { status: 'ok', timestamp: Date.now() }
   })
 
   // API 版本
-  fastify.get('/api/v1', async (request, reply) => {
+  fastify.get('/api/v1', async () => {
     return { 
       name: 'Hulu Lands API',
       version: '1.0.0',

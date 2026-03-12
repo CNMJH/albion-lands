@@ -3,7 +3,7 @@ import { prisma } from '../prisma'
 
 const users: FastifyPluginAsync = async (fastify) => {
   // 获取用户列表
-  fastify.get('/', async (request, reply) => {
+  fastify.get('/', async (_request, reply) => {
     try {
       const users = await prisma.user.findMany({
         include: {
@@ -14,7 +14,7 @@ const users: FastifyPluginAsync = async (fastify) => {
         },
       })
 
-      return {
+      reply.send({
         users: users.map(u => ({
           id: u.id,
           email: u.email,
@@ -26,7 +26,7 @@ const users: FastifyPluginAsync = async (fastify) => {
           } : null,
         })),
         total: users.length,
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`获取用户列表失败：${error.message}`)
       reply.status(500).send({
@@ -55,7 +55,7 @@ const users: FastifyPluginAsync = async (fastify) => {
         })
       }
 
-      return {
+      reply.send({
         id: user.id,
         email: user.email,
         createdAt: user.createdAt,
@@ -66,7 +66,7 @@ const users: FastifyPluginAsync = async (fastify) => {
           zoneId: user.character.zoneId,
           isOnline: user.character.isOnline,
         } : null,
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`获取用户详情失败：${error.message}`)
       reply.status(500).send({

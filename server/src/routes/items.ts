@@ -28,7 +28,7 @@ const items: FastifyPluginAsync = async (fastify) => {
         },
       })
 
-      return {
+      reply.send({
         items: items.map(item => ({
           id: item.id,
           name: item.name,
@@ -42,7 +42,7 @@ const items: FastifyPluginAsync = async (fastify) => {
           stats: item.stats ? JSON.parse(item.stats) : {},
         })),
         total: items.length,
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`获取物品列表失败：${error.message}`)
       reply.status(500).send({
@@ -68,7 +68,7 @@ const items: FastifyPluginAsync = async (fastify) => {
         })
       }
 
-      return {
+      reply.send({
         id: item.id,
         name: item.name,
         type: item.type,
@@ -80,7 +80,7 @@ const items: FastifyPluginAsync = async (fastify) => {
         slot: item.slot,
         description: item.description,
         stats: item.stats ? JSON.parse(item.stats) : {},
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`获取物品详情失败：${error.message}`)
       reply.status(500).send({

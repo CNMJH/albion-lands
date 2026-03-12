@@ -44,7 +44,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取 GM 面板数据失败:', error)
+      fastify.log.error(`获取 GM 面板数据失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -80,7 +80,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取玩家列表失败:', error)
+      fastify.log.error(`获取玩家列表失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -118,7 +118,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取玩家详情失败:', error)
+      fastify.log.error(`获取玩家详情失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -163,7 +163,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('修改玩家等级失败:', error)
+      fastify.log.error(`修改玩家等级失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -216,7 +216,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         message: `给予 ${item.name} x${quantity} 成功`,
       })
     } catch (error) {
-      fastify.log.error('给予物品失败:', error)
+      fastify.log.error(`给予物品失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -262,7 +262,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('给予货币失败:', error)
+      fastify.log.error(`给予货币失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -303,7 +303,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         message: `传送玩家到 ${zoneId} (${x}, ${y}) 成功`,
       })
     } catch (error) {
-      fastify.log.error('传送玩家失败:', error)
+      fastify.log.error(`传送玩家失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -326,7 +326,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取物品列表失败:', error)
+      fastify.log.error(`获取物品列表失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -385,7 +385,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('创建物品失败:', error)
+      fastify.log.error(`创建物品失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -412,7 +412,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取市场订单失败:', error)
+      fastify.log.error(`获取市场订单失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -437,7 +437,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         orderBy: {
           createdAt: 'desc',
         },
-        take: limitNum,
+        take: limit,
       })
 
       reply.send({
@@ -447,7 +447,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取游戏日志失败:', error)
+      fastify.log.error(`获取游戏日志失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -466,7 +466,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取资源节点失败:', error)
+      fastify.log.error(`获取资源节点失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -485,7 +485,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         },
       })
     } catch (error) {
-      fastify.log.error('获取配方失败:', error)
+      fastify.log.error(`获取配方失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -514,7 +514,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         message: '广播发送成功',
       })
     } catch (error) {
-      fastify.log.error('发送广播失败:', error)
+      fastify.log.error(`发送广播失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -547,7 +547,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         message: '重置背包成功',
       })
     } catch (error) {
-      fastify.log.error('重置背包失败:', error)
+      fastify.log.error(`重置背包失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })
@@ -585,7 +585,7 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
         message: '删除玩家成功',
       })
     } catch (error) {
-      fastify.log.error('删除玩家失败:', error)
+      fastify.log.error(`删除玩家失败：${(error as any).message}`)
       reply.status(500).send({ success: false, error: '服务器错误' })
     }
   })

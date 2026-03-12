@@ -48,6 +48,8 @@ model Item {
   rarity         String // Common, Uncommon...
   stats          String? // JSON string
   slot           String? // MainHand, Armor...
+  icon           String?
+  description    String?
   minLevel       Int             @default(1)
   stackSize      Int             @default(99)
   basePrice      Int             @default(0)

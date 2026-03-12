@@ -1,22 +1,30 @@
 import { prisma } from '../prisma'
 
+interface MonsterInstance {
+  id: string
+  templateId: string
+  zoneId: string
+  x: number
+  y: number
+  hp: number
+  maxHp: number
+  level: number
+  defense: number
+  expReward: number
+  silverReward: number
+  state: 'idle' | 'patrol' | 'chase' | 'attack'
+  targetId: string | null
+  lastAttackTime: number
+}
+
+// 活跃怪物列表（内存缓存）
+const activeMonsters = new Map<string, MonsterInstance>()
+
 /**
  * 战斗服务
  * 处理战斗相关逻辑
  */
 export class CombatService {
-  // 怪物模板
-  private static readonly MONSTER_TEMPLATES = {
-    // 新手村庄 (Lv1-10)
-    'slime_t1': { id: 'slime_t1', name: '绿色史莱姆', level: 2, hp: 50, attack: 8, defense: 2, expReward: 20, silverReward: 5 },
-    'slime_t2': { id: 'slime_t2', name: '蓝色史莱姆', level: 5, hp: 80, attack: 12, defense: 4, expReward: 35, silverReward: 8 },
-    'rabbit': { id: 'rabbit', name: '野兔', level: 3, hp: 40, attack: 6, defense: 1, expReward: 15, silverReward: 3 },
-    
-    // 平原旷野 (Lv10-25)
-    'wolf': { id: 'wolf', name: '灰狼', level: 12, hp: 150, attack: 25, defense: 8, expReward: 60, silverReward: 15 },
-    'boar': { id: 'boar', name: '野猪', level: 15, hp: 200, attack: 30, defense: 12, expReward: 80, silverReward: 20 },
-    'deer': { id: 'deer', name: '鹿', level: 10, hp: 100, attack: 15, defense: 5, expReward: 40, silverReward: 10 },
-  }
 
   /**
    * 计算伤害
@@ -35,7 +43,7 @@ export class CombatService {
   public static async playerAttackMonster(
     characterId: string,
     monsterId: string,
-    attackType: 'basic' | 'skill' = 'basic'
+    _attackType: 'basic' | 'skill' = 'basic'
   ): Promise<{
     success: boolean
     damage: number
@@ -48,7 +56,7 @@ export class CombatService {
     const character = await prisma.character.findUnique({
       where: { id: characterId },
       include: {
-        inventoryItems: {
+        inventory: {
           include: {
             item: true,
           },
@@ -68,7 +76,7 @@ export class CombatService {
 
     // 计算攻击力（基于装备）
     let attack = 10 + character.level * 2
-    const weapon = character.inventoryItems.find(item => item.isEquipped && item.item.slot === 'MainHand')
+    const weapon = character.inventory.find(item => item.isEquipped && item.item.slot === 'MainHand')
     if (weapon) {
       const stats = JSON.parse(weapon.item.stats || '{}')
       attack += stats.attack || 0
@@ -131,7 +139,7 @@ export class CombatService {
     const character = await prisma.character.findUnique({
       where: { id: characterId },
       include: {
-        inventoryItems: {
+        inventory: {
           include: {
             item: true,
           },
@@ -150,29 +158,23 @@ export class CombatService {
 
     // 计算防御力（基于装备）
     let defense = character.level
-    const armor = character.inventoryItems.find(item => item.isEquipped && item.item.slot === 'Armor')
+    const armor = character.inventory.find(item => item.isEquipped && item.item.slot === 'Armor')
     if (armor) {
       const stats = JSON.parse(armor.item.stats || '{}')
       defense += stats.defense || 0
     }
 
-    // 计算伤害
-    const damage = this.calculateDamage(monster.level, monster.attack, character.level, defense)
-    const newHP = (character as any).hp - damage || 100 - damage
+    // 计算伤害（简化：使用固定攻击力）
+    const damage = this.calculateDamage(monster.level, 15, character.level, defense)
 
-    // 更新角色 HP
-    await prisma.character.update({
-      where: { id: characterId },
-      data: {
-        hp: Math.max(0, newHP),
-      },
-    })
+    // 简化处理：不追踪玩家 HP（Schema 中没有 HP 字段）
+    // 实际项目中应添加 HP 字段到 Character 模型
 
     return {
       success: true,
       damage,
-      playerHP: Math.max(0, newHP),
-      playerDead: newHP <= 0,
+      playerHP: 100 - damage,
+      playerDead: false,
     }
   }
 

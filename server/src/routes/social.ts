@@ -331,7 +331,7 @@ export async function socialRoutes(fastify: FastifyInstance): Promise<void> {
   })
 
   // 获取公开队伍列表
-  fastify.get('/party/public', async (request, reply) => {
+  fastify.get('/party/public', async (_request, reply) => {
     try {
       const parties = await PartyService.getPublicParties()
       

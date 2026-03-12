@@ -190,6 +190,47 @@ export class ItemService {
   }
 
   /**
+   * 按物品 ID 移除角色背包中的物品
+   */
+  public static async removeItemById(
+    characterId: string,
+    itemId: string,
+    quantity: number = 1
+  ): Promise<boolean> {
+    try {
+      const invItem = await prisma.inventoryItem.findFirst({
+        where: {
+          characterId,
+          itemId,
+          isEquipped: false,
+        },
+      })
+
+      if (!invItem) {
+        return false
+      }
+
+      if (invItem.quantity <= quantity) {
+        await prisma.inventoryItem.delete({
+          where: { id: invItem.id },
+        })
+      } else {
+        await prisma.inventoryItem.update({
+          where: { id: invItem.id },
+          data: {
+            quantity: invItem.quantity - quantity,
+          },
+        })
+      }
+
+      return true
+    } catch (error) {
+      console.error('移除物品失败:', error)
+      return false
+    }
+  }
+
+  /**
    * 装备物品
    */
   public static async equipItem(

@@ -331,7 +331,7 @@ export class PartyService {
    * 更新队伍成员状态
    */
   public static async updateMemberStatus(
-    partyId: string,
+    _partyId: string,
     characterId: string,
     isOnline: boolean
   ): Promise<void> {

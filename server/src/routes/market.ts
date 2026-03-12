@@ -26,7 +26,7 @@ const market: FastifyPluginAsync = async (fastify) => {
         },
       })
 
-      return {
+      reply.send({
         orders: orders.map(order => ({
           id: order.id,
           sellerId: order.sellerId,
@@ -45,7 +45,7 @@ const market: FastifyPluginAsync = async (fastify) => {
           },
         })),
         total: orders.length,
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`获取市场订单失败：${error.message}`)
       reply.status(500).send({
@@ -127,7 +127,7 @@ const market: FastifyPluginAsync = async (fastify) => {
         })
       }
 
-      return {
+      reply.send({
         success: true,
         message: '订单已创建',
         order: {
@@ -145,7 +145,7 @@ const market: FastifyPluginAsync = async (fastify) => {
             rarity: order.item.rarity,
           },
         },
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`创建市场订单失败：${error.message}`)
       reply.status(500).send({
@@ -212,10 +212,10 @@ const market: FastifyPluginAsync = async (fastify) => {
         })
       }
 
-      return {
+      reply.send({
         success: true,
         message: '订单已取消',
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`取消市场订单失败：${error.message}`)
       reply.status(500).send({
@@ -282,12 +282,15 @@ const market: FastifyPluginAsync = async (fastify) => {
       })
 
       // 添加卖家金币
-      await prisma.character.update({
-        where: { id: order.sellerId },
-        data: {
-          gold: (await prisma.character.findUnique({ where: { id: order.sellerId } }))!.gold + totalPrice,
-        },
-      })
+      const seller = await prisma.character.findUnique({ where: { id: order.sellerId } })
+      if (seller) {
+        await prisma.character.update({
+          where: { id: order.sellerId },
+          data: {
+            gold: seller.gold + totalPrice,
+          },
+        })
+      }
 
       // 更新订单状态
       await prisma.marketOrder.update({
@@ -323,14 +326,14 @@ const market: FastifyPluginAsync = async (fastify) => {
         })
       }
 
-      return {
+      reply.send({
         success: true,
         message: '购买成功',
         order: {
           id: order.id,
           status: 'Completed',
         },
-      }
+      })
     } catch (error: any) {
       fastify.log.error(`购买订单失败：${error.message}`)
       reply.status(500).send({

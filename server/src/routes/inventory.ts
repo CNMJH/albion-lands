@@ -1,6 +1,5 @@
 import { FastifyPluginAsync } from 'fastify'
 import { prisma } from '../prisma'
-import { ItemService } from '../services/ItemService'
 
 const inventory: FastifyPluginAsync = async (fastify) => {
   // 获取角色背包

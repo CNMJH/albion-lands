@@ -248,7 +248,7 @@ export class CraftingService {
     recipe: CraftingRecipe
   ): Promise<boolean> {
     for (const required of recipe.requiredItems) {
-      const success = await ItemService.removeItemFromCharacter(
+      const success = await ItemService.removeItemById(
         characterId,
         required.itemId,
         required.quantity
@@ -337,7 +337,7 @@ export class CraftingService {
    * 增加制造经验
    */
   private static async addCraftingExp(
-    characterId: string,
+    _characterId: string,
     exp: number,
     type: CraftingType
   ): Promise<void> {

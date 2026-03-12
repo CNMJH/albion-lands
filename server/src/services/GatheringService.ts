@@ -352,7 +352,7 @@ export class GatheringService {
    * 增加采集经验
    */
   private static async addGatheringExp(
-    characterId: string,
+    _characterId: string,
     exp: number,
     type: ResourceType
   ): Promise<void> {
