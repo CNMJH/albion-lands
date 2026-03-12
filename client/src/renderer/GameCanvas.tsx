@@ -3,6 +3,7 @@ import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
 import { CombatRenderer } from './CombatRenderer'
 import { AttackEffectRenderer } from './AttackEffectRenderer'
+import { MinimapRenderer } from './MinimapRenderer'
 import { MapSystem } from '../systems/MapSystem'
 import { playerControls } from '../systems/PlayerControlsSystem'
 
@@ -15,6 +16,7 @@ export function GameCanvas() {
   const rendererRef = useRef<GameRenderer | null>(null)
   const combatRendererRef = useRef<CombatRenderer | null>(null)
   const playerControlsRef = useRef<ReturnType<typeof playerControls.init> | null>(null)
+  const minimapRef = useRef<MinimapRenderer | null>(null)
   const { player } = useGameStore()
   
   // 使用 useRef 存储渲染器，避免闭包问题
@@ -69,6 +71,11 @@ export function GameCanvas() {
     new AttackEffectRenderer(renderer)
     console.log('⚔️ 攻击效果渲染器已创建')
 
+    // 创建小地图渲染器
+    const minimap = new MinimapRenderer()
+    minimapRef.current = minimap
+    console.log('🗺️ 小地图已创建')
+
     // 初始化玩家操作系统
     const controls = playerControls.init(renderer)
     playerControlsRef.current = controls
@@ -102,6 +109,9 @@ export function GameCanvas() {
       }
       if (combatRendererRef.current) {
         combatRendererRef.current.update(deltaTime)
+      }
+      if (minimapRef.current) {
+        minimapRef.current.update()
       }
     }
     renderer.on('update', handleUpdate)
@@ -141,6 +151,12 @@ export function GameCanvas() {
           console.log('GameCanvas: 清理战斗渲染器...')
           combatRendererRef.current.clear()
           combatRendererRef.current = null
+        }
+        
+        if (minimapRef.current) {
+          console.log('GameCanvas: 清理小地图...')
+          minimapRef.current.destroy()
+          minimapRef.current = null
         }
         
         if (rendererRef.current) {
