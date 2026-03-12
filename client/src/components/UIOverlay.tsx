@@ -6,6 +6,7 @@ import { MenuBar } from './MenuBar'
 import { Inventory } from './Inventory'
 import { FriendsUI } from './FriendsUI'
 import { ChatUI } from './ChatUI'
+import { EquipmentPanel } from './EquipmentPanel'
 import './UIOverlay.css'
 
 /**
@@ -62,6 +63,9 @@ export function UIOverlay() {
 
       {/* 背包按钮 */}
       <Inventory />
+
+      {/* 装备面板 */}
+      <EquipmentPanel />
 
       {/* 弹窗窗口 */}
       {showCharacter && (
