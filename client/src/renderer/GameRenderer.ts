@@ -285,18 +285,34 @@ export class GameRenderer extends EventEmitter {
    * 销毁渲染器
    */
   public destroy(): void {
+    console.log('GameRenderer: 开始销毁...')
+    
     this.isRunning = false
 
-    if (this.app) {
-      if (this.app.ticker) {
-        this.app.ticker.destroy()
+    try {
+      if (this.app) {
+        // 先停止 ticker，避免访问 next 指针
+        if (this.app.ticker) {
+          this.app.ticker.stop()
+          // 不要调用 ticker.destroy()，直接设为 null
+          this.app.ticker = null as any
+        }
+        
+        // 销毁 app，不销毁 renderer（因为可能被复用）
+        this.app.destroy(false, { children: true, texture: false, baseTexture: false })
+        this.app = null
       }
-      this.app.destroy(true, { children: true })
+
+      this.gameObjects.clear()
+      this.stages.clear()
+      
+      console.log('GameRenderer: 销毁完成')
+    } catch (error) {
+      console.error('GameRenderer: 销毁时出错', error)
+      // 即使出错也要清理
       this.app = null
     }
-
-    this.gameObjects.clear()
-    this.stages.clear()
+  }
 
     console.log('渲染器已销毁')
   }

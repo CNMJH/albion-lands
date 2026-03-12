@@ -50,12 +50,25 @@ export function GameCanvas() {
 
     // 清理
     return () => {
+      console.log('GameCanvas: 清理组件...')
+      
       window.removeEventListener('resize', handleResize)
-      if (combatRendererRef.current) {
-        combatRendererRef.current.clear()
+      
+      try {
+        if (combatRendererRef.current) {
+          combatRendererRef.current.clear()
+          combatRendererRef.current = null
+        }
+        
+        if (rendererRef.current) {
+          rendererRef.current.destroy()
+          rendererRef.current = null
+        }
+      } catch (error) {
+        console.error('GameCanvas: 清理时出错', error)
       }
-      renderer.destroy()
-      rendererRef.current = null
+      
+      console.log('GameCanvas: 清理完成')
     }
   }, [])
 
