@@ -123,7 +123,8 @@ function App() {
 function setupNetworkHandlers() {
   const network = NetworkManager.getInstance()
   const { setPlayer, addMonster, removeMonster, addCombatLog, updatePlayerHP } = useGameStore.getState()
-  const { fetchAvailableQuests, fetchCharacterQuests, fetchAchievements, fetchAchievementProgress, fetchNPCs } = useQuestStore.getState()
+  
+  console.log('setupNetworkHandlers: 开始设置网络处理器...')
 
   // 监听欢迎消息
   network.onMessage('welcome', (data) => {
@@ -135,28 +136,6 @@ function setupNetworkHandlers() {
     console.log('玩家更新:', data)
     if (data.exp || data.silver) {
       addCombatLog(`获得 ${data.exp || 0} 经验，${data.silver || 0} 银币`)
-    }
-  })
-
-  // 监听任务进度更新
-  network.onMessage('questProgress', (data) => {
-    console.log('任务进度更新:', data)
-    if (data.characterId) {
-      // 刷新角色任务列表
-      fetchCharacterQuests(data.characterId)
-      addCombatLog(`任务进度更新：${data.questName}`)
-    }
-  })
-
-  // 监听成就解锁
-  network.onMessage('achievementUnlocked', (data) => {
-    console.log('成就解锁:', data)
-    if (data.achievementName) {
-      addCombatLog(`🏆 解锁成就：${data.achievementName}`)
-      // 刷新成就进度
-      if (data.characterId) {
-        fetchAchievementProgress(data.characterId)
-      }
     }
   })
 
@@ -180,22 +159,6 @@ function setupNetworkHandlers() {
     }
   })
 
-  // 监听怪物生成
-  network.onMessage('monsterSpawn', (data) => {
-    console.log('怪物生成:', data)
-    addMonster({
-      id: data.id,
-      templateId: data.templateId,
-      name: data.name || '怪物',
-      level: data.level || 1,
-      hp: data.hp || 50,
-      maxHp: data.maxHp || 50,
-      x: data.x || 0,
-      y: data.y || 0,
-      zoneId: data.zoneId || 'zone_1',
-    })
-  })
-
   // 监听怪物死亡
   network.onMessage('monsterDeath', (data) => {
     console.log('怪物死亡:', data)
@@ -208,32 +171,33 @@ function setupNetworkHandlers() {
     updatePlayerHP(data.hp)
   })
 
-  // 模拟玩家数据（临时）
+  console.log('setupNetworkHandlers: 网络处理器设置完成')
+
+  // 模拟玩家数据（临时）- 延迟执行让渲染器先准备好
   setTimeout(() => {
-    const playerData = {
-      id: 'test-character-id',
-      name: '测试角色',
-      level: 10,
-      exp: 1000,
-      maxExp: 1500,
-      hp: 100,
-      maxHp: 100,
-      mp: 50,
-      maxMp: 50,
-      x: 400,
-      y: 300,
-      zoneId: 'zone_1',
-      isBot: false,
+    try {
+      const playerData = {
+        id: 'test-character-id',
+        name: '测试角色',
+        level: 10,
+        exp: 1000,
+        maxExp: 1500,
+        hp: 100,
+        maxHp: 100,
+        mp: 50,
+        maxMp: 50,
+        x: 400,
+        y: 300,
+        zoneId: 'zone_1',
+        isBot: false,
+      }
+      console.log('setupNetworkHandlers: 设置玩家数据', playerData)
+      setPlayer(playerData)
+      console.log('setupNetworkHandlers: 玩家数据设置完成')
+    } catch (error) {
+      console.error('setupNetworkHandlers: 设置玩家数据失败', error)
     }
-    setPlayer(playerData)
-    
-    // 初始化任务系统数据
-    fetchAvailableQuests()
-    fetchCharacterQuests(playerData.id)
-    fetchAchievements()
-    fetchAchievementProgress(playerData.id)
-    fetchNPCs()
-  }, 1000)
+  }, 2000)
 }
 
 // 启动游戏循环
