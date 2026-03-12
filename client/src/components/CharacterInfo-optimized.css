@@ -1,0 +1,228 @@
+/**
+ * 角色信息组件样式 - 优化版
+ * 现代化设计，更好的视觉效果
+ */
+
+.character-info {
+  background: rgba(22, 33, 62, 0.95);
+  border: 2px solid #3a4a5a;
+  border-radius: 12px;
+  padding: 15px 25px;
+  min-width: 350px;
+  text-align: center;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 顶部装饰线 */
+.character-info::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3498db, #2980b9, #3498db);
+}
+
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+  color: white;
+  font-weight: bold;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.level-badge::before {
+  content: '⚔️';
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.character-name {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.bot-tag {
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: white;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-left: 4px;
+  vertical-align: middle;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(155, 89, 182, 0.3);
+}
+
+.status-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.status-bar {
+  position: relative;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hp-bar .bar-fill {
+  background: linear-gradient(90deg, #e74c3c 0%, #c0392b 50%, #e74c3c 100%);
+  box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+.mp-bar .bar-fill {
+  background: linear-gradient(90deg, #3498db 0%, #2980b9 50%, #3498db 100%);
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.exp-bar .bar-fill {
+  background: linear-gradient(90deg, #f39c12 0%, #f1c40f 50%, #f39c12 100%);
+  box-shadow: 0 0 10px rgba(243, 156, 18, 0.5);
+}
+
+.bar-text {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  line-height: 24px;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.5);
+  font-weight: 500;
+  padding: 0 10px;
+  letter-spacing: 0.5px;
+}
+
+.bar-label {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* HP 条特殊样式 */
+.hp-bar {
+  position: relative;
+}
+
+.hp-bar::before {
+  content: '❤️';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-size: 14px;
+}
+
+.hp-bar .bar-text {
+  padding-left: 30px;
+}
+
+/* MP 条特殊样式 */
+.mp-bar::before {
+  content: '💎';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-size: 14px;
+}
+
+.mp-bar .bar-text {
+  padding-left: 30px;
+}
+
+/* EXP 条特殊样式 */
+.exp-bar::before {
+  content: '⭐';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-size: 14px;
+}
+
+.exp-bar .bar-text {
+  padding-left: 30px;
+}
+
+/* 动画效果 */
+@keyframes barPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.hp-bar.low-hp .bar-fill {
+  animation: barPulse 1s infinite;
+  background: linear-gradient(90deg, #ff0000 0%, #cc0000 50%, #ff0000 100%);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .character-info {
+    min-width: auto;
+    width: 100%;
+    padding: 12px 15px;
+  }
+  
+  .character-name {
+    font-size: 18px;
+  }
+  
+  .level-badge {
+    font-size: 13px;
+    padding: 4px 12px;
+  }
+  
+  .status-bar {
+    height: 20px;
+  }
+  
+  .bar-text {
+    font-size: 12px;
+  }
+}

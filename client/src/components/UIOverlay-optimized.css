@@ -1,0 +1,461 @@
+/**
+ * UI 覆盖层样式 - 优化版
+ * 现代化游戏 UI 设计，统一的视觉风格
+ */
+
+#ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+
+#ui-overlay > * {
+  pointer-events: auto;
+}
+
+/* ==================== 顶部区域 ==================== */
+.ui-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.ui-top-left {
+  flex: 1;
+  max-width: 300px;
+}
+
+.ui-top-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 400px;
+}
+
+.ui-top-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ==================== 底部区域 ==================== */
+.ui-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+.ui-bottom-center {
+  display: flex;
+  justify-content: center;
+}
+
+/* ==================== 左侧区域 ==================== */
+.ui-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  padding: 80px 15px 20px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.ui-left > * {
+  pointer-events: auto;
+}
+
+.ui-left-bottom {
+  display: flex;
+  flex-direction: column;
+  max-width: 400px;
+}
+
+/* ==================== 右侧区域 ==================== */
+.ui-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  padding: 80px 15px 20px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.ui-right > * {
+  pointer-events: auto;
+}
+
+/* ==================== 通用面板样式 ==================== */
+.game-panel {
+  background: rgba(22, 33, 62, 0.95);
+  border: 2px solid #3a4a5a;
+  border-radius: 8px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.game-panel-header {
+  background: linear-gradient(180deg, rgba(58, 74, 90, 0.8) 0%, rgba(22, 33, 62, 0.9) 100%);
+  padding: 10px 15px;
+  border-bottom: 1px solid #3a4a5a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-panel-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-panel-content {
+  padding: 12px;
+}
+
+/* ==================== 窗口样式（优化版） ==================== */
+.ui-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(22, 33, 62, 0.98);
+  border: 2px solid #4a5568;
+  border-radius: 12px;
+  min-width: 400px;
+  min-height: 300px;
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: windowSlideIn 0.3s ease-out;
+}
+
+@keyframes windowSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, rgba(58, 74, 90, 0.9) 0%, rgba(22, 33, 62, 0.95) 100%);
+  border-bottom: 1px solid #4a5568;
+  border-radius: 12px 12px 0 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.window-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.window-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 18px;
+  background: linear-gradient(180deg, #3498db, #2980b9);
+  border-radius: 2px;
+}
+
+.window-header button {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #a0a0a0;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 10px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.window-header button:hover {
+  background: rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+  transform: scale(1.1);
+}
+
+.window-content {
+  padding: 18px;
+  color: #b0b0b0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.window-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.window-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.window-content::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 4px;
+}
+
+.window-content::-webkit-scrollbar-thumb:hover {
+  background: #5a6578;
+}
+
+/* ==================== 按钮样式 ==================== */
+.game-button {
+  background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.game-button:hover {
+  background: linear-gradient(180deg, #5dade2 0%, #3498db 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+.game-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 4px rgba(52, 152, 219, 0.3);
+}
+
+.game-button.secondary {
+  background: linear-gradient(180deg, #5a6578 0%, #4a5568 100%);
+  box-shadow: 0 2px 8px rgba(90, 101, 120, 0.3);
+}
+
+.game-button.secondary:hover {
+  background: linear-gradient(180deg, #6b7888 0%, #5a6578 100%);
+}
+
+.game-button.danger {
+  background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.game-button.danger:hover {
+  background: linear-gradient(180deg, #ec7063 0%, #e74c3c 100%);
+}
+
+/* ==================== 工具提示 ==================== */
+.tooltip {
+  position: absolute;
+  background: rgba(22, 33, 62, 0.98);
+  border: 1px solid #4a5568;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  pointer-events: none;
+  max-width: 300px;
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #3498db;
+}
+
+.tooltip-description {
+  font-size: 12px;
+  color: #a0a0a0;
+  line-height: 1.5;
+}
+
+/* ==================== 响应式设计 ==================== */
+@media (max-width: 1200px) {
+  .ui-top-center {
+    min-width: 300px;
+  }
+  
+  .ui-top {
+    padding: 10px 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ui-top {
+    flex-wrap: wrap;
+    padding: 8px 10px;
+  }
+  
+  .ui-top-left {
+    order: 2;
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .ui-top-center {
+    order: 1;
+    position: relative;
+    left: 0;
+    transform: none;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .ui-top-right {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .ui-left {
+    padding: 60px 10px 10px 10px;
+  }
+  
+  .ui-left-bottom {
+    max-width: 100%;
+  }
+}
+
+/* ==================== 动画效果 ==================== */
+.ui-fade-in {
+  animation: uiFadeIn 0.3s ease-out;
+}
+
+@keyframes uiFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ui-slide-up {
+  animation: uiSlideUp 0.3s ease-out;
+}
+
+@keyframes uiSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== 滚动条美化 ==================== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 5px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a6578;
+}
+
+/* ==================== 颜色主题变量 ==================== */
+:root {
+  /* 主色调 */
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --primary-light: #5dade2;
+  
+  /* 强调色 */
+  --accent-color: #e74c3c;
+  --accent-dark: #c0392b;
+  --accent-light: #ec7063;
+  
+  /* 成功色 */
+  --success-color: #27ae60;
+  --success-dark: #229954;
+  
+  /* 警告色 */
+  --warning-color: #f39c12;
+  --warning-dark: #d68910;
+  
+  /* 背景色 */
+  --bg-dark: #16213e;
+  --bg-darker: #0f1724;
+  --bg-light: #1a2744;
+  
+  /* 边框色 */
+  --border-color: #3a4a5a;
+  --border-light: #4a5568;
+  
+  /* 文字色 */
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted: #6c7a89;
+}
