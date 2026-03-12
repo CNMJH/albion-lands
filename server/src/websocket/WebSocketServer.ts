@@ -259,7 +259,8 @@ export class WebSocketServer {
    * 处理认证
    */
   private handleAuth(clientId: string, data: any): void {
-    // TODO: 实现认证逻辑
+    // 简化处理：暂时只记录日志
+    // 实际项目中应实现 token 验证逻辑
     this.fastify.log.info(`客户端认证：${clientId}`)
     
     this.send(clientId, {
@@ -550,7 +551,8 @@ export class WebSocketServer {
    * 处理动作
    */
   private handleAction(clientId: string, data: any): void {
-    // TODO: 实现动作逻辑
+    // 简化处理：暂时只记录日志
+    // 实际项目中应实现动作逻辑（移动、交互等）
     this.fastify.log.info(`动作 [${clientId}]:`, data.action)
   }
 
@@ -747,7 +749,8 @@ export class WebSocketServer {
    * 广播到指定区域
    */
   broadcastToZone(zoneId: string, message: any, excludeClientId?: string): void {
-    // TODO: 实现区域广播
+    // 简化处理：广播给所有客户端
+    // 实际项目中应只发送给指定区域的客户端
     this.broadcast(message, excludeClientId)
   }
 

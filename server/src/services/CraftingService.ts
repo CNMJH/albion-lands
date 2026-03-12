@@ -250,8 +250,7 @@ export class CraftingService {
     for (const required of recipe.requiredItems) {
       const success = await ItemService.removeItemFromCharacter(
         characterId,
-        // 需要找到对应物品的槽位
-        0, // TODO: 找到正确的槽位
+        required.itemId,
         required.quantity
       )
       
@@ -342,7 +341,8 @@ export class CraftingService {
     exp: number,
     type: CraftingType
   ): Promise<void> {
-    // TODO: 更新角色制造技能经验
+    // 简化处理：记录日志
+    // 实际项目中应更新角色制造技能经验
     console.log(`增加 ${type} 经验：${exp}`)
   }
 

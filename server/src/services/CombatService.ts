@@ -188,16 +188,20 @@ export class CombatService {
     expReward: number
     silverReward: number
   } | null> {
-    // TODO: 从数据库或缓存获取怪物
-    // 这里暂时返回模拟数据
+    // 从活跃怪物列表中获取
+    const monster = activeMonsters.get(monsterId)
+    if (!monster) {
+      return null
+    }
+    
     return {
-      id: monsterId,
-      templateId: 'slime_t1',
-      hp: 50,
-      level: 2,
-      defense: 2,
-      expReward: 20,
-      silverReward: 5,
+      id: monster.id,
+      templateId: monster.templateId,
+      hp: monster.hp,
+      level: monster.level || 1,
+      defense: monster.defense || 0,
+      expReward: monster.expReward || 10,
+      silverReward: monster.silverReward || 5,
     }
   }
 
@@ -205,16 +209,18 @@ export class CombatService {
    * 更新怪物 HP
    */
   private static async updateMonsterHP(monsterId: string, hp: number): Promise<void> {
-    // TODO: 更新数据库或缓存
-    console.log(`怪物 ${monsterId} HP 更新为 ${hp}`)
+    const monster = activeMonsters.get(monsterId)
+    if (monster) {
+      monster.hp = hp
+      activeMonsters.set(monsterId, monster)
+    }
   }
 
   /**
    * 移除怪物
    */
   private static async removeMonster(monsterId: string): Promise<void> {
-    // TODO: 从数据库或缓存移除
-    console.log(`怪物 ${monsterId} 已死亡`)
+    activeMonsters.delete(monsterId)
   }
 
   /**
@@ -228,8 +234,25 @@ export class CombatService {
   ): Promise<string> {
     const monsterId = `monster_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
-    // TODO: 保存到数据库或缓存
-    console.log(`生成怪物 ${monsterId} (${templateId}) 在 ${zoneId} (${x}, ${y})`)
+    // 创建怪物实例并保存到活跃列表
+    const monster: MonsterInstance = {
+      id: monsterId,
+      templateId,
+      zoneId,
+      x,
+      y,
+      hp: 50,
+      maxHp: 50,
+      level: 1,
+      defense: 0,
+      expReward: 10,
+      silverReward: 5,
+      state: 'idle',
+      targetId: null,
+      lastAttackTime: 0,
+    }
+    
+    activeMonsters.set(monsterId, monster)
     
     return monsterId
   }

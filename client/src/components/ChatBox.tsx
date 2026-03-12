@@ -78,7 +78,8 @@ export function ChatBox() {
     inputRef.current?.blur()
     setIsFocused(false)
 
-    // TODO: 发送到服务器
+    // 简化处理：暂时只输出到控制台
+    // 实际项目中应发送到服务器
     console.log('发送消息:', input)
   }
 

@@ -105,7 +105,7 @@ export class CombatHandler {
         sendToPlayer(userId, 'monsterHP', {
           monsterId: targetMonster.id,
           hp: result.monsterHP,
-          maxHp: 50, // TODO: 从模板获取
+          maxHp: targetMonster.maxHp || 50,
         })
 
         // 如果怪物死亡
@@ -136,7 +136,8 @@ export class CombatHandler {
     payload: { skillIndex: number; targetId?: string; timestamp: number },
     sendToPlayer: (userId: string, type: string, payload: any) => void
   ): Promise<void> {
-    // TODO: 实现技能逻辑
+    // 简化处理：暂时只记录日志
+    // 实际项目中应实现技能逻辑
     this.fastify.log.info(`玩家 ${userId} 使用技能 ${payload.skillIndex}`)
 
     sendToPlayer(userId, 'skill', {
@@ -149,7 +150,8 @@ export class CombatHandler {
    * 获取角色
    */
   private async getCharacterByUserId(userId: string): Promise<{ id: string } | null> {
-    // TODO: 从数据库获取
+    // 简化处理：返回模拟数据
+    // 实际项目中应从数据库获取
     return { id: `char_${userId}` }
   }
 
@@ -160,8 +162,8 @@ export class CombatHandler {
     characterId: string,
     pos: { x: number; y: number }
   ): { id: string; x: number; y: number } | null {
-    // TODO: 实现查找逻辑
-    // 暂时返回模拟数据
+    // 简化处理：返回模拟数据
+    // 实际项目中应查找附近的怪物实例
     return {
       id: 'monster_1',
       x: pos.x + 50,

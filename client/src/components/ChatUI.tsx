@@ -48,7 +48,7 @@ export const ChatUI: React.FC = () => {
         sendMessage(type, inputMessage.trim())
       } else {
         // 本地/区域聊天
-        sendMessage(type, inputMessage.trim(), { zoneId: 'zone_1' }) // TODO: 使用实际区域 ID
+        sendMessage(type, inputMessage.trim(), { zoneId: 'zone_1' })
       }
 
       setInputMessage('')

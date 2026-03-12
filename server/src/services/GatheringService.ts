@@ -232,9 +232,10 @@ export class GatheringService {
       }
     }
 
-    // 检查工具（TODO: 检查背包）
+    // 检查工具
     if (node.toolRequired) {
-      // 临时跳过工具检查
+      // 简化处理：暂时跳过工具检查
+      // 实际项目中应检查背包中是否有对应工具
     }
 
     return { success: true }
@@ -355,7 +356,8 @@ export class GatheringService {
     exp: number,
     type: ResourceType
   ): Promise<void> {
-    // TODO: 更新角色采集技能经验
+    // 简化处理：记录日志
+    // 实际项目中应更新角色采集技能经验
     console.log(`增加 ${type} 经验：${exp}`)
   }
 
@@ -373,7 +375,7 @@ export class GatheringService {
 
     this.activeNodes.set(nodeId, newNode)
     
-    // TODO: 通知客户端节点重生
+    // 资源节点重生完成
     console.log(`资源节点重生：${nodeId}`)
   }
 

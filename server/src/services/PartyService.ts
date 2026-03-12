@@ -147,7 +147,8 @@ export class PartyService {
       return { success: false, error: '目标已在队伍中' }
     }
 
-    // TODO: 发送邀请通知
+    // 简化处理：暂时跳过邀请通知
+    // 实际项目中应通过 WebSocket 发送邀请通知
     return { success: true }
   }
 

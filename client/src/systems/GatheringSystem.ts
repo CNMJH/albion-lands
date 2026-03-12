@@ -255,7 +255,8 @@ export class GatheringSystem extends EventEmitter {
    * 检查是否有工具
    */
   private hasTool(toolType: string): boolean {
-    // TODO: 检查背包中是否有工具
+    // 简化处理：暂时返回 true
+    // 实际项目中应检查背包中是否有对应工具
     return true
   }
 

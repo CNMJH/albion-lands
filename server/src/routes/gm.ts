@@ -497,7 +497,8 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
     try {
       const { message } = request.body as { message: string }
 
-      // TODO: 通过 WebSocket 广播
+      // 简化处理：暂时只记录日志
+      // 实际项目中应通过 WebSocket 广播
       console.log('[GM 广播]:', message)
 
       // 记录 GM 操作
@@ -788,8 +789,8 @@ export async function gmRoutes(fastify: FastifyInstance): Promise<void> {
       const { id } = request.params as { id: string }
       const { duration } = request.body as { duration: number } // 分钟
       
-      // TODO: 添加禁言逻辑（需要添加 muteUntil 字段到 Character）
-      // 临时实现：记录到 GameLog
+      // 简化处理：记录到 GameLog
+      // 实际项目中需要添加 muteUntil 字段到 Character 模型
       await prisma.gameLog.create({
         data: {
           type: 'mute',

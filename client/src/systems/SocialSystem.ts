@@ -313,7 +313,8 @@ export const useSocialStore = create<SocialState>((set, get) => ({
    * 获取好友列表
    */
   fetchFriends: async () => {
-    // TODO: 通过 HTTP API 获取
+    // 简化处理：暂时只记录日志
+    // 实际项目中应通过 HTTP API 获取
     console.log('获取好友列表')
   },
 
@@ -321,7 +322,8 @@ export const useSocialStore = create<SocialState>((set, get) => ({
    * 获取待处理请求
    */
   fetchPendingRequests: async () => {
-    // TODO: 通过 HTTP API 获取
+    // 简化处理：暂时只记录日志
+    // 实际项目中应通过 HTTP API 获取
     console.log('获取好友请求')
   },
 
@@ -381,7 +383,8 @@ export const useSocialStore = create<SocialState>((set, get) => ({
    * 获取队伍信息
    */
   fetchParty: async () => {
-    // TODO: 通过 HTTP API 获取
+    // 简化处理：暂时只记录日志
+    // 实际项目中应通过 HTTP API 获取
     console.log('获取队伍信息')
   },
 
@@ -429,7 +432,8 @@ export const useSocialStore = create<SocialState>((set, get) => ({
    * 获取聊天记录
    */
   fetchChatHistory: async (type: string, targetId?: string) => {
-    // TODO: 通过 HTTP API 获取
+    // 简化处理：暂时只记录日志
+    // 实际项目中应通过 HTTP API 获取
     console.log('获取聊天记录:', type, targetId)
   },
 }))

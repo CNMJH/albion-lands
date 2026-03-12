@@ -30,8 +30,9 @@ export function SkillBar() {
   }, [])
 
   const useSkill = (index: number) => {
+    // 简化处理：暂时只记录日志
+    // 实际项目中应通过 WebSocket 发送技能使用请求
     console.log(`使用技能 ${index + 1}`)
-    // TODO: 实现技能使用逻辑
   }
 
   return (

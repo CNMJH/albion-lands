@@ -205,7 +205,8 @@ function startGameLoop() {
 
 // 模拟资源加载
 async function loadResources() {
-  // TODO: 实现真实的资源加载
+  // 简化处理：模拟加载延迟
+  // 实际项目中应加载真实的游戏资源（图片、音频等）
   return new Promise(resolve => setTimeout(resolve, 1000))
 }
 
