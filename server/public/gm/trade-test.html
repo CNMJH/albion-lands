@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GM 工具 - 交易测试</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e4e4e4;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .card h2 {
+      margin-bottom: 15px;
+      color: #4ecca3;
+      border-bottom: 1px solid rgba(78, 204, 163, 0.3);
+      padding-bottom: 10px;
+    }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; color: #a0a0a0; }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #e4e4e4;
+      font-size: 14px;
+    }
+    input:focus, select:focus { outline: none; border-color: #4ecca3; }
+    button {
+      background: linear-gradient(135deg, #4ecca3 0%, #38a169 100%);
+      color: #1a1a2e;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(78, 204, 163, 0.4);
+    }
+    button.danger { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+    button.danger:hover { box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
+    button.info { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+    button.info:hover { box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); }
+    .result {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .result pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #e4e4e4;
+    }
+    .success { color: #4ecca3; }
+    .error { color: #e74c3c; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤝 GM 工具 - 交易测试</h1>
+
+    <!-- 发起交易 -->
+    <div class="card">
+      <h2>📝 发起交易</h2>
+      <div class="form-group">
+        <label>发起者 ID:</label>
+        <select id="initiatorId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>接收者 ID:</label>
+        <select id="recipientId">
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <button onclick="requestTrade()">📝 发起交易</button>
+      <div id="requestResult" class="result"></div>
+    </div>
+
+    <!-- 响应交易 -->
+    <div class="card">
+      <h2>✅ 响应交易</h2>
+      <div class="form-group">
+        <label>交易 ID:</label>
+        <input type="text" id="tradeId" placeholder="输入交易 ID">
+      </div>
+      <div class="form-group">
+        <label>接收者 ID:</label>
+        <select id="respondRecipientId">
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <button onclick="respondTrade(true)">✅ 接受</button>
+      <button class="danger" onclick="respondTrade(false)">❌ 拒绝</button>
+      <div id="respondResult" class="result"></div>
+    </div>
+
+    <!-- 添加物品 -->
+    <div class="card">
+      <h2>📦 添加物品</h2>
+      <div class="form-group">
+        <label>交易 ID:</label>
+        <input type="text" id="addItemTradeId" placeholder="输入交易 ID">
+      </div>
+      <div class="form-group">
+        <label>角色 ID:</label>
+        <select id="addItemCharacterId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>物品 ID:</label>
+        <input type="text" id="itemId" placeholder="输入物品 ID">
+      </div>
+      <div class="form-group">
+        <label>数量:</label>
+        <input type="number" id="quantity" value="1" min="1">
+      </div>
+      <button onclick="addItem()">📦 添加物品</button>
+      <div id="addItemResult" class="result"></div>
+    </div>
+
+    <!-- 设置银币 -->
+    <div class="card">
+      <h2>💰 设置银币</h2>
+      <div class="form-group">
+        <label>交易 ID:</label>
+        <input type="text" id="setSilverTradeId" placeholder="输入交易 ID">
+      </div>
+      <div class="form-group">
+        <label>角色 ID:</label>
+        <select id="setSilverCharacterId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>银币数量:</label>
+        <input type="number" id="silver" value="100" min="0">
+      </div>
+      <button onclick="setSilver()">💰 设置银币</button>
+      <div id="setSilverResult" class="result"></div>
+    </div>
+
+    <!-- 确认/取消交易 -->
+    <div class="card">
+      <h2>⚡ 确认/取消</h2>
+      <div class="form-group">
+        <label>交易 ID:</label>
+        <input type="text" id="actionTradeId" placeholder="输入交易 ID">
+      </div>
+      <div class="form-group">
+        <label>角色 ID:</label>
+        <select id="actionCharacterId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <button onclick="confirmTrade()">✅ 确认交易</button>
+      <button class="danger" onclick="cancelTrade()">❌ 取消交易</button>
+      <div id="actionResult" class="result"></div>
+    </div>
+
+    <!-- 查询交易历史 -->
+    <div class="card">
+      <h2>📜 交易历史</h2>
+      <div class="form-group">
+        <label>角色 ID:</label>
+        <select id="historyCharacterId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <button class="info" onclick="getHistory()">📜 查询历史</button>
+      <div id="historyResult" class="result"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3002/api/v1';
+
+    async function requestTrade() {
+      const initiatorId = document.getElementById('initiatorId').value;
+      const recipientId = document.getElementById('recipientId').value;
+      const resultDiv = document.getElementById('requestResult');
+      resultDiv.innerHTML = '<p>正在发起...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/trade/request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initiatorId, recipientId }),
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+          resultDiv.innerHTML = `<p class="success">✅ 交易发起成功! ID: ${result.tradeId}</p>`;
+          document.getElementById('tradeId').value = result.tradeId;
+          document.getElementById('addItemTradeId').value = result.tradeId;
+          document.getElementById('setSilverTradeId').value = result.tradeId;
+          document.getElementById('actionTradeId').value = result.tradeId;
+        } else {
+          resultDiv.innerHTML = `<p class="error">❌ 失败：${result.message}</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function respondTrade(accept) {
+      const tradeId = document.getElementById('tradeId').value;
+      const recipientId = document.getElementById('respondRecipientId').value;
+      const resultDiv = document.getElementById('respondResult');
+      resultDiv.innerHTML = '<p>正在响应...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/trade/respond`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tradeId, recipientId, accept }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ ${accept ? '交易已接受' : '交易已拒绝'}</p>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function addItem() {
+      const tradeId = document.getElementById('addItemTradeId').value;
+      const characterId = document.getElementById('addItemCharacterId').value;
+      const itemId = document.getElementById('itemId').value;
+      const quantity = parseInt(document.getElementById('quantity').value);
+      const resultDiv = document.getElementById('addItemResult');
+      resultDiv.innerHTML = '<p>正在添加...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/trade/add-item`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tradeId, characterId, itemId, quantity }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ 物品已添加</p>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function setSilver() {
+      const tradeId = document.getElementById('setSilverTradeId').value;
+      const characterId = document.getElementById('setSilverCharacterId').value;
+      const silver = parseInt(document.getElementById('silver').value);
+      const resultDiv = document.getElementById('setSilverResult');
+      resultDiv.innerHTML = '<p>正在设置...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/trade/set-silver`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tradeId, characterId, silver }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ 银币已设置</p>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function confirmTrade() {
+      const tradeId = document.getElementById('actionTradeId').value;
+      const characterId = document.getElementById('actionCharacterId').value;
+      const resultDiv = document.getElementById('actionResult');
+      resultDiv.innerHTML = '<p>正在确认...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/trade/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tradeId, characterId }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ 交易完成!</p>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function cancelTrade() {
+      const tradeId = document.getElementById('actionTradeId').value;
+      const characterId = document.getElementById('actionCharacterId').value;
+      const resultDiv = document.getElementById('actionResult');
+      resultDiv.innerHTML = '<p>正在取消...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/trade/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tradeId, characterId }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ 交易已取消</p>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function getHistory() {
+      const characterId = document.getElementById('historyCharacterId').value;
+      const resultDiv = document.getElementById('historyResult');
+      resultDiv.innerHTML = '<p>正在查询...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/trade/history/${characterId}`);
+        const result = await response.json();
+        
+        if (result.success && result.history.length > 0) {
+          let html = '<pre>';
+          result.history.forEach(trade => {
+            const status = trade.status === 'COMPLETED' ? '✅' : trade.status === 'CANCELLED' ? '❌' : '⏳';
+            const time = new Date(trade.createdAt).toLocaleString('zh-CN');
+            html += `${status} ${time} | ${trade.initiatorName} ↔ ${trade.recipientName} | 银币：${trade.initiatorSilver}/${trade.recipientSilver} | 物品：${trade.itemCount}\n`;
+          });
+          html += '</pre>';
+          resultDiv.innerHTML = html;
+        } else {
+          resultDiv.innerHTML = '<p>暂无交易记录</p>';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

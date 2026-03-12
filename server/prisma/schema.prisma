@@ -69,6 +69,7 @@ model Item {
   inventoryItems InventoryItem[]
   marketOrders   MarketOrder[]
   droppedItems   DroppedItem[]   // 掉落物品
+  tradeItems     TradeItem[]
 }
 
 model InventoryItem {
@@ -447,4 +448,38 @@ model PlayerKill {
   @@index([killerId])
   @@index([victimId])
   @@index([timestamp])
+}
+
+// 交易记录
+model Trade {
+  id            String    @id @default(uuid())
+  initiatorId   String
+  recipientId   String
+  status        String    @default("PENDING") // PENDING, ACCEPTED, COMPLETED, CANCELLED
+  initiatorSilver Int     @default(0)
+  recipientSilver Int     @default(0)
+  createdAt     DateTime  @default(now())
+  completedAt   DateTime?
+  
+  items         TradeItem[]
+  
+  @@index([initiatorId])
+  @@index([recipientId])
+  @@index([status])
+}
+
+// 交易物品
+model TradeItem {
+  id          String   @id @default(uuid())
+  tradeId     String
+  ownerId     String   // 原所有者 ID
+  itemId      String
+  quantity    Int      @default(1)
+  slot        String   // INITIATOR, RECIPIENT
+  
+  trade       Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  item        Item     @relation(fields: [itemId], references: [id])
+  
+  @@index([tradeId])
+  @@index([slot])
 }

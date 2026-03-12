@@ -12,6 +12,7 @@ import { skillsRoutes } from './skills'
 import { equipmentRoutes } from './equipment'
 import deathRoutes from './death'
 import { pvpRoutes } from './pvp'
+import { tradeRoutes } from './trade'
 
 /**
  * 注册所有 HTTP 路由
@@ -69,4 +70,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // PVP 路由
   fastify.register(pvpRoutes, { prefix: '/api/v1/pvp' })
+  
+  // 交易路由
+  fastify.register(tradeRoutes, { prefix: '/api/v1/trade' })
 }
