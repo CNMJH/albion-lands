@@ -23,12 +23,9 @@ export function GameCanvas() {
       return
     }
 
-    // 清理容器中旧的 canvas（React 严格模式会导致重复调用）
-    const oldCanvas = containerRef.current.querySelector('canvas')
-    if (oldCanvas) {
-      console.log('GameCanvas: 清理旧的 canvas（React 严格模式）')
-      oldCanvas.remove()
-    }
+    // 清理容器中旧的内容（React 严格模式会导致重复调用）
+    containerRef.current.innerHTML = ''
+    console.log('GameCanvas: 已清理容器内容')
 
     console.log('GameCanvas: 开始初始化渲染器...')
 
@@ -91,13 +88,6 @@ export function GameCanvas() {
       window.removeEventListener('resize', handleResize)
       if (resizeTimeout) {
         clearTimeout(resizeTimeout)
-      }
-      
-      // 从容器中移除 canvas（防止 React 严格模式导致重复）
-      if (containerRef.current) {
-        const canvases = containerRef.current.querySelectorAll('canvas')
-        canvases.forEach(canvas => canvas.remove())
-        console.log('GameCanvas: 移除了', canvases.length, '个 canvas')
       }
       
       // 清理渲染器
