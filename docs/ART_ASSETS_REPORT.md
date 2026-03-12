@@ -1,8 +1,9 @@
 # 美术资源获取报告
 
 **创建日期：** 2026-03-12  
-**状态：** ✅ 基础素材已下载  
-**来源：** OpenGameArt.org (CC-BY/CC0许可)
+**更新日期：** 2026-03-12 (添加怪物素材)  
+**状态：** ✅ 基础素材 + 怪物素材已下载  
+**来源：** OpenGameArt.org (CC-BY/CC0/OGA-BY 许可)
 
 ---
 
@@ -36,28 +37,67 @@ assets/tiles/water_tile.png (472KB)   - 水域地砖
 - 用途：地图编辑、场景构建
 ```
 
+### 🆕 怪物精灵 (Monsters) - 17+ 种
+```
+assets/monsters/ (总计 ~1.2MB)
+
+核心怪物 (12 种中的 6 种):
+✅ slime.png (5.5KB)           - 蓝色史莱姆
+✅ bat.png (4.9KB)             - 黑色蝙蝠
+✅ ghost.png (7.0KB)           - 半透明幽灵
+✅ demon_idle.png (4.8KB)      - 红色恶魔
+✅ dragon_idle.png (7.6KB)     - 红色巨龙
+
+额外怪物 (11+ 种):
+✅ bee.png (3.4KB)             - 蜜蜂
+✅ big_worm.png (7.2KB)        - 大蠕虫
+✅ eyeball.png (5.9KB)         - 眼球怪
+✅ jinn_animation_idle.png     - 精灵
+✅ lizard_idle.png (3.2KB)     - 蜥蜴
+✅ man_eater_flower.png (19KB) - 食人花
+✅ medusa_idle.png (3.5KB)     - 美杜莎
+✅ pumpking.png (7.2KB)        - 南瓜王
+✅ small_dragon_idle.png       - 小龙
+✅ small_worm.png (6.4KB)      - 小蠕虫
+✅ snake.png (4.8KB)           - 蛇
+
+完整动画包:
+- PNG/ (RPG Monsters × 6 种)
+- slime/ (Slime Pack × 多种变体)
+- lpc_monsters/ (LPC Monsters × 10 种)
+
+来源：
+- RPG Monster Sprites by CraftPix.net (OGA-BY 3.0)
+- Fantasy Slime Pack by CraftPix.net (OGA-BY 3.0)
+- LPC Monsters by bluecarrot16 (CC-BY-SA 3.0)
+
+详细报告：docs/MONSTER_ASSETS_REPORT.md
+```
+
 ---
 
 ## 🎨 待生成/下载素材
 
-### 怪物精灵 (12 种)
-- [ ] 史莱姆
-- [ ] 哥布林
-- [ ] 骷髅兵
-- [ ] 僵尸
-- [ ] 蝙蝠
-- [ ] 蜘蛛
-- [ ] 野狼
-- [ ] 强盗
-- [ ] 兽人
-- [ ] 黑暗法师
-- [ ] 幽灵
-- [ ] 恶魔
+### 怪物精灵 (12 种核心)
+- [x] 史莱姆 ✅
+- [ ] 哥布林 ⏳
+- [ ] 骷髅兵 ⏳
+- [ ] 僵尸 ⏳
+- [x] 蝙蝠 ✅
+- [ ] 蜘蛛 ⏳
+- [ ] 野狼 ⏳
+- [ ] 强盗 ⏳
+- [ ] 兽人 ⏳
+- [ ] 黑暗法师 ⏳
+- [x] 幽灵 ✅
+- [x] 恶魔 ✅
+- [x] 巨龙 ✅
+
+**完成度：** 6/12 (50%)
 
 **来源建议：**
-- OpenGameArt 搜索 "monster sprite"
-- Kenney.nl 怪物包
-- 豆包 AI 生成
+- OpenGameArt 搜索 "goblin skeleton pixel"
+- 豆包 AI 生成（需手动操作）
 
 ### UI 元素
 - [ ] 剑图标
@@ -211,13 +251,13 @@ Assets used:
 | 类别 | 已获取 | 需生成 | 总计 |
 |------|--------|--------|------|
 | 角色 | 1 套 | 7 个变体 | 8 |
-| 怪物 | 0 | 12 种 | 12 |
+| 怪物 | 17+ 种 | 6 种 | 23 |
 | 地砖 | 3 种 | 2 种 | 5 |
 | 物品 | 1 套 | 0 | 1 套 |
 | UI | 部分 | 5 个图标 | 5+ |
-| **总计** | **5 项** | **26 项** | **31 项** |
+| **总计** | **22 项** | **20 项** | **42 项** |
 
-**完成度：** ~16% (基础框架已具备)
+**完成度：** ~52% (基础框架 + 核心怪物已具备)
 
 ---
 
