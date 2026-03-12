@@ -41,6 +41,7 @@ model Character {
   friendsReceived Friend[]        @relation("CharacterFriendsReceived")
   questProgress   QuestProgress[]
   achievementProgress AchievementProgress[]
+  characterSkills CharacterSkill[]
 }
 
 model Item {
@@ -334,4 +335,51 @@ model AchievementProgress {
   @@index([characterId])
   @@index([achievementId])
   @@index([completed])
+}
+
+// ============================================
+// 技能系统
+// ============================================
+
+// 技能模板
+model Skill {
+  id              String   @id @default(uuid())
+  name            String   // 技能名称
+  description     String   // 技能描述
+  type            String   // Damage, Heal, Buff, Debuff, Dash, Shield
+  weaponType      String   // 关联武器类型
+  damageMultiplier Float?  // 伤害倍率
+  healAmount      Int?     // 治疗量
+  cooldown        Int      // 冷却时间（秒）
+  energyCost      Int      // 能量消耗
+  range           Int      // 施法距离
+  duration        Int?     // 持续时间（秒）
+  radius          Int?     // 作用半径
+  icon            String?  // 技能图标
+  
+  characterSkills CharacterSkill[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([weaponType])
+  @@index([type])
+}
+
+// 角色技能
+model CharacterSkill {
+  id          String   @id @default(uuid())
+  characterId String
+  skillId     String
+  level       Int      @default(1) // 技能等级
+  slot        Int      @default(-1) // 快捷栏位 (0-7, -1 未装备)
+  cooldownUntil DateTime? // 冷却结束时间
+  
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  skill       Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  @@unique([characterId, skillId])
+  @@index([characterId])
+  @@index([skillId])
+  @@index([slot])
 }

@@ -16,6 +16,7 @@ export interface Player {
   y: number
   zoneId: string
   isBot: boolean
+  skills?: string[] // 技能栏 [skillId, skillId, ...]
 }
 
 // 物品接口

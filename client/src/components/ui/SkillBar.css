@@ -1,0 +1,165 @@
+/* 技能栏样式 */
+.skill-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+}
+
+/* 能量条 */
+.mp-bar {
+  position: relative;
+  width: 400px;
+  height: 20px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
+  border: 2px solid #4a4a6a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mp-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(180deg, #00b4db 0%, #0083b0 100%);
+  transition: width 0.3s ease;
+}
+
+.mp-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  z-index: 1;
+}
+
+/* 技能栏 */
+.skill-slots {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #4a4a6a;
+  border-radius: 8px;
+}
+
+/* 技能槽 */
+.skill-slot {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
+  border: 2px solid #5a5a7a;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.skill-slot:hover {
+  border-color: #7a7a9a;
+  transform: scale(1.05);
+}
+
+.skill-slot.empty {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.skill-slot.on-cooldown {
+  cursor: not-allowed;
+}
+
+.skill-slot.no-energy {
+  opacity: 0.6;
+}
+
+/* 技能图标 */
+.skill-icon {
+  font-size: 28px;
+  z-index: 2;
+}
+
+/* 技能快捷键提示 */
+.skill-key {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  color: #aaa;
+  font-weight: bold;
+  z-index: 2;
+}
+
+/* 冷却遮罩 */
+.skill-cooldown-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  transition: height 0.1s linear;
+  z-index: 1;
+}
+
+/* 冷却文本 */
+.skill-cooldown-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  z-index: 3;
+}
+
+/* 空槽提示 */
+.empty-slot {
+  color: #666;
+  font-size: 12px;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .skill-bar {
+    bottom: 10px;
+  }
+
+  .mp-bar {
+    width: 300px;
+    height: 16px;
+  }
+
+  .skill-slots {
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .skill-slot {
+    width: 40px;
+    height: 40px;
+  }
+
+  .skill-icon {
+    font-size: 22px;
+  }
+
+  .skill-key {
+    font-size: 9px;
+  }
+}

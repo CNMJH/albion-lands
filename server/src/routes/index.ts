@@ -8,6 +8,7 @@ import inventoryRoutes from './inventory'
 import { gmRoutes } from './gm'
 import { socialRoutes } from './social'
 import { questRoutes } from './quests'
+import { skillsRoutes } from './skills'
 
 /**
  * 注册所有 HTTP 路由
@@ -53,4 +54,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 任务路由
   fastify.register(questRoutes, { prefix: '/api/v1/quests' })
+  
+  // 技能路由
+  fastify.register(skillsRoutes, { prefix: '/api/v1/skills' })
 }

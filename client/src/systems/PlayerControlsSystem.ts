@@ -1,6 +1,7 @@
 import { GameRenderer } from '../renderer/GameRenderer'
 import { useGameStore } from '../stores/gameStore'
 import { network } from '../network/NetworkManager'
+import { skillSystem } from './SkillSystem'
 
 /**
  * 玩家操作类型
@@ -232,6 +233,9 @@ export class PlayerControlsSystem {
       this.attackCooldown -= deltaTime * 1000
     }
 
+    // 更新技能冷却
+    skillSystem.update(deltaTime)
+
     // 处理移动输入
     this.handleMovement(deltaTime, state)
   }
@@ -352,22 +356,32 @@ export class PlayerControlsSystem {
     const state = useGameStore.getState()
     if (!state.player) return
 
-    console.log(`玩家使用技能 ${skillIndex + 1}`)
+    // 获取玩家的技能栏配置（从玩家数据中）
+    const skillIds = state.player.skills || []
+    if (skillIndex >= skillIds.length) {
+      console.warn(`技能索引 ${skillIndex} 超出范围`)
+      return
+    }
 
-    // 发送技能指令
-    network.send('skill', {
-      skillIndex,
-      x: state.player.x,
-      y: state.player.y,
-      timestamp: Date.now(),
-    })
+    const skillId = skillIds[skillIndex]
+    if (!skillId) {
+      console.warn(`技能栏 ${skillIndex + 1} 未配置技能`)
+      return
+    }
 
-    // 触发技能事件
-    this.gameRenderer.emit('playerSkill', {
-      skillIndex,
-      x: state.player.x,
-      y: state.player.y,
-    })
+    // 使用 SkillSystem 释放技能
+    const success = skillSystem.useSkill(skillId)
+    
+    if (success) {
+      // 触发技能事件（用于 UI 和动画）
+      this.gameRenderer.emit('playerSkill', {
+        skillId,
+        skillIndex,
+        x: state.player.x,
+        y: state.player.y,
+      })
+      console.log(`技能释放成功：${skillId}`)
+    }
   }
 
   /**
