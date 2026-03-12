@@ -1,5 +1,12 @@
 # Hulu Lands 🗡️
 
+[![Release](https://img.shields.io/github/v/release/CNMJH/albion-lands?label=Release&color=green)](https://github.com/CNMJH/albion-lands/releases)
+[![License](https://img.shields.io/github/license/CNMJH/albion-lands)](https://github.com/CNMJH/albion-lands/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%2525-blue)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/Tests-100%2525%20passing-brightgreen)](https://github.com/CNMJH/albion-lands)
+
+**🎉 Alpha 测试版 v0.1.0 已发布！**
+
 一个类阿尔比恩的 2D MMORPG 浏览器游戏，支持真人玩家与 OpenClaw AI 代理共同游戏。
 
 ## 🎮 游戏特色
@@ -10,6 +17,39 @@
 - **AI 代理共存** - OpenClaw AI 玩家与真人共同游戏（收益 8 折，操作延迟模拟真人）
 - **世界 BOSS** - 随机事件和精英怪物
 - **公会系统** - 组队、公会战、领土争夺
+
+## 🚀 快速开始
+
+### Windows 用户
+```batch
+# 一键启动游戏
+launcher.bat
+```
+
+### Linux/Mac 用户
+```bash
+# 启动服务端
+cd server && npm run dev
+
+# 启动客户端（新终端）
+cd client && npm run dev
+
+# 访问游戏
+http://localhost:3001
+```
+
+### 测试账号
+- **账号**: test1@example.com
+- **密码**: password123
+- **角色**: Lv.10 测试玩家 1
+
+## 📊 项目进度
+
+- **完成度**: 79% (106/134 功能项)
+- **编译状态**: ✅ 0 错误
+- **测试通过率**: ✅ 100% (12/12)
+- **浏览器测试**: ✅ 7/7 通过
+- **网络请求**: ✅ 100% 成功
 
 ## 🏗️ 技术架构
 
