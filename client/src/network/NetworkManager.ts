@@ -60,6 +60,11 @@ export class NetworkManager extends EventEmitter {
   private heartbeatTimer: ReturnType<typeof setTimeout> | null = null
   private messageHandlers: Map<string, Array<(payload: any) => void>> = new Map()
   private connectionPromise: Promise<void> | null = null
+  
+  // 防重复逻辑
+  private pendingRequests: Map<string, number> = new Map() // type -> timestamp
+  private requestDebounce: number = 100 // 100ms 防抖
+  private loadingStates: Map<string, boolean> = new Map() // type -> loading
 
   private constructor() {
     super()
@@ -129,12 +134,21 @@ export class NetworkManager extends EventEmitter {
   /**
    * 发送消息
    */
-  public send(type: string, payload: any = {}): void {
+  public send(type: string, payload: any = {}, options?: { skipDebounce?: boolean }): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       console.warn('❌ WebSocket 未连接，消息发送失败:', type)
       console.log('WebSocket 状态:', this.ws?.readyState)
       return
     }
+
+    // 防重复检查（某些消息类型需要防抖）
+    if (!options?.skipDebounce && this.isDuplicateRequest(type)) {
+      console.log(`⚠️ 跳过重复请求：${type}`)
+      return
+    }
+
+    // 设置 loading 状态
+    this.setLoading(type, true)
 
     const packet: GamePacket = {
       seq: this.seq++,
@@ -145,6 +159,40 @@ export class NetworkManager extends EventEmitter {
 
     this.ws.send(JSON.stringify(packet))
     console.log(`📡 发送消息 [${type}]:`, payload)
+    
+    // 自动清除 loading（1 秒后）
+    setTimeout(() => {
+      this.setLoading(type, false)
+    }, 1000)
+  }
+
+  /**
+   * 检查是否为重复请求
+   */
+  private isDuplicateRequest(type: string): boolean {
+    const now = Date.now()
+    const lastTime = this.pendingRequests.get(type)
+    
+    if (lastTime && (now - lastTime) < this.requestDebounce) {
+      return true
+    }
+    
+    this.pendingRequests.set(type, now)
+    return false
+  }
+
+  /**
+   * 设置 loading 状态
+   */
+  private setLoading(type: string, loading: boolean): void {
+    this.loadingStates.set(type, loading)
+  }
+
+  /**
+   * 获取 loading 状态
+   */
+  public isLoading(type: string): boolean {
+    return this.loadingStates.get(type) || false
   }
 
   /**
