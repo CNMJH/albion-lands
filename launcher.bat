@@ -1,44 +1,42 @@
 @echo off
-chcp 65001 >nul
-setlocal EnableDelayedExpansion
-
 title Hulu Lands Launcher
 color 0B
 
 echo.
 echo ========================================
 echo       Hulu Lands Launcher
-echo              v2.2
 echo ========================================
 echo.
 
-:: Get script directory
+:: Step 1: Check directory
+echo Step 1: Checking directory...
 cd /d "%~dp0"
-set "SCRIPT_DIR=%CD%"
+echo Current directory: %CD%
+pause
 
-:: Simple log filename (no wmic)
-set "LOGFILE=logs\launcher.log"
-if not exist "logs" mkdir logs
-
-echo Started: %date% %time% > "%LOGFILE%"
-
-:: Check context
-echo Checking project...
-if exist "server\package.json" if exist "client\package.json" (
-    echo [OK] Project found
-    set "PROJECT_DIR=%CD%"
+:: Step 2: Check project files
+echo.
+echo Step 2: Checking project files...
+if exist "server\package.json" (
+    echo [OK] server\package.json found
 ) else (
-    echo [ERROR] Project not found!
-    echo.
-    echo Please run this from the albion-lands directory
-    echo.
+    echo [ERROR] server\package.json NOT found!
     pause
     exit /b 1
 )
 
-:: Check Git
+if exist "client\package.json" (
+    echo [OK] client\package.json found
+) else (
+    echo [ERROR] client\package.json NOT found!
+    pause
+    exit /b 1
+)
+pause
+
+:: Step 3: Check Git
 echo.
-echo Checking Git...
+echo Step 3: Checking Git...
 where git >nul 2>nul
 if errorlevel 1 (
     echo [ERROR] Git not found!
@@ -47,10 +45,11 @@ if errorlevel 1 (
     exit /b 1
 )
 echo [OK] Git found
+pause
 
-:: Check Node.js
+:: Step 4: Check Node.js
 echo.
-echo Checking Node.js...
+echo Step 4: Checking Node.js...
 where node >nul 2>nul
 if errorlevel 1 (
     echo [ERROR] Node.js not found!
@@ -59,10 +58,11 @@ if errorlevel 1 (
     exit /b 1
 )
 echo [OK] Node.js found
+pause
 
-:: Check npm
+:: Step 5: Check npm
 echo.
-echo Checking npm...
+echo Step 5: Checking npm...
 where npm >nul 2>nul
 if errorlevel 1 (
     echo [ERROR] npm not found!
@@ -70,98 +70,83 @@ if errorlevel 1 (
     exit /b 1
 )
 echo [OK] npm found
+pause
 
-:: Check .env
+:: Step 6: Create .env if needed
 echo.
-echo Checking configuration...
+echo Step 6: Checking .env file...
 if not exist "server\.env" (
-    echo [INFO] Creating .env file...
-    if exist "server\.env.example" (
-        copy server\.env.example server\.env >nul
-        echo [OK] .env created
-    )
+    echo Creating .env...
+    copy server\.env.example server\.env
 ) else (
     echo [OK] .env exists
 )
+pause
 
-:: Kill old processes
+:: Step 7: Kill old processes
 echo.
-echo Stopping old processes...
-taskkill /F /IM node.exe >nul 2>&1
-timeout /t 2 /nobreak >nul
-echo [OK] Processes stopped
+echo Step 7: Stopping old processes...
+taskkill /F /IM node.exe >nul 2>nul
+echo Done
+pause
 
-:: Git pull
+:: Step 8: Git pull
 echo.
-echo Updating code...
+echo Step 8: Updating code (git pull)...
 git pull origin main
-if errorlevel 1 (
-    echo [WARN] Git pull failed, continuing with local code
-) else (
-    echo [OK] Code updated
-)
+echo Done
+pause
 
-:: Install server deps
+:: Step 9: Install server deps
 echo.
-echo Checking server dependencies...
+echo Step 9: Checking server dependencies...
 if not exist "server\node_modules" (
-    echo [INFO] Installing server dependencies...
+    echo Installing... (this may take minutes)
     cd server
-    call npm install --prefer-offline
-    if errorlevel 1 (
-        echo [ERROR] Server install failed!
-        cd ..
-        pause
-        exit /b 1
-    )
+    call npm install
     cd ..
-    echo [OK] Server dependencies installed
 ) else (
-    echo [OK] Server dependencies OK
+    echo [OK] Already installed
 )
+pause
 
-:: Install client deps
+:: Step 10: Install client deps
 echo.
-echo Checking client dependencies...
+echo Step 10: Checking client dependencies...
 if not exist "client\node_modules" (
-    echo [INFO] Installing client dependencies...
+    echo Installing... (this may take minutes)
     cd client
-    call npm install --prefer-offline
-    if errorlevel 1 (
-        echo [ERROR] Client install failed!
-        cd ..
-        pause
-        exit /b 1
-    )
+    call npm install
     cd ..
-    echo [OK] Client dependencies installed
 ) else (
-    echo [OK] Client dependencies OK
+    echo [OK] Already installed
 )
+pause
 
-:: Start server
+:: Step 11: Start server
 echo.
 echo ========================================
-echo Starting Server...
+echo Step 11: Starting Server...
 echo ========================================
-start "Hulu Lands - Server" cmd /k "cd /d %PROJECT_DIR%\server && echo Server starting... && npm run dev"
-echo Waiting for server...
-timeout /t 5 /nobreak >nul
+start "Hulu Lands - Server" cmd /k "cd /d %CD%\server && npm run dev"
+echo Server starting...
+pause
 
-:: Start client
+:: Step 12: Start client
 echo.
 echo ========================================
-echo Starting Client...
+echo Step 12: Starting Client...
 echo ========================================
-start "Hulu Lands - Client" cmd /k "cd /d %PROJECT_DIR%\client && echo Client starting... && npm run dev"
-echo Waiting for client...
-timeout /t 10 /nobreak >nul
+start "Hulu Lands - Client" cmd /k "cd /d %CD%\client && npm run dev"
+echo Client starting...
+pause
 
-:: Open browser
+:: Step 13: Open browser
 echo.
-echo Opening browser...
+echo Step 13: Opening browser...
 start http://localhost:3001
 
+:: Done
 echo.
 echo ========================================
 echo          Launch Complete!
@@ -169,6 +154,9 @@ echo ========================================
 echo.
 echo Game URL: http://localhost:3001
 echo.
-echo Close the two console windows to stop the game
+echo To stop the game, close the two console windows
 echo.
+pause
+echo.
+echo Goodbye!
 pause
