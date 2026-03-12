@@ -39,6 +39,8 @@ model Character {
   chatMessages    ChatMessage[]
   friendsSent     Friend[]        @relation("CharacterFriendsSent")
   friendsReceived Friend[]        @relation("CharacterFriendsReceived")
+  questProgress   QuestProgress[]
+  achievementProgress AchievementProgress[]
 }
 
 model Item {
@@ -147,4 +149,189 @@ model GameLog {
   data        String? // JSON string
   characterId String?
   createdAt   DateTime @default(now())
+}
+
+// ============================================
+// 任务系统 - 阶段 6
+// ============================================
+
+// NPC 模型 - 任务发布者
+model NPC {
+  id          String   @id @default(uuid())
+  name        String   // NPC 名称
+  type        String   @default("quest") // quest, merchant, service
+  zoneId      String   // 所在区域
+  x           Float    // X 坐标
+  y           Float    // Y 坐标
+  dialogue    String?  // JSON 字符串，对话内容
+  givenQuests     Quest[]    @relation("NPCGiver")
+  receivedQuests  Quest[]    @relation("NPCReceiver")
+  quests      NPCQuest[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 任务模板 - 任务定义
+model Quest {
+  id            String   @id @default(uuid())
+  name          String   // 任务名称
+  description   String   // 任务描述
+  type          String   @default("main") // main, side, daily, weekly
+  level         Int      @default(1) // 推荐等级
+  difficulty    String   @default("normal") // easy, normal, hard
+  category      String?  // main_story, side, gathering, combat, delivery
+  
+  // 任务目标（JSON 格式）
+  objectives    String?
+  
+  // 前置任务
+  prerequisites String?  // JSON 数组，前置任务 ID 列表
+  
+  // 奖励
+  expReward     Int      @default(0)
+  silverReward  Int      @default(0)
+  goldReward    Int      @default(0)
+  itemRewards   String?  // JSON 数组，奖励物品 [{itemId, quantity}]
+  
+  // 重复性
+  isRepeatable  Boolean  @default(false)
+  repeatCooldown Int     @default(0) // 冷却时间（秒）
+  
+  // 时间限制
+  timeLimit     Int?     // 时间限制（秒）
+  
+  // 关联 NPC
+  giverId       String?  // 发布任务的 NPC
+  receiverId    String?  // 提交任务的 NPC
+  
+  giver         NPC?     @relation("NPCGiver", fields: [giverId], references: [id])
+  receiver      NPC?     @relation("NPCReceiver", fields: [receiverId], references: [id])
+  
+  quests        NPCQuest[]
+  progress      QuestProgress[]
+  dailyQuests   DailyQuest[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// NPC-任务关联
+model NPCQuest {
+  id        String   @id @default(uuid())
+  npcId     String
+  questId   String
+  type      String   @default("give") // give, receive, both
+  
+  npc       NPC      @relation(fields: [npcId], references: [id], onDelete: Cascade)
+  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  
+  @@unique([npcId, questId])
+  @@index([npcId])
+  @@index([questId])
+}
+
+// 任务进度 - 玩家任务状态
+model QuestProgress {
+  id          String   @id @default(uuid())
+  characterId String
+  questId     String
+  status      String   @default("in_progress") // in_progress, completed, failed, abandoned
+  
+  // 目标进度（JSON 格式）
+  progress    String?
+  
+  // 时间追踪
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  failedAt    DateTime?
+  abandonedAt DateTime?
+  
+  // 重复追踪
+  completedCount Int   @default(0)
+  lastCompletedAt DateTime?
+  
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  quest       Quest     @relation(fields: [questId], references: [id], onDelete: Cascade)
+  
+  @@unique([characterId, questId])
+  @@index([characterId])
+  @@index([questId])
+  @@index([status])
+}
+
+// 每日任务
+model DailyQuest {
+  id          String   @id @default(uuid())
+  questId     String
+  name        String
+  description String
+  type        String   @default("daily") // daily, weekly
+  
+  pool        String?  // 任务池名称
+  refreshTime String   @default("00:00")
+  
+  expReward   Int      @default(0)
+  silverReward Int     @default(0)
+  goldReward  Int      @default(0)
+  itemRewards String?
+  
+  maxPerDay   Int      @default(1)
+  
+  quest       Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([type])
+  @@index([pool])
+}
+
+// 成就系统
+model Achievement {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  category    String   // combat, gathering, crafting, social, exploration
+  type        String   // kill, collect, craft, reach_level, explore...
+  
+  targetType  String?
+  targetId    String?
+  targetCount Int      @default(1)
+  
+  expReward   Int      @default(0)
+  silverReward Int     @default(0)
+  goldReward  Int      @default(0)
+  title       String?
+  badge       String?
+  
+  prerequisites String?
+  isHidden    Boolean  @default(false)
+  isRepeatable Boolean @default(false)
+  
+  progress    AchievementProgress[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([category])
+  @@index([type])
+}
+
+// 成就进度
+model AchievementProgress {
+  id            String   @id @default(uuid())
+  characterId   String
+  achievementId String
+  current       Int      @default(0)
+  completed     Boolean  @default(false)
+  completedAt   DateTime?
+  completedCount Int     @default(0)
+  
+  character     Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([characterId, achievementId])
+  @@index([characterId])
+  @@index([achievementId])
+  @@index([completed])
 }

@@ -1,0 +1,525 @@
+/* ============================================
+   任务系统样式
+   ============================================ */
+
+/* 任务追踪面板 */
+.quest-tracker {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 280px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #8b7355;
+  border-radius: 8px;
+  padding: 12px;
+  color: #fff;
+  font-family: 'Pixel', sans-serif;
+  z-index: 100;
+}
+
+.quest-tracker.empty {
+  opacity: 0.7;
+}
+
+.tracker-header {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #8b7355;
+  text-align: center;
+}
+
+.tracker-content {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.quest-item {
+  padding: 8px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quest-item:hover,
+.quest-item.selected {
+  background: rgba(139, 115, 85, 0.5);
+}
+
+.quest-name {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #ffd700;
+}
+
+.quest-objectives {
+  font-size: 12px;
+}
+
+.objective {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.objective-icon {
+  font-size: 10px;
+}
+
+.objective-icon.completed {
+  filter: grayscale(0);
+}
+
+.objective-text {
+  color: #ccc;
+}
+
+/* 任务面板 */
+.quest-panel-toggle,
+.achievement-panel-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #8b7355, #6b5345);
+  border: 2px solid #a08060;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Pixel', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.2s;
+}
+
+.quest-panel-toggle:hover,
+.achievement-panel-toggle:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #a08060, #8b7355);
+}
+
+.achievement-panel-toggle {
+  right: 140px;
+}
+
+.quest-panel,
+.achievement-panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  width: 400px;
+  max-height: 600px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #8b7355;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Pixel', sans-serif;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 2px solid #8b7355;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  color: #ff6b6b;
+  transform: scale(1.2);
+}
+
+.panel-content {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.quest-section,
+.achievement-section {
+  margin-bottom: 20px;
+}
+
+.quest-section h4,
+.achievement-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #ffd700;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #8b7355;
+}
+
+.quest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quest-card,
+.achievement-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #8b7355;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.quest-card:hover,
+.achievement-card:hover {
+  background: rgba(139, 115, 85, 0.3);
+  transform: translateY(-2px);
+}
+
+.quest-card.completed,
+.achievement-card.completed {
+  border-color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+}
+
+.quest-info,
+.achievement-info {
+  margin-bottom: 8px;
+}
+
+.quest-title,
+.achievement-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 4px;
+}
+
+.achievement-title {
+  font-size: 12px;
+  color: #a08060;
+  margin-left: 8px;
+}
+
+.quest-desc,
+.achievement-desc {
+  font-size: 12px;
+  color: #ccc;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.quest-requirements,
+.quest-rewards,
+.achievement-rewards {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.quest-requirements span,
+.quest-rewards span,
+.achievement-rewards span {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.progress-bar {
+  position: relative;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+  transition: width 0.3s;
+}
+
+.progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.btn-accept,
+.btn-complete,
+.btn-abandon,
+.btn-accept-quest {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-family: 'Pixel', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.btn-accept,
+.btn-complete,
+.btn-accept-quest {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: #fff;
+}
+
+.btn-accept:hover,
+.btn-complete:hover,
+.btn-accept-quest:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+}
+
+.btn-abandon {
+  background: linear-gradient(135deg, #f87171, #ef4444);
+  color: #fff;
+}
+
+.btn-abandon:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+}
+
+.empty-message {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  padding: 20px;
+}
+
+/* 成就特殊样式 */
+.achievement-hidden {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.hidden-icon {
+  font-size: 24px;
+}
+
+.completed-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 20px;
+  filter: drop-shadow(0 0 5px rgba(74, 222, 128, 0.8));
+}
+
+/* NPC 对话 */
+.npc-dialogue-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.npc-dialogue-box {
+  width: 500px;
+  max-width: 90%;
+  background: linear-gradient(135deg, #2d2a26, #1a1816);
+  border: 3px solid #8b7355;
+  border-radius: 12px;
+  padding: 20px;
+  color: #fff;
+  font-family: 'Pixel', sans-serif;
+  box-shadow: 0 0 30px rgba(139, 115, 85, 0.5);
+}
+
+.npc-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #8b7355;
+}
+
+.npc-avatar {
+  font-size: 48px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(139, 115, 85, 0.3);
+  border-radius: 50%;
+  border: 3px solid #a08060;
+}
+
+.npc-name {
+  flex: 1;
+}
+
+.npc-name > div:first-child {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.npc-type {
+  font-size: 12px;
+  color: #a08060;
+  margin-top: 4px;
+}
+
+.dialogue-content {
+  margin-bottom: 20px;
+}
+
+.dialogue-text {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  border-left: 4px solid #8b7355;
+  margin-bottom: 16px;
+  min-height: 60px;
+}
+
+.dialogue-options {
+  display: flex;
+  gap: 12px;
+}
+
+.dialogue-option {
+  flex: 1;
+  padding: 10px 16px;
+  background: rgba(139, 115, 85, 0.3);
+  border: 2px solid #8b7355;
+  border-radius: 6px;
+  color: #fff;
+  font-family: 'Pixel', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dialogue-option:hover,
+.dialogue-option.active {
+  background: rgba(139, 115, 85, 0.6);
+  transform: translateY(-2px);
+}
+
+.quest-offers {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #8b7355;
+}
+
+.quest-offers h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #ffd700;
+}
+
+.quest-offer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #8b7355;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.quest-offer-info {
+  flex: 1;
+}
+
+.quest-offer-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 4px;
+}
+
+.quest-offer-desc {
+  font-size: 12px;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.quest-offer-rewards {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.btn-close {
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  background: linear-gradient(135deg, #8b7355, #6b5345);
+  border: 2px solid #a08060;
+  border-radius: 6px;
+  color: #fff;
+  font-family: 'Pixel', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: linear-gradient(135deg, #a08060, #8b7355);
+  transform: translateY(-2px);
+}
+
+/* 滚动条样式 */
+.tracker-content::-webkit-scrollbar,
+.panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tracker-content::-webkit-scrollbar-track,
+.panel-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.tracker-content::-webkit-scrollbar-thumb,
+.panel-content::-webkit-scrollbar-thumb {
+  background: #8b7355;
+  border-radius: 4px;
+}
+
+.tracker-content::-webkit-scrollbar-thumb:hover,
+.panel-content::-webkit-scrollbar-thumb:hover {
+  background: #a08060;
+}

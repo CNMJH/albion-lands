@@ -7,6 +7,7 @@ import marketRoutes from './market'
 import inventoryRoutes from './inventory'
 import { gmRoutes } from './gm'
 import { socialRoutes } from './social'
+import { questRoutes } from './quests'
 
 /**
  * 注册所有 HTTP 路由
@@ -49,4 +50,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 社交路由
   fastify.register(socialRoutes, { prefix: '/api/v1/social' })
+  
+  // 任务路由
+  fastify.register(questRoutes, { prefix: '/api/v1/quests' })
 }
