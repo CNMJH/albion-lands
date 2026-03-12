@@ -110,6 +110,13 @@ export class GameRenderer extends EventEmitter {
   }
 
   /**
+   * 获取舞台图层
+   */
+  public getStage(name: string): PIXI.Container | null {
+    return this.stages.get(name) || null
+  }
+
+  /**
    * 绑定输入事件
    */
   private bindInputEvents(): void {

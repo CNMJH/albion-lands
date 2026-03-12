@@ -10,6 +10,7 @@ import { useGameStore } from './stores/gameStore'
 import { NetworkManager } from './network/NetworkManager'
 import { combatSystem } from './systems/CombatSystem'
 import { monsterAI } from './systems/MonsterAI'
+import { MapSystem } from './systems/MapSystem'
 import './App.css'
 import './styles/quest-system.css'
 

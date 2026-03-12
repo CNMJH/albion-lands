@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
 import { CombatRenderer } from './CombatRenderer'
+import { MapSystem } from '../systems/MapSystem'
 
 /**
  * 游戏画布组件
@@ -37,6 +38,12 @@ export function GameCanvas() {
 
     // 初始化 Pixi 应用
     renderer.init(containerRef.current)
+
+    // 初始化地图系统
+    const mapSystem = new MapSystem(renderer)
+    mapSystem.init().then(() => {
+      console.log('GameCanvas: 地图系统初始化完成')
+    })
 
     // 创建战斗渲染器
     const combatRenderer = new CombatRenderer(renderer)
