@@ -23,6 +23,13 @@ export function GameCanvas() {
       return
     }
 
+    // 检查是否已经有 canvas（React 严格模式会导致重复调用）
+    const existingCanvas = containerRef.current.querySelector('canvas')
+    if (existingCanvas) {
+      console.log('GameCanvas: 已有 canvas，跳过初始化（React 严格模式）')
+      return
+    }
+
     console.log('GameCanvas: 开始初始化渲染器...')
 
     // 创建游戏渲染器
