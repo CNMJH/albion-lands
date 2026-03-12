@@ -277,6 +277,67 @@ export class CombatRenderer {
   }
 
   /**
+   * 显示技能特效
+   */
+  public showSkillEffect(skillId: string, x: number, y: number): void {
+    const app = this.gameRenderer.getApp()
+    if (!app) return
+
+    const layer = this.gameRenderer.getLayer('effects')
+    if (!layer) return
+
+    console.log(`✨ 显示技能特效：${skillId} at (${x.toFixed(0)}, ${y.toFixed(0)})`)
+
+    // 根据技能类型创建不同的特效
+    // TODO: 根据技能配置创建不同特效
+    // 现在使用通用特效：彩色光环
+
+    const graphics = new PIXI.Graphics()
+    graphics.lineStyle(3, 0xFFFF00, 0.8)
+    graphics.drawCircle(0, 0, 30)
+    graphics.beginFill(0xFFFF00, 0.3)
+    graphics.drawCircle(0, 0, 30)
+    graphics.endFill()
+    
+    const texture = app.renderer.generateTexture(graphics)
+    const effect = new PIXI.Sprite(texture)
+    effect.anchor.set(0.5)
+    effect.x = x
+    effect.y = y
+    effect.alpha = 1
+
+    layer.addChild(effect)
+
+    // 动画：缩放 + 淡出
+    const startTime = Date.now()
+    const duration = 500 // 500ms
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const progress = elapsed / duration
+
+      if (progress >= 1) {
+        if (effect.parent) {
+          effect.parent.removeChild(effect)
+          effect.destroy()
+        }
+        return
+      }
+
+      // 缩放效果
+      const scale = 1 + progress * 1.5
+      effect.scale.set(scale)
+      
+      // 淡出效果
+      effect.alpha = 1 - progress
+
+      requestAnimationFrame(animate)
+    }
+
+    animate()
+  }
+
+  /**
    * 清理
    */
   public clear(): void {
