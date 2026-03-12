@@ -11,6 +11,7 @@ import { questRoutes } from './quests'
 import { skillsRoutes } from './skills'
 import { equipmentRoutes } from './equipment'
 import deathRoutes from './death'
+import { pvpRoutes } from './pvp'
 
 /**
  * 注册所有 HTTP 路由
@@ -65,4 +66,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 死亡掉落路由
   fastify.register(deathRoutes, { prefix: '/api/v1/combat' })
+  
+  // PVP 路由
+  fastify.register(pvpRoutes, { prefix: '/api/v1/pvp' })
 }

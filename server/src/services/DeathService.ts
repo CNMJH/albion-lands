@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { Character, EquipmentSlot } from '../types';
 
 const prisma = new PrismaClient();
 
@@ -91,6 +90,7 @@ export class DeathService {
     });
 
     // 6. 扣除装备耐久度
+    const durabilityLoss = 10;
     await this.reduceEquipmentDurability(characterId, durabilityLoss);
 
     // 7. 计算复活位置
@@ -236,7 +236,6 @@ export class DeathService {
             itemId: drop.itemId,
             isEquipped: false,
           },
-          take: 1,
         });
       }
     }

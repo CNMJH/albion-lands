@@ -44,6 +44,9 @@ model Character {
   achievementProgress AchievementProgress[]
   characterSkills CharacterSkill[]
   deathRecords    DeathRecord[]   // 死亡记录
+  pvpStats        PVPStats?       // PVP 统计
+  kills           PlayerKill[]    @relation("KillerKills")
+  deaths          PlayerKill[]    @relation("VictimKills")
 }
 
 model Item {
@@ -414,6 +417,34 @@ model CharacterSkill {
   
   @@unique([characterId, skillId])
   @@index([characterId])
-  @@index([skillId])
-  @@index([slot])
+}
+
+// PVP 统计
+model PVPStats {
+  id          String   @id @default(uuid())
+  characterId String   @unique
+  kills       Int      @default(0)
+  deaths      Int      @default(0)
+  assists     Int      @default(0)
+  honorPoints Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+}
+
+// 玩家击杀记录
+model PlayerKill {
+  id        String   @id @default(uuid())
+  killerId  String
+  victimId  String
+  mapId     String
+  timestamp DateTime @default(now())
+  
+  killer    Character @relation("KillerKills", fields: [killerId], references: [id], onDelete: Cascade)
+  victim    Character @relation("VictimKills", fields: [victimId], references: [id], onDelete: Cascade)
+  
+  @@index([killerId])
+  @@index([victimId])
+  @@index([timestamp])
 }
