@@ -150,7 +150,10 @@ export class GameRenderer extends EventEmitter {
    * 启动游戏循环
    */
   public start(): void {
-    if (!this.app || this.isRunning) return
+    if (!this.app || !this.app.ticker || this.isRunning) {
+      console.log('渲染器未就绪或已运行，跳过启动')
+      return
+    }
 
     this.isRunning = true
     this.lastFrameTime = performance.now()
@@ -285,7 +288,9 @@ export class GameRenderer extends EventEmitter {
     this.isRunning = false
 
     if (this.app) {
-      this.app.ticker.destroy()
+      if (this.app.ticker) {
+        this.app.ticker.destroy()
+      }
       this.app.destroy(true, { children: true })
       this.app = null
     }
