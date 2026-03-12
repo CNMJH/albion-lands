@@ -1,0 +1,51 @@
+.durability-bar-container {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.durability-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.durability-good {
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+}
+
+.durability-medium {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+.durability-low {
+  background: linear-gradient(90deg, #fb923c, #f97316);
+}
+
+.durability-critical {
+  background: linear-gradient(90deg, #f87171, #ef4444);
+  animation: durability-flash 1s infinite;
+}
+
+@keyframes durability-flash {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.durability-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  color: white;
+  text-shadow: 0 0 2px black;
+  font-weight: bold;
+}

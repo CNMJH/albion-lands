@@ -90,8 +90,8 @@ export class DeathService {
       },
     });
 
-    // 6. 计算耐久损失
-    const durabilityLoss = 10; // 所有装备耐久 -10
+    // 6. 扣除装备耐久度
+    await this.reduceEquipmentDurability(characterId, durabilityLoss);
 
     // 7. 计算复活位置
     const respawnLocation = this.getRespawnLocation(safetyLevel, mapId);
@@ -357,6 +357,35 @@ export class DeathService {
 
     console.log(`清理了 ${result.count} 个过期掉落物`);
     return result.count;
+  }
+
+  /**
+   * 扣除装备耐久度
+   */
+  async reduceEquipmentDurability(characterId: string, amount: number): Promise<void> {
+    // 获取所有装备的 InventoryItem
+    const equippedItems = await prisma.inventoryItem.findMany({
+      where: {
+        characterId,
+        isEquipped: true,
+      },
+    });
+
+    // 更新耐久度
+    for (const invItem of equippedItems) {
+      const newDurability = Math.max(0, invItem.durability - amount);
+      
+      await prisma.inventoryItem.update({
+        where: { id: invItem.id },
+        data: {
+          durability: newDurability,
+        },
+      });
+
+      console.log(`装备 ${invItem.itemId} 耐久度：${invItem.durability} -> ${newDurability}`);
+    }
+
+    console.log(`✅ 已扣除 ${equippedItems.length} 件装备的耐久度 (-${amount})`);
   }
 }
 
