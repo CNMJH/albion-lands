@@ -3,7 +3,7 @@ import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
 import { CombatRenderer } from './CombatRenderer'
 import { MapSystem } from '../systems/MapSystem'
-import { inputSystem } from '../systems/InputSystem'
+import { playerControls } from '../systems/PlayerControlsSystem'
 
 /**
  * 游戏画布组件
@@ -13,7 +13,7 @@ export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const rendererRef = useRef<GameRenderer | null>(null)
   const combatRendererRef = useRef<CombatRenderer | null>(null)
-  const inputSystemRef = useRef<ReturnType<typeof inputSystem.init> | null>(null)
+  const playerControlsRef = useRef<ReturnType<typeof playerControls.init> | null>(null)
   const { player } = useGameStore()
   
   // 使用 useRef 存储渲染器，避免闭包问题
@@ -55,9 +55,9 @@ export function GameCanvas() {
     const combatRenderer = new CombatRenderer(renderer)
     combatRendererRef.current = combatRenderer
 
-    // 初始化输入系统
-    const inputSys = inputSystem.init(renderer)
-    inputSystemRef.current = inputSys
+    // 初始化玩家操作系统
+    const controls = playerControls.init(renderer)
+    playerControlsRef.current = controls
 
     // 创建玩家精灵
     setTimeout(() => {
@@ -84,10 +84,10 @@ export function GameCanvas() {
     // 启动游戏循环
     renderer.start()
 
-    // 监听渲染器更新事件，处理输入
+    // 监听渲染器更新事件，处理玩家输入
     const handleUpdate = (deltaTime: number) => {
-      if (inputSystemRef.current) {
-        inputSystemRef.current.update(deltaTime)
+      if (playerControlsRef.current) {
+        playerControlsRef.current.update(deltaTime)
       }
     }
     renderer.on('update', handleUpdate)
@@ -111,9 +111,9 @@ export function GameCanvas() {
       
       // 清理渲染器
       try {
-        if (inputSystemRef.current) {
-          console.log('GameCanvas: 清理输入系统...')
-          inputSystemRef.current = null
+        if (playerControlsRef.current) {
+          console.log('GameCanvas: 清理玩家操作系统...')
+          playerControlsRef.current = null
         }
         
         if (combatRendererRef.current) {

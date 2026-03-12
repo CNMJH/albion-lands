@@ -50,9 +50,15 @@ export class CombatRenderer {
       console.log(`怪物 ${data.monsterId} 状态变为 ${data.state}`)
     })
 
-    // 监听玩家攻击
+    // 监听玩家攻击（CombatSystem）
     combatSystem.on('attack', (data) => {
-      console.log('玩家攻击', data)
+      console.log('玩家攻击（CombatSystem）', data)
+    })
+
+    // 监听玩家攻击（PlayerControlsSystem）
+    this.gameRenderer.on('playerAttack', (data: any) => {
+      console.log('玩家攻击（PlayerControlsSystem）', data)
+      // 可以在这里添加攻击动画效果
     })
 
     // 监听网络消息 - 攻击
