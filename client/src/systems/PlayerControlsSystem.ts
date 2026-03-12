@@ -421,9 +421,14 @@ export class PlayerControlsSystem {
    */
   public performInteract(): void {
     const state = useGameStore.getState()
-    if (!state.player) return
+    if (!state.player) {
+      console.warn('⚠️ 玩家数据不存在，无法交互')
+      return
+    }
 
-    console.log('🤝 玩家尝试交互')
+    console.log('🤝 玩家尝试交互 (E 键)')
+    console.log('📍 玩家位置:', { x: state.player.x, y: state.player.y })
+    console.log('📏 交互范围:', this.config.interactRange)
 
     // 发送交互指令
     network.send('interact', {
@@ -433,12 +438,14 @@ export class PlayerControlsSystem {
       timestamp: Date.now(),
     })
 
-    // 触发交互事件
+    // 触发交互事件（UI 可以监听并显示提示）
     this.gameRenderer.emit('playerInteract', {
       x: state.player.x,
       y: state.player.y,
       range: this.config.interactRange,
     })
+    
+    console.log('✅ 交互指令已发送')
   }
 
   /**

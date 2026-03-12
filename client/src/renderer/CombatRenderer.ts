@@ -179,13 +179,21 @@ export class CombatRenderer {
     const texture = app.renderer.generateTexture(graphics)
     this.playerSprite = new PIXI.Sprite(texture)
     this.playerSprite.anchor.set(0.5)
+    
+    // 设置初始位置到屏幕中央
+    this.playerSprite.x = 0
+    this.playerSprite.y = 0
 
     const layer = this.gameRenderer.getLayer('characters')
     if (layer) {
       layer.addChild(this.playerSprite)
+      console.log('✅ 玩家精灵已添加到 characters 图层')
+    } else {
+      console.error('❌ characters 图层不存在！')
     }
     
     console.log('⚔️ 玩家精灵已创建（亮蓝色圆形 + 白色轮廓 + 方向指示）')
+    console.log('📍 玩家初始位置:', { x: this.playerSprite.x, y: this.playerSprite.y })
   }
 
   /**
@@ -225,6 +233,41 @@ export class CombatRenderer {
         renderer.updateHP()
       }
     })
+  }
+
+  /**
+   * 显示交互范围（按 E 键时）
+   */
+  public showInteractRange(x: number, y: number, range: number): void {
+    const app = this.gameRenderer.getApp()
+    if (!app) return
+
+    const layer = this.gameRenderer.getLayer('effects')
+    if (!layer) return
+
+    // 创建交互范围圈
+    const graphics = new PIXI.Graphics()
+    graphics.lineStyle(2, 0x00FF00, 0.6)
+    graphics.drawCircle(0, 0, range)
+    
+    const texture = app.renderer.generateTexture(graphics)
+    const effect = new PIXI.Sprite(texture)
+    effect.anchor.set(0.5)
+    effect.x = x
+    effect.y = y
+    effect.alpha = 1
+
+    layer.addChild(effect)
+
+    // 0.5 秒后淡出
+    setTimeout(() => {
+      if (effect.parent) {
+        effect.parent.removeChild(effect)
+        effect.destroy()
+      }
+    }, 500)
+    
+    console.log('🟢 显示交互范围圈')
   }
 
   /**

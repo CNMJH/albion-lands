@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
 import { CombatRenderer } from './CombatRenderer'
+import { AttackEffectRenderer } from './AttackEffectRenderer'
 import { MapSystem } from '../systems/MapSystem'
 import { playerControls } from '../systems/PlayerControlsSystem'
 
@@ -64,6 +65,10 @@ export function GameCanvas() {
     const combatRenderer = new CombatRenderer(renderer)
     combatRendererRef.current = combatRenderer
 
+    // 创建攻击效果渲染器（攻击反馈）
+    new AttackEffectRenderer(renderer)
+    console.log('⚔️ 攻击效果渲染器已创建')
+
     // 初始化玩家操作系统
     const controls = playerControls.init(renderer)
     playerControlsRef.current = controls
@@ -95,8 +100,18 @@ export function GameCanvas() {
       if (playerControlsRef.current) {
         playerControlsRef.current.update(deltaTime)
       }
+      if (combatRendererRef.current) {
+        combatRendererRef.current.update(deltaTime)
+      }
     }
     renderer.on('update', handleUpdate)
+
+    // 监听交互事件，显示交互范围
+    renderer.on('playerInteract', (data: any) => {
+      if (combatRendererRef.current) {
+        combatRendererRef.current.showInteractRange(data.x, data.y, data.range)
+      }
+    })
 
     console.log('GameCanvas: 初始化完成')
 
