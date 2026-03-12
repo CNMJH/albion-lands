@@ -188,6 +188,8 @@ export class CombatRenderer {
       
       // 更新摄像机目标
       this.gameRenderer.setCameraTarget(x, y)
+    } else {
+      console.log('⚠️ 玩家精灵未创建，跳过位置更新')
     }
   }
 

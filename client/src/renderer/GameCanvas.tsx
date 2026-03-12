@@ -45,6 +45,15 @@ export function GameCanvas() {
     // 初始化 Pixi 应用
     renderer.init(containerRef.current)
 
+    // 自动 focus canvas 以接收键盘事件
+    setTimeout(() => {
+      const canvas = renderer.getApp()?.view as HTMLCanvasElement
+      if (canvas) {
+        canvas.focus()
+        console.log('GameCanvas: Canvas 已 focus，可以接收键盘事件')
+      }
+    }, 100)
+
     // 初始化地图系统
     const mapSystem = new MapSystem(renderer)
     mapSystem.init().then(() => {
@@ -59,12 +68,9 @@ export function GameCanvas() {
     const controls = playerControls.init(renderer)
     playerControlsRef.current = controls
 
-    // 创建玩家精灵
-    setTimeout(() => {
-      if (combatRendererRef.current) {
-        combatRendererRef.current.createPlayerSprite()
-      }
-    }, 1000)
+    // 创建玩家精灵（立即创建，不要延迟）
+    combatRenderer.createPlayerSprite()
+    console.log('GameCanvas: 玩家精灵已创建')
 
     // 处理窗口大小变化（使用防抖）
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null
@@ -139,6 +145,8 @@ export function GameCanvas() {
   // 当玩家位置更新时，更新摄像机
   useEffect(() => {
     if (rendererInstance.current && player) {
+      console.log('📍 玩家位置更新:', { x: player.x, y: player.y })
+      
       rendererInstance.current.setCameraTarget(player.x, player.y)
       
       // 更新玩家精灵位置

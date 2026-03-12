@@ -72,34 +72,30 @@ export class PlayerControlsSystem {
    * 设置输入处理器
    */
   private setupInputHandlers(): void {
+    console.log('🎮 玩家操作系统：开始设置输入监听...')
+    
+    // 方案 1：通过 GameRenderer 监听（canvas focus 时）
+    this.setupGameRendererInput()
+    
+    // 方案 2：全局监听（备用方案）
+    this.setupGlobalInput()
+    
+    console.log('🎮 玩家操作系统：输入监听设置完成（双模式）')
+  }
+
+  /**
+   * 通过 GameRenderer 监听输入
+   */
+  private setupGameRendererInput(): void {
     // 监听键盘按下
     this.gameRenderer.on('keydown', (e: KeyboardEvent) => {
-      // 如果聊天框激活，不处理游戏快捷键
-      if (this.uiState.chat) {
-        return
-      }
-
-      this.keysPressed.add(e.code)
-      
-      // 阻止游戏快捷键的默认行为
-      const gameKeys = [
-        'KeyW', 'KeyA', 'KeyS', 'KeyD',
-        'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-        'Space', 'KeyE', 'KeyB', 'KeyC', 'KeyQ', 'KeyF',
-        'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8',
-        'Enter'
-      ]
-      
-      if (gameKeys.includes(e.code)) {
-        e.preventDefault()
-      }
-
-      // 处理单次触发的快捷键
-      this.handleKeyPress(e.code)
+      console.log('⌨️ [Canvas] 键盘按下:', e.code)
+      this.handleKeyDown(e)
     })
 
     // 监听键盘释放
     this.gameRenderer.on('keyup', (e: KeyboardEvent) => {
+      console.log('⬆️ [Canvas] 键盘释放:', e.code)
       this.keysPressed.delete(e.code)
     })
 
@@ -123,8 +119,76 @@ export class PlayerControlsSystem {
     this.gameRenderer.on('contextmenu', (e: MouseEvent) => {
       e.preventDefault()
     })
+  }
 
-    console.log('📡 玩家操作系统：输入监听已设置')
+  /**
+   * 全局输入监听（备用方案）
+   */
+  private setupGlobalInput(): void {
+    // 全局键盘按下
+    window.addEventListener('keydown', (e) => {
+      // 如果事件目标是输入框，忽略
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+      
+      console.log('⌨️ [Global] 键盘按下:', e.code)
+      this.handleKeyDown(e)
+    })
+
+    // 全局键盘释放
+    window.addEventListener('keyup', (e) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return
+      }
+      
+      console.log('⬆️ [Global] 键盘释放:', e.code)
+      this.keysPressed.delete(e.code)
+    })
+
+    // 全局鼠标点击
+    window.addEventListener('mousedown', (e) => {
+      if (e.button === 0) { // 左键 - 攻击
+        this.performAttack()
+      } else if (e.button === 2) { // 右键 - 移动
+        const canvas = this.gameRenderer.getApp()?.view as HTMLCanvasElement
+        if (canvas) {
+          const rect = canvas.getBoundingClientRect()
+          const worldX = e.clientX - rect.left
+          const worldY = e.clientY - rect.top
+          this.sendMoveTo(worldX, worldY)
+        }
+      }
+    })
+  }
+
+  /**
+   * 处理键盘按下事件
+   */
+  private handleKeyDown(e: KeyboardEvent): void {
+    // 如果聊天框激活，不处理游戏快捷键
+    if (this.uiState.chat) {
+      console.log('💬 聊天框激活，忽略游戏快捷键')
+      return
+    }
+
+    this.keysPressed.add(e.code)
+    
+    // 阻止游戏快捷键的默认行为
+    const gameKeys = [
+      'KeyW', 'KeyA', 'KeyS', 'KeyD',
+      'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+      'Space', 'KeyE', 'KeyB', 'KeyC', 'KeyQ', 'KeyF',
+      'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8',
+      'Enter'
+    ]
+    
+    if (gameKeys.includes(e.code)) {
+      e.preventDefault()
+    }
+
+    // 处理单次触发的快捷键
+    this.handleKeyPress(e.code)
   }
 
   /**
@@ -260,6 +324,8 @@ export class PlayerControlsSystem {
 
     // 如果有移动输入
     if (dx !== 0 || dy !== 0) {
+      console.log('🚶 移动输入:', { dx, dy, deltaTime })
+      
       // 归一化对角线移动
       const length = Math.sqrt(dx * dx + dy * dy)
       dx /= length
@@ -274,6 +340,8 @@ export class PlayerControlsSystem {
       const newX = state.player.x + moveDx
       const newY = state.player.y + moveDy
       state.updatePlayer({ x: newX, y: newY })
+      
+      console.log('📍 玩家位置更新:', { x: newX, y: newY })
 
       // 缓冲移动增量
       if (this.moveBuffer) {
