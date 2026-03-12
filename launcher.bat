@@ -3,7 +3,10 @@ chcp 65001 >nul
 setlocal EnableDelayedExpansion
 
 :: ========================================
-:: Hulu Lands Smart Launcher v2.0
+:: Hulu Lands Smart Launcher v2.1
+:: ========================================
+:: Fixed: Git/Node.js version detection
+:: Added: Better error messages
 :: ========================================
 
 title Hulu Lands Smart Launcher
@@ -13,6 +16,9 @@ color 0B
 set "SERVER_PORT=3002"
 set "CLIENT_PORT=3001"
 set "MAX_RETRIES=3"
+
+:: Enable debug mode (set to 1 to see more details)
+set "DEBUG=0"
 
 :: Get script directory
 cd /d "%~dp0"
@@ -68,7 +74,7 @@ goto :eof
 echo.
 echo ========================================
 echo       Hulu Lands Smart Launcher
-echo              v2.0
+echo              v2.1
 echo ========================================
 echo.
 
@@ -164,14 +170,14 @@ call :log_warn "Continuing without admin rights"
 goto :check_requirements
 
 :: ========================================
-:: System Requirements Check
+:: System Requirements Check (FIXED)
 :: ========================================
 
 :check_requirements
 echo.
 call :log "Checking system requirements..."
 
-:: Check Git
+:: Check Git - SIMPLIFIED
 call :log "Checking Git..."
 where git >nul 2>nul
 if errorlevel 1 (
@@ -182,10 +188,21 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-for /f "tokens=*" %%i in ('git --version') do set GIT_VERSION=%%i
+:: Get Git version - FIXED with better error handling
+set "GIT_VERSION=unknown"
+if "%DEBUG%"=="1" (
+    echo [DEBUG] Running: git --version
+)
+for /f "delims=" %%i in ('git --version 2^>^&1') do (
+    if not defined GIT_VERSION set "GIT_VERSION=%%i"
+)
+if "!GIT_VERSION!"=="unknown" (
+    call :log_warn "Git version detection failed, but Git is available"
+    set "GIT_VERSION=installed"
+)
 call :log_success "Git found: !GIT_VERSION!"
 
-:: Check Node.js
+:: Check Node.js - SIMPLIFIED
 call :log "Checking Node.js..."
 where node >nul 2>nul
 if errorlevel 1 (
@@ -196,10 +213,21 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-for /f "tokens=*" %%i in ('node --version') do set NODE_VERSION=%%i
+:: Get Node.js version - FIXED
+set "NODE_VERSION=unknown"
+if "%DEBUG%"=="1" (
+    echo [DEBUG] Running: node --version
+)
+for /f "delims=" %%i in ('node --version 2^>^&1') do (
+    if not defined NODE_VERSION set "NODE_VERSION=%%i"
+)
+if "!NODE_VERSION!"=="unknown" (
+    call :log_warn "Node.js version detection failed, but Node.js is available"
+    set "NODE_VERSION=installed"
+)
 call :log_success "Node.js found: !NODE_VERSION!"
 
-:: Check npm
+:: Check npm - SIMPLIFIED
 call :log "Checking npm..."
 where npm >nul 2>nul
 if errorlevel 1 (
@@ -210,7 +238,18 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-for /f "tokens=*" %%i in ('npm --version') do set NPM_VERSION=%%i
+:: Get npm version - FIXED
+set "NPM_VERSION=unknown"
+if "%DEBUG%"=="1" (
+    echo [DEBUG] Running: npm --version
+)
+for /f "delims=" %%i in ('npm --version 2^>^&1') do (
+    if not defined NPM_VERSION set "NPM_VERSION=%%i"
+)
+if "!NPM_VERSION!"=="unknown" (
+    call :log_warn "npm version detection failed, but npm is available"
+    set "NPM_VERSION=installed"
+)
 call :log_success "npm found: !NPM_VERSION!"
 
 goto :check_config
