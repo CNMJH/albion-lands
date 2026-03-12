@@ -3,206 +3,195 @@ chcp 65001 >nul
 setlocal EnableDelayedExpansion
 
 :: ========================================
-:: 呼噜大陆 - 一键启动器
-:: ========================================
-:: 功能：
-:: 1. 从 GitHub 拉取最新代码
-:: 2. 检查和安装依赖
-:: 3. 创建配置文件
-:: 4. 启动服务端和客户端
-:: 5. 自动打开浏览器
+:: Hulu Lands Launcher
 :: ========================================
 
-title 呼噜大陆 - 一键启动器
+title Hulu Lands Launcher
 color 0A
 
 echo.
 echo ========================================
-echo          呼噜大陆 - 一键启动器
 echo          Hulu Lands Launcher
 echo ========================================
 echo.
 
-:: 获取脚本所在目录
+:: Get script directory
 cd /d "%~dp0"
 
-:: 检查 Git 是否安装
+:: Check Git
 where git >nul 2>nul
 if errorlevel 1 (
-    echo [错误] 未检测到 Git，请先安装 Git
-    echo 下载地址：https://git-scm.com/download/win
+    echo [ERROR] Git not found. Please install Git first.
+    echo Download: https://git-scm.com/download/win
     pause
     exit /b 1
 )
 
-:: 检查 Node.js 是否安装
+:: Check Node.js
 where node >nul 2>nul
 if errorlevel 1 (
-    echo [错误] 未检测到 Node.js，请先安装 Node.js
-    echo 下载地址：https://nodejs.org/
+    echo [ERROR] Node.js not found. Please install Node.js first.
+    echo Download: https://nodejs.org/
     pause
     exit /b 1
 )
 
-echo [信息] 检查运行环境...
-echo   ✓ Git 已安装
-echo   ✓ Node.js 已安装
+echo [INFO] Checking environment...
+echo   OK - Git installed
+echo   OK - Node.js installed
 echo.
 
-:: 检查是否是第一次运行（从根目录运行）
+:: Check if first run
 if not exist "server" (
-    echo [信息] 首次运行，正在克隆项目...
+    echo [INFO] First run, cloning project...
     cd ..
     if not exist "albion-lands" (
         git clone https://github.com/CNMJH/albion-lands.git
         if errorlevel 1 (
-            echo [错误] 克隆项目失败
+            echo [ERROR] Clone failed
             pause
             exit /b 1
         )
     )
     cd albion-lands
-    echo [信息] 项目已克隆，正在拉取最新代码...
+    echo [INFO] Project cloned, pulling latest code...
 ) else (
-    echo [信息] 项目已存在，正在拉取最新代码...
+    echo [INFO] Project exists, pulling latest code...
 )
 
-:: 拉取最新代码
+:: Pull latest code
 echo.
-echo [1/6] 从 GitHub 拉取最新代码...
+echo [1/6] Pulling latest code from GitHub...
 git pull origin main
 if errorlevel 1 (
-    echo [警告] Git 拉取失败，继续使用本地代码
+    echo [WARN] Git pull failed, continuing with local code
 )
 
-:: 检查服务端配置
+:: Check server config
 echo.
-echo [2/6] 检查服务端配置...
+echo [2/6] Checking server configuration...
 if not exist "server\.env" (
-    echo   创建服务端 .env 文件...
+    echo   Creating server .env file...
     copy server\.env.example server\.env >nul
-    echo   ✓ .env 文件已创建
+    echo   OK - .env created
 ) else (
-    echo   ✓ .env 文件已存在
+    echo   OK - .env exists
 )
 
-:: 检查服务端依赖
+:: Check server dependencies
 echo.
-echo [3/6] 检查服务端依赖...
+echo [3/6] Checking server dependencies...
 if not exist "server\node_modules" (
-    echo   正在安装服务端依赖（首次运行可能需要几分钟）...
+    echo   Installing server dependencies (first run may take minutes)...
     cd server
     call npm install
     if errorlevel 1 (
-        echo [错误] 服务端依赖安装失败
+        echo [ERROR] Server dependencies installation failed
         cd ..
         pause
         exit /b 1
     )
     cd ..
-    echo   ✓ 服务端依赖安装完成
+    echo   OK - Server dependencies installed
 ) else (
-    echo   ✓ 服务端依赖已安装
+    echo   OK - Server dependencies installed
 )
 
-:: 检查客户端依赖
+:: Check client dependencies
 echo.
-echo [4/6] 检查客户端依赖...
+echo [4/6] Checking client dependencies...
 if not exist "client\node_modules" (
-    echo   正在安装客户端依赖（首次运行可能需要几分钟）...
+    echo   Installing client dependencies (first run may take minutes)...
     cd client
     call npm install
     if errorlevel 1 (
-        echo [错误] 客户端依赖安装失败
+        echo [ERROR] Client dependencies installation failed
         cd ..
         pause
         exit /b 1
     )
     cd ..
-    echo   ✓ 客户端依赖安装完成
+    echo   OK - Client dependencies installed
 ) else (
-    echo   ✓ 客户端依赖已安装
+    echo   OK - Client dependencies installed
 )
 
-:: 停止之前的进程
+:: Kill old processes
 echo.
-echo [5/6] 清理旧进程...
-echo   正在停止 Node.js 进程...
+echo [5/6] Cleaning old processes...
+echo   Stopping Node.js processes...
 taskkill /F /IM node.exe >nul 2>nul
 timeout /t 3 /nobreak >nul
-:: 再次检查确保清理完成
 taskkill /F /IM node.exe >nul 2>nul
 timeout /t 2 /nobreak >nul
-echo   ✓ 已清理旧进程
+echo   OK - Old processes cleaned
 
-:: 启动服务端
+:: Start server
 echo.
-echo [6/6] 启动游戏服务...
+echo [6/6] Starting game services...
 echo.
 echo ========================================
-echo 正在启动服务端...
+echo Starting server...
 echo ========================================
 echo.
 
-:: 创建启动日志
-echo 呼噜大陆启动日志 > startup.log
-echo 启动时间：%date% %time% >> startup.log
-echo. >> startup.log
+:: Generate unique log filename
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /value') do set datetime=%%I
+set logfile=logs\server-%datetime:~0,8%-%datetime:~8,6%.log
 
-:: 在后台启动服务端
-start "呼噜大陆 - 服务端" cmd /k "cd /d %cd%\server && echo 服务端启动中... && npm run dev >> ..\startup.log 2>&1"
+:: Create logs directory
+if not exist "logs" mkdir logs
 
-:: 等待服务端启动
-echo 等待服务端启动（5 秒）...
+:: Start server in new window
+start "Hulu Lands - Server" cmd /k "cd /d %cd%\server && echo Server starting... && npm run dev"
+
+:: Wait for server
+echo Waiting for server to start (5 seconds)...
 timeout /t 5 /nobreak >nul
 
-:: 启动客户端
+:: Start client
 echo.
 echo ========================================
-echo 正在启动客户端...
+echo Starting client...
 echo ========================================
 echo.
 
-:: 在后台启动客户端
-start "呼噜大陆 - 客户端" cmd /k "cd /d %cd%\client && echo 客户端启动中... && npm run dev >> ..\startup.log 2>&1"
+:: Start client in new window
+start "Hulu Lands - Client" cmd /k "cd /d %cd%\client && echo Client starting... && npm run dev"
 
-:: 等待客户端启动
-echo 等待客户端启动（10 秒）...
+:: Wait for client
+echo Waiting for client to start (10 seconds)...
 timeout /t 10 /nobreak >nul
 
-:: 打开浏览器
+:: Open browser
 echo.
 echo ========================================
-echo 打开游戏页面...
+echo Opening game page...
 echo ========================================
 echo.
 
-:: 使用默认浏览器打开
+:: Open browser
 start http://localhost:3001
 
 echo.
 echo ========================================
-echo ✓ 启动完成！
+echo OK - Launch complete!
 echo ========================================
 echo.
-echo 游戏已在默认浏览器中打开
-echo 地址：http://localhost:3001
+echo Game opened in default browser
+echo Address: http://localhost:3001
 echo.
-echo 服务端控制台：呼噜大陆 - 服务端 窗口
-echo 客户端控制台：呼噜大陆 - 客户端 窗口
+echo Server console: Hulu Lands - Server window
+echo Client console: Hulu Lands - Client window
 echo.
-echo 日志文件：startup.log
+echo Log directory: logs\
 echo.
 echo ========================================
-echo 提示：
-echo - 关闭游戏时，请关闭两个控制台窗口
-echo - 下次运行会自动拉取最新代码
-echo - 如遇问题，请查看 startup.log
+echo Tips:
+echo - Close game by closing both console windows
+echo - Next run will auto-update code
+echo - Check logs folder for issues
 echo ========================================
 echo.
 
-:: 写入日志
-echo 启动完成 >> startup.log
-
-:: 保持窗口打开
 pause

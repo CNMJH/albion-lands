@@ -1,32 +1,33 @@
 @echo off
 chcp 65001 >nul
 
-:: 创建桌面快捷方式
-echo 正在创建桌面快捷方式...
+:: Create desktop shortcut
+echo Creating desktop shortcut...
 
-:: 获取脚本所在目录
+:: Get script directory
 set SCRIPT_DIR=%~dp0
 
-:: 创建批处理版本快捷方式
-set SHORTCUT_PATH=%USERPROFILE%\Desktop\呼噜大陆启动器.lnk
+:: Create shortcut path
+set SHORTCUT_PATH=%USERPROFILE%\Desktop\HuluLands.lnk
 
-:: 使用 PowerShell 创建快捷方式
-powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%SHORTCUT_PATH%'); $Shortcut.TargetPath = '%SCRIPT_DIR%launcher.bat'; $Shortcut.WorkingDirectory = '%SCRIPT_DIR%'; $Shortcut.IconLocation = 'shell32.dll,13'; $Shortcut.Description = '呼噜大陆 - 一键启动游戏'; $Shortcut.Save()"
+:: Use PowerShell to create shortcut
+powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%SHORTCUT_PATH%'); $Shortcut.TargetPath = '%SCRIPT_DIR%launcher.bat'; $Shortcut.WorkingDirectory = '%SCRIPT_DIR%'; $Shortcut.IconLocation = 'shell32.dll,13'; $Shortcut.Description = 'Hulu Lands - One-click launcher'; $Shortcut.Save()"
 
 if errorlevel 1 (
-    echo 快捷方式创建失败，请手动创建
+    echo Shortcut creation failed. Please create manually.
     pause
     exit /b 1
 )
 
 echo.
 echo ========================================
-echo ✓ 桌面快捷方式已创建！
+echo OK - Desktop shortcut created!
 echo ========================================
 echo.
-echo 位置：%USERPROFILE%\Desktop\呼噜大陆启动器.lnk
+echo Location: %USERPROFILE%\Desktop\HuluLands.lnk
 echo.
-echo 下次只需双击桌面上的快捷方式即可启动游戏
+echo Double-click the shortcut to start the game
 echo ========================================
 echo.
+
 pause
