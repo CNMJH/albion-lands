@@ -23,8 +23,6 @@ function App() {
   const { initialize } = useGameStore()
 
   useEffect(() => {
-    let isMounted = true
-    
     // 初始化游戏
     const initGame = async () => {
       console.log('App: 开始初始化游戏...')
@@ -32,18 +30,18 @@ function App() {
         // 1. 初始化状态管理
         initialize()
         console.log('App: 状态管理初始化完成')
-        if (isMounted) setLoadingProgress(20)
+        setLoadingProgress(20)
 
         // 2. 初始化网络
         const network = NetworkManager.getInstance()
         await network.connect('ws://localhost:3002/ws')
         console.log('App: 网络连接完成')
-        if (isMounted) setLoadingProgress(40)
+        setLoadingProgress(40)
 
         // 3. 加载资源配置
         await loadResources()
         console.log('App: 资源加载完成')
-        if (isMounted) setLoadingProgress(80)
+        setLoadingProgress(80)
 
         // 4. 设置网络消息处理器
         setupNetworkHandlers()
@@ -52,15 +50,14 @@ function App() {
         // 5. 启动游戏循环
         startGameLoop()
         console.log('App: 游戏循环启动')
-        if (isMounted) setLoadingProgress(100)
+        setLoadingProgress(100)
         
-        // 延迟移除加载界面
-        if (isMounted) {
-          setTimeout(() => {
-            console.log('App: 移除加载界面')
-            setLoading(false)
-          }, 500)
-        }
+        // 移除加载界面
+        console.log('App: 准备移除加载界面...')
+        setTimeout(() => {
+          console.log('App: 设置 loading = false')
+          setLoading(false)
+        }, 100)
       } catch (error) {
         console.error('游戏初始化失败:', error)
         alert('游戏加载失败，请刷新页面重试')
@@ -72,7 +69,6 @@ function App() {
     // 清理
     return () => {
       console.log('App: 清理函数被调用')
-      isMounted = false
       if (gameLoopRef) {
         cancelAnimationFrame(gameLoopRef)
       }
