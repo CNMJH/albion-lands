@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuestStore } from '../../stores/QuestSystem';
+import { useGameStore } from '../../stores/gameStore';
 
 /**
  * 任务面板
@@ -17,7 +18,8 @@ export const QuestPanel: React.FC = () => {
   } = useQuestStore();
 
   // 假设从用户上下文获取角色 ID
-  const characterId = 'test-character-id'; // TODO: 从认证上下文获取
+  const { player } = useGameStore()
+  const characterId = player?.id || ''; // 从 gameStore 获取
 
   if (!isQuestPanelOpen) {
     return (

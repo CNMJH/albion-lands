@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuestStore } from '../../stores/QuestSystem';
+import { useGameStore } from '../../stores/gameStore';
 
 interface NPCDialogueProps {
   npcId: string;
@@ -15,7 +16,8 @@ export const NPCDialogue: React.FC<NPCDialogueProps> = ({ npcId, onClose }) => {
   const [selectedDialogue, setSelectedDialogue] = useState<string>('greeting');
 
   const npc = npcs.find(n => n.id === npcId);
-  const characterId = 'test-character-id'; // TODO: 从认证上下文获取
+  const { player } = useGameStore()
+  const characterId = player?.id || ''; // 从 gameStore 获取
 
   if (!npc) {
     return null;

@@ -11,11 +11,28 @@ import { equipmentService, EquipmentSlot } from '../services/EquipmentService'
  * POST   /api/equipment/:characterId/compare  - 对比物品
  */
 export async function equipmentRoutes(fastify: FastifyInstance) {
+  // 验证 characterId 辅助函数
+  const validateCharacterId = (characterId: string, reply: FastifyReply) => {
+    if (!characterId || characterId.trim() === '') {
+      reply.code(400)
+      return {
+        success: false,
+        error: '角色 ID 不能为空',
+        message: '请先创建角色或登录'
+      }
+    }
+    return null
+  }
+
   // 获取角色装备
   fastify.get('/:characterId', async (request: FastifyRequest, reply: FastifyReply) => {
+    const { characterId } = request.params as { characterId: string }
+    
+    // 验证 characterId
+    const error = validateCharacterId(characterId, reply)
+    if (error) return error
+    
     try {
-      const { characterId } = request.params as { characterId: string }
-      
       const equipment = await equipmentService.getEquipment(characterId)
       
       return {
@@ -33,9 +50,13 @@ export async function equipmentRoutes(fastify: FastifyInstance) {
 
   // 获取角色属性
   fastify.get('/:characterId/stats', async (request: FastifyRequest, reply: FastifyReply) => {
+    const { characterId } = request.params as { characterId: string }
+    
+    // 验证 characterId
+    const error = validateCharacterId(characterId, reply)
+    if (error) return error
+    
     try {
-      const { characterId } = request.params as { characterId: string }
-      
       const stats = await equipmentService.getCharacterStats(characterId)
       
       return {

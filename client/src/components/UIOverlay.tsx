@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { CharacterInfo } from './CharacterInfo'
 import { SkillBar } from './SkillBar'
-import { MiniMap } from './MiniMap'
 import { MenuBar } from './MenuBar'
 import { Inventory } from './Inventory'
 import { FriendsUI } from './FriendsUI'
@@ -12,6 +11,7 @@ import './UIOverlay-optimized.css'
 /**
  * UI 覆盖层组件
  * 包含所有游戏 UI 元素
+ * 注意：小地图由 MinimapRenderer 直接渲染到 Canvas，不在此处显示
  */
 export function UIOverlay() {
   const [_showInventory, setShowInventory] = useState(false)
@@ -22,9 +22,9 @@ export function UIOverlay() {
     <div id="ui-overlay">
       {/* 顶部区域 */}
       <div className="ui-top">
-        {/* 小地图 */}
+        {/* 小地图 - 由 MinimapRenderer 渲染，此处留空 */}
         <div className="ui-top-left">
-          <MiniMap />
+          {/* 小地图占位，实际由 renderer/MinimapRenderer.ts 渲染 */}
         </div>
 
         {/* 角色信息 */}

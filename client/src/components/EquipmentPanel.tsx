@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { EquipmentSystem, type EquipmentSlot, type Equipment, type CharacterStats } from '../systems/EquipmentSystem'
+import { useGameStore } from '../stores/gameStore'
 import './EquipmentPanel.css'
 
 /**
@@ -24,7 +25,6 @@ interface Item {
  */
 export function EquipmentPanel() {
   const [isOpen, setIsOpen] = useState(false)
-  const [_characterId, setCharacterId] = useState<string>('')
   const [equipment, setEquipment] = useState<Equipment>({})
   const [stats, setStats] = useState<CharacterStats>({
     attack: 0,
@@ -35,11 +35,18 @@ export function EquipmentPanel() {
   })
   const [selectedSlot, setSelectedSlot] = useState<EquipmentSlot | null>(null)
   const [equipmentSystem, setEquipmentSystem] = useState<EquipmentSystem | null>(null)
+  const { player } = useGameStore()
 
   // 初始化
   useEffect(() => {
-    const charId = localStorage.getItem('characterId') || ''
-    setCharacterId(charId)
+    // 从 gameStore 获取 characterId（优先）
+    const charId = player?.id || localStorage.getItem('characterId') || ''
+    
+    // 如果 characterId 为空，不初始化装备系统
+    if (!charId) {
+      console.warn('⚠️ EquipmentPanel: characterId 为空，等待登录')
+      return
+    }
     
     const system = new EquipmentSystem(charId)
     setEquipmentSystem(system)
@@ -58,7 +65,7 @@ export function EquipmentPanel() {
     return () => {
       system.off('equipmentChanged', handleEquipmentChange)
     }
-  }, [])
+  }, [player?.id]) // 依赖 player.id，当玩家登录时重新初始化
 
   // 键盘快捷键
   useEffect(() => {

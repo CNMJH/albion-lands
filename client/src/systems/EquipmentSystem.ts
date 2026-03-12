@@ -10,6 +10,11 @@ export type EquipmentSlot =
   | 'Accessory'
 
 /**
+ * 服务端地址（绕过 Vite 代理问题）
+ */
+const SERVER_URL = 'http://localhost:3002'
+
+/**
  * 装备数据
  */
 export interface Equipment {
@@ -65,15 +70,21 @@ export class EquipmentSystem {
    */
   async loadEquipment(): Promise<void> {
     try {
-      const response = await fetch(`/api/v1/equipment/${this.characterId}`)
+      const url = `http://localhost:3002/api/v1/equipment/${this.characterId}`
+      console.log('📡 请求装备:', url)
+      const response = await fetch(url)
+      console.log('📬 装备响应状态:', response.status)
       const data = await response.json()
+      console.log('📦 装备响应数据:', data)
 
       if (data.success) {
         this.equipment = data.data
         console.log('🎒 装备加载完成:', this.equipment)
+      } else {
+        console.error('❌ 装备加载失败:', data.error)
       }
     } catch (error) {
-      console.error('加载装备失败:', error)
+      console.error('❌ 加载装备异常:', error)
     }
   }
 
@@ -82,15 +93,21 @@ export class EquipmentSystem {
    */
   async loadStats(): Promise<void> {
     try {
-      const response = await fetch(`/api/v1/equipment/${this.characterId}/stats`)
+      const url = `http://localhost:3002/api/v1/equipment/${this.characterId}/stats`
+      console.log('📡 请求属性:', url)
+      const response = await fetch(url)
+      console.log('📬 属性响应状态:', response.status)
       const data = await response.json()
+      console.log('📦 属性响应数据:', data)
 
       if (data.success) {
         this.stats = data.data
         console.log('📊 属性加载完成:', this.stats)
+      } else {
+        console.error('❌ 属性加载失败:', data.error)
       }
     } catch (error) {
-      console.error('加载属性失败:', error)
+      console.error('❌ 加载属性异常:', error)
     }
   }
 
@@ -102,7 +119,7 @@ export class EquipmentSystem {
     error?: string
   }> {
     try {
-      const response = await fetch(`/api/v1/equipment/${this.characterId}/equip`, {
+      const response = await fetch(`${SERVER_URL}/api/v1/equipment/${this.characterId}/equip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, slot })
@@ -140,7 +157,7 @@ export class EquipmentSystem {
     error?: string
   }> {
     try {
-      const response = await fetch(`/api/v1/equipment/${this.characterId}/unequip`, {
+      const response = await fetch(`${SERVER_URL}/api/v1/equipment/${this.characterId}/unequip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ slot })
@@ -199,7 +216,7 @@ export class EquipmentSystem {
     downgrades: string[]
   }> {
     try {
-      const response = await fetch(`/api/v1/equipment/${this.characterId}/compare`, {
+      const response = await fetch(`${SERVER_URL}/api/v1/equipment/${this.characterId}/compare`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, slot })

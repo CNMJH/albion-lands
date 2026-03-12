@@ -178,9 +178,10 @@ function setupNetworkHandlers() {
   // 模拟玩家数据（临时）- 延迟执行让渲染器先准备好
   setTimeout(() => {
     try {
+      // 使用真实的测试角色 ID（从数据库种子数据）
       const playerData = {
-        id: 'test-character-id',
-        name: '测试角色',
+        id: '1fc5bfa9-a54b-406c-abaa-adb032a3f59a', // 测试玩家 1
+        name: '测试玩家 1',
         level: 10,
         exp: 1000,
         maxExp: 1500,
@@ -193,11 +194,11 @@ function setupNetworkHandlers() {
         zoneId: 'zone_1',
         isBot: false,
       }
-      console.log('setupNetworkHandlers: 设置玩家数据', playerData)
+      console.log('👤 setupNetworkHandlers: 设置玩家数据', playerData)
       setPlayer(playerData)
-      console.log('setupNetworkHandlers: 玩家数据设置完成')
+      console.log('✅ setupNetworkHandlers: 玩家数据设置完成')
     } catch (error) {
-      console.error('setupNetworkHandlers: 设置玩家数据失败', error)
+      console.error('❌ setupNetworkHandlers: 设置玩家数据失败', error)
     }
   }, 2000)
 }
