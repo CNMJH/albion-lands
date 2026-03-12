@@ -7,7 +7,6 @@ import { GameRenderer } from '../renderer/GameRenderer'
  */
 export class MapSystem {
   private renderer: GameRenderer
-  private groundSprite: PIXI.Sprite | null = null
   private tileTexture: PIXI.Texture | null = null
   
   // 地图配置
@@ -42,30 +41,18 @@ export class MapSystem {
    * 加载地砖纹理
    */
   private async loadTileTexture(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        // 使用草地地砖作为默认地面
-        const texturePath = 'assets/tiles/grass_tile.png'
-        console.log('MapSystem: 加载地砖纹理:', texturePath)
-        
-        PIXI.Texture.from(texturePath)
-          .then(texture => {
-            this.tileTexture = texture
-            console.log('MapSystem: 地砖纹理加载成功')
-            resolve()
-          })
-          .catch(error => {
-            console.error('MapSystem: 地砖纹理加载失败', error)
-            // 创建默认纹理
-            this.createDefaultTexture()
-            resolve()
-          })
-      } catch (error) {
-        console.error('MapSystem: 加载地砖纹理出错', error)
-        this.createDefaultTexture()
-        resolve()
-      }
-    })
+    try {
+      // 使用草地地砖作为默认地面
+      const texturePath = 'assets/tiles/grass_tile.png'
+      console.log('MapSystem: 加载地砖纹理:', texturePath)
+      
+      this.tileTexture = await PIXI.Texture.from(texturePath)
+      console.log('MapSystem: 地砖纹理加载成功')
+    } catch (error) {
+      console.error('MapSystem: 地砖纹理加载失败，使用默认纹理', error)
+      // 创建默认纹理
+      this.createDefaultTexture()
+    }
   }
   
   /**
@@ -122,7 +109,6 @@ export class MapSystem {
     tilingSprite.y = -(this.mapHeight * this.tileSize) / 2
     
     groundLayer.addChild(tilingSprite)
-    this.groundSprite = tilingSprite as any
     
     console.log(`MapSystem: 地面创建完成 (${this.mapWidth}x${this.mapHeight} 地砖)`)
   }
