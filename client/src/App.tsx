@@ -23,33 +23,44 @@ function App() {
   const { initialize } = useGameStore()
 
   useEffect(() => {
+    let isMounted = true
+    
     // 初始化游戏
     const initGame = async () => {
+      console.log('App: 开始初始化游戏...')
       try {
         // 1. 初始化状态管理
         initialize()
-        setLoadingProgress(20)
+        console.log('App: 状态管理初始化完成')
+        if (isMounted) setLoadingProgress(20)
 
         // 2. 初始化网络
         const network = NetworkManager.getInstance()
         await network.connect('ws://localhost:3002/ws')
-        setLoadingProgress(40)
+        console.log('App: 网络连接完成')
+        if (isMounted) setLoadingProgress(40)
 
         // 3. 加载资源配置
         await loadResources()
-        setLoadingProgress(80)
+        console.log('App: 资源加载完成')
+        if (isMounted) setLoadingProgress(80)
 
         // 4. 设置网络消息处理器
         setupNetworkHandlers()
+        console.log('App: 网络处理器设置完成')
         
         // 5. 启动游戏循环
         startGameLoop()
-        setLoadingProgress(100)
+        console.log('App: 游戏循环启动')
+        if (isMounted) setLoadingProgress(100)
         
         // 延迟移除加载界面
-        setTimeout(() => {
-          setLoading(false)
-        }, 500)
+        if (isMounted) {
+          setTimeout(() => {
+            console.log('App: 移除加载界面')
+            setLoading(false)
+          }, 500)
+        }
       } catch (error) {
         console.error('游戏初始化失败:', error)
         alert('游戏加载失败，请刷新页面重试')
@@ -60,6 +71,8 @@ function App() {
 
     // 清理
     return () => {
+      console.log('App: 清理函数被调用')
+      isMounted = false
       if (gameLoopRef) {
         cancelAnimationFrame(gameLoopRef)
       }
@@ -248,9 +261,11 @@ function startGameLoop() {
 
 // 模拟资源加载
 async function loadResources() {
+  console.log('loadResources: 开始加载资源...')
   // 简化处理：模拟加载延迟
   // 实际项目中应加载真实的游戏资源（图片、音频等）
-  return new Promise(resolve => setTimeout(resolve, 1000))
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  console.log('loadResources: 资源加载完成')
 }
 
 export default App

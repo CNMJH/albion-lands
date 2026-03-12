@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
 import { CombatRenderer } from './CombatRenderer'
@@ -12,9 +12,17 @@ export function GameCanvas() {
   const rendererRef = useRef<GameRenderer | null>(null)
   const combatRendererRef = useRef<CombatRenderer | null>(null)
   const { player } = useGameStore()
+  
+  // 使用 useRef 存储渲染器，避免闭包问题
+  const rendererInstance = useRef<GameRenderer | null>(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current) {
+      console.log('GameCanvas: 容器未就绪，跳过初始化')
+      return
+    }
+
+    console.log('GameCanvas: 开始初始化渲染器...')
 
     // 创建游戏渲染器
     const renderer = new GameRenderer({
@@ -25,6 +33,7 @@ export function GameCanvas() {
     })
 
     rendererRef.current = renderer
+    rendererInstance.current = renderer
 
     // 初始化 Pixi 应用
     renderer.init(containerRef.current)
@@ -35,12 +44,22 @@ export function GameCanvas() {
 
     // 创建玩家精灵
     setTimeout(() => {
-      combatRenderer.createPlayerSprite()
+      if (combatRendererRef.current) {
+        combatRendererRef.current.createPlayerSprite()
+      }
     }, 1000)
 
-    // 处理窗口大小变化
+    // 处理窗口大小变化（使用防抖）
+    let resizeTimeout: ReturnType<typeof setTimeout> | null = null
     const handleResize = () => {
-      renderer.resize(window.innerWidth, window.innerHeight)
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout)
+      }
+      resizeTimeout = setTimeout(() => {
+        if (rendererInstance.current) {
+          rendererInstance.current.resize(window.innerWidth, window.innerHeight)
+        }
+      }, 100) // 100ms 防抖
     }
 
     window.addEventListener('resize', handleResize)
@@ -48,21 +67,31 @@ export function GameCanvas() {
     // 启动游戏循环
     renderer.start()
 
-    // 清理
+    console.log('GameCanvas: 初始化完成')
+
+    // 清理函数
     return () => {
-      console.log('GameCanvas: 清理组件...')
+      console.log('GameCanvas: 清理函数被调用')
       
+      // 先移除事件监听
       window.removeEventListener('resize', handleResize)
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout)
+      }
       
+      // 清理渲染器
       try {
         if (combatRendererRef.current) {
+          console.log('GameCanvas: 清理战斗渲染器...')
           combatRendererRef.current.clear()
           combatRendererRef.current = null
         }
         
         if (rendererRef.current) {
+          console.log('GameCanvas: 清理游戏渲染器...')
           rendererRef.current.destroy()
           rendererRef.current = null
+          rendererInstance.current = null
         }
       } catch (error) {
         console.error('GameCanvas: 清理时出错', error)
@@ -70,12 +99,12 @@ export function GameCanvas() {
       
       console.log('GameCanvas: 清理完成')
     }
-  }, [])
+  }, []) // 空依赖数组，只运行一次
 
   // 当玩家位置更新时，更新摄像机
   useEffect(() => {
-    if (rendererRef.current && player) {
-      rendererRef.current.setCameraTarget(player.x, player.y)
+    if (rendererInstance.current && player) {
+      rendererInstance.current.setCameraTarget(player.x, player.y)
       
       // 更新玩家精灵位置
       if (combatRendererRef.current) {
