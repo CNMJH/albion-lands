@@ -281,6 +281,11 @@ export class PlayerControlsSystem {
       return
     }
 
+    if (code === 'KeyM') {
+      this.toggleUI('market')
+      return
+    }
+
     if (code === 'KeyL') {
       this.toggleMinionHealthBars()
       return
@@ -546,6 +551,7 @@ export class PlayerControlsSystem {
     character: boolean
     shop: boolean
     scoreboard: boolean
+    market: boolean
   } = {
     inventory: false,
     crafting: false,
@@ -555,6 +561,7 @@ export class PlayerControlsSystem {
     character: false,
     shop: false,
     scoreboard: false,
+    market: false,
   }
 
   /**

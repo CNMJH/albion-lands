@@ -7,6 +7,7 @@ import { MinimapRenderer } from './MinimapRenderer'
 import { MapSystem } from '../systems/MapSystem'
 import { playerControls } from '../systems/PlayerControlsSystem'
 import { DeathSystem } from '../systems/DeathSystem'
+import { MarketSystem } from '../systems/MarketSystem'
 import './GameCanvas.css'
 
 /**
@@ -98,6 +99,11 @@ export function GameCanvas() {
     deathSystemRef.current = deathSystem
     setDeathSystem(deathSystem)
     console.log('💀 死亡系统已创建 (characterId:', characterId + ')')
+
+    // 初始化市场系统
+    const marketSystem = new MarketSystem(characterId || 'unknown')
+    useGameStore.getState().marketSystem = marketSystem
+    console.log('🏪 市场系统已创建 (characterId:', characterId + ')')
 
     // 初始化玩家操作系统
     const controls = playerControls.init(renderer)

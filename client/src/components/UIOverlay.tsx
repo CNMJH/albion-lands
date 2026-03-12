@@ -6,6 +6,8 @@ import { Inventory } from './Inventory'
 import { FriendsUI } from './FriendsUI'
 import { ChatUI } from './ChatUI'
 import { EquipmentPanel } from './EquipmentPanel'
+import { MarketPanel } from './MarketPanel'
+import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
 
 /**
@@ -17,6 +19,7 @@ export function UIOverlay() {
   const [_showInventory, setShowInventory] = useState(false)
   const [showCharacter, setShowCharacter] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const { uiState } = useGameStore()
 
   return (
     <div id="ui-overlay">
@@ -66,6 +69,9 @@ export function UIOverlay() {
 
       {/* 装备面板 */}
       <EquipmentPanel />
+
+      {/* 拍卖行面板 */}
+      {uiState.market && <MarketPanel />}
 
       {/* 弹窗窗口 */}
       {showCharacter && (

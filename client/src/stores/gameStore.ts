@@ -75,6 +75,22 @@ interface GameState {
   // 死亡系统引用
   deathSystem: any | null
   
+  // 市场系统引用
+  marketSystem: any | null
+  
+  // UI 状态
+  uiState: {
+    inventory: boolean
+    crafting: boolean
+    quest: boolean
+    friends: boolean
+    chat: boolean
+    character: boolean
+    shop: boolean
+    scoreboard: boolean
+    market: boolean
+  }
+  
   // 动作
   initialize: () => void
   setPlayer: (player: Partial<Player>) => void
@@ -85,6 +101,8 @@ interface GameState {
   setParty: (party: any) => void
   addFriend: (friend: any) => void
   setDeathSystem: (deathSystem: any) => void
+  setUIState: (uiType: keyof GameState['uiState'], visible: boolean) => void
+  closeUI: (uiType: keyof GameState['uiState']) => void
   
   // 战斗相关
   addMonster: (monster: Monster) => void
@@ -121,6 +139,18 @@ export const useGameStore = create<GameState>()(
     isLoggedIn: false,
     characterId: null,
     deathSystem: null,
+    marketSystem: null,
+    uiState: {
+      inventory: false,
+      crafting: false,
+      quest: false,
+      friends: false,
+      chat: false,
+      character: false,
+      shop: false,
+      scoreboard: false,
+      market: false,
+    },
     inventory: {
       slots: Array(50).fill(null),
       capacity: 50,
@@ -256,6 +286,26 @@ export const useGameStore = create<GameState>()(
         monsters: state.monsters.map(m =>
           m.id === id ? { ...m, hp: Math.max(0, hp), maxHp: m.maxHp } : m
         ),
+      }))
+    },
+    
+    // 设置 UI 状态
+    setUIState: (uiType, visible) => {
+      set((state) => ({
+        uiState: {
+          ...state.uiState,
+          [uiType]: visible,
+        },
+      }))
+    },
+    
+    // 关闭 UI
+    closeUI: (uiType) => {
+      set((state) => ({
+        uiState: {
+          ...state.uiState,
+          [uiType]: false,
+        },
       }))
     },
   }))
