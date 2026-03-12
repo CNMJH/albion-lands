@@ -226,20 +226,23 @@ else
 fi
 echo ""
 
-# 测试 12: 检查背包（待实现）
-echo -e "${YELLOW}测试 12: 检查背包物品 (待实现)${NC}"
-echo -e "${YELLOW}⚠️  跳过 - 背包 API 路由尚未实现${NC}"
-# INVENTORY_RESULT=$(curl -s "${API_BASE}/character/inventory" \
-#     -H "Authorization: Bearer ${TOKEN}")
-# 
-# if echo "$INVENTORY_RESULT" | grep -q '"success":true\|"data":'; then
-#     echo -e "${GREEN}✅ 获取背包信息成功${NC}"
-#     ((PASSED++))
-# else
-#     echo -e "${RED}❌ 获取背包信息失败${NC}"
-#     echo "$INVENTORY_RESULT"
-#     ((FAILED++))
-# fi
+# 测试 12: 检查背包物品
+echo -e "${YELLOW}测试 12: 检查背包物品${NC}"
+INVENTORY_RESULT=$(curl -s "${API_BASE}/inventory?characterId=${CHAR_ID}")
+
+if echo "$INVENTORY_RESULT" | grep -q '"success":true\|"data":'; then
+    echo -e "${GREEN}✅ 获取背包信息成功${NC}"
+    # 显示大喇叭数量
+    HORNS=$(echo "$INVENTORY_RESULT" | grep -o '"name":"world_horn"[^}]*"quantity":[0-9]*' | grep -o '"quantity":[0-9]*' | cut -d':' -f2 | head -1)
+    if [ -n "$HORNS" ]; then
+        echo "   大喇叭数量：${HORNS}"
+    fi
+    ((PASSED++))
+else
+    echo -e "${RED}❌ 获取背包信息失败${NC}"
+    echo "$INVENTORY_RESULT"
+    ((FAILED++))
+fi
 echo ""
 
 # 输出结果
