@@ -10,6 +10,7 @@ import { socialRoutes } from './social'
 import { questRoutes } from './quests'
 import { skillsRoutes } from './skills'
 import { equipmentRoutes } from './equipment'
+import deathRoutes from './death'
 
 /**
  * 注册所有 HTTP 路由
@@ -61,4 +62,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 装备路由
   fastify.register(equipmentRoutes, { prefix: '/api/v1/equipment' })
+  
+  // 死亡掉落路由
+  fastify.register(deathRoutes, { prefix: '/api/v1/combat' })
 }

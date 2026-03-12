@@ -43,6 +43,7 @@ model Character {
   questProgress   QuestProgress[]
   achievementProgress AchievementProgress[]
   characterSkills CharacterSkill[]
+  deathRecords    DeathRecord[]   // 死亡记录
 }
 
 model Item {
@@ -64,6 +65,7 @@ model Item {
   createdAt      DateTime        @default(now())
   inventoryItems InventoryItem[]
   marketOrders   MarketOrder[]
+  droppedItems   DroppedItem[]   // 掉落物品
 }
 
 model InventoryItem {
@@ -97,6 +99,32 @@ model Zone {
   maxLevel    Int      @default(10)
   pvpEnabled  Boolean  @default(false)
   portals     String? // JSON string
+  createdAt   DateTime @default(now())
+}
+
+// 死亡记录
+model DeathRecord {
+  id          String   @id @default(uuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id])
+  killerId    String?  // 击杀者 (PVP 时)
+  mapId       String   // 死亡地图
+  safetyLevel Int      // 安全等级
+  droppedItems String  // JSON string: [{itemId, itemName, slot}]
+  createdAt   DateTime @default(now())
+}
+
+// 掉落物品
+model DroppedItem {
+  id          String   @id @default(uuid())
+  mapId       String   // 掉落地图
+  x           Int      // X 坐标
+  y           Int      // Y 坐标
+  itemId      String
+  item        Item     @relation(fields: [itemId], references: [id])
+  ownerId     String?  // 原主人 (可拾取保护)
+  quantity    Int      @default(1)
+  expireAt    DateTime // 过期时间 (30 分钟)
   createdAt   DateTime @default(now())
 }
 

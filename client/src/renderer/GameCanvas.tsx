@@ -6,6 +6,7 @@ import { AttackEffectRenderer } from './AttackEffectRenderer'
 import { MinimapRenderer } from './MinimapRenderer'
 import { MapSystem } from '../systems/MapSystem'
 import { playerControls } from '../systems/PlayerControlsSystem'
+import { DeathSystem } from '../systems/DeathSystem'
 import './GameCanvas.css'
 
 /**
@@ -18,6 +19,7 @@ export function GameCanvas() {
   const combatRendererRef = useRef<CombatRenderer | null>(null)
   const playerControlsRef = useRef<ReturnType<typeof playerControls.init> | null>(null)
   const minimapRef = useRef<MinimapRenderer | null>(null)
+  const deathSystemRef = useRef<DeathSystem | null>(null)
   const { player } = useGameStore()
   
   // 使用 useRef 存储渲染器，避免闭包问题
@@ -90,6 +92,11 @@ export function GameCanvas() {
     const minimap = new MinimapRenderer()
     minimapRef.current = minimap
     console.log('🗺️ 小地图已创建')
+
+    // 初始化死亡系统
+    const deathSystem = new DeathSystem(renderer)
+    deathSystemRef.current = deathSystem
+    console.log('💀 死亡系统已创建')
 
     // 初始化玩家操作系统
     const controls = playerControls.init(renderer)
