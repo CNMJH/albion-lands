@@ -1,6 +1,28 @@
-import { EventEmitter } from 'events'
 import { network } from '../network/NetworkManager'
 import { useGameStore } from '../stores/gameStore'
+
+/**
+ * 简单的事件发射器 (浏览器环境)
+ */
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map()
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, [])
+    }
+    this.events.get(event)!.push(listener)
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      listeners.forEach(listener => listener(...args))
+      return true
+    }
+    return false
+  }
+}
 
 /**
  * 物品类型

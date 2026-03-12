@@ -1,6 +1,27 @@
-import { EventEmitter } from 'events'
-import { GameObject } from '../renderer/GameRenderer'
 import { network } from '../network/NetworkManager'
+
+/**
+ * 简单的事件发射器 (浏览器环境)
+ */
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map()
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, [])
+    }
+    this.events.get(event)!.push(listener)
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      listeners.forEach(listener => listener(...args))
+      return true
+    }
+    return false
+  }
+}
 
 /**
  * 怪物类型
@@ -18,6 +39,7 @@ export interface MonsterTemplate {
   aggroRange: number
   attackRange: number
   moveSpeed: number
+  size?: number // 缩放比例 (默认 1.0)
 }
 
 /**
@@ -37,6 +59,8 @@ export interface Monster {
   targetId?: string
   patrolPoints?: Array<{ x: number; y: number }>
   currentPatrolIndex?: number
+  type?: string // 用于渲染的怪物类型
+  size?: number // 缩放比例 (默认 1.0)
 }
 
 /**
@@ -49,29 +73,33 @@ export class MonsterAI extends EventEmitter {
   private updateInterval: number = 100 // 毫秒
   private lastUpdateTime: number = 0
 
-  // 怪物模板定义
+  // 怪物模板定义 (使用新素材映射)
   private readonly defaultTemplates: MonsterTemplate[] = [
-    // 新手村庄 (Lv1-10)
-    { id: 'slime_t1', name: '绿色史莱姆', level: 2, hp: 50, attack: 8, defense: 2, expReward: 20, silverReward: 5, zoneId: 'zone_1', aggroRange: 100, attackRange: 30, moveSpeed: 80 },
-    { id: 'slime_t2', name: '蓝色史莱姆', level: 5, hp: 80, attack: 12, defense: 4, expReward: 35, silverReward: 8, zoneId: 'zone_1', aggroRange: 100, attackRange: 30, moveSpeed: 80 },
-    { id: 'rabbit', name: '野兔', level: 3, hp: 40, attack: 6, defense: 1, expReward: 15, silverReward: 3, zoneId: 'zone_1', aggroRange: 80, attackRange: 20, moveSpeed: 120 },
+    // 新手村庄 (Lv1-10) - zone_1
+    { id: 'slime', name: '蓝色史莱姆', level: 2, hp: 50, attack: 8, defense: 2, expReward: 20, silverReward: 5, zoneId: 'zone_1', aggroRange: 100, attackRange: 30, moveSpeed: 80, size: 0.8 },
+    { id: 'bat', name: '黑色蝙蝠', level: 4, hp: 60, attack: 10, defense: 3, expReward: 25, silverReward: 6, zoneId: 'zone_1', aggroRange: 90, attackRange: 25, moveSpeed: 110, size: 0.6 },
+    { id: 'bee', name: '蜜蜂', level: 3, hp: 40, attack: 7, defense: 2, expReward: 18, silverReward: 4, zoneId: 'zone_1', aggroRange: 80, attackRange: 20, moveSpeed: 130, size: 0.5 },
     
-    // 平原旷野 (Lv10-25)
-    { id: 'wolf', name: '灰狼', level: 12, hp: 150, attack: 25, defense: 8, expReward: 60, silverReward: 15, zoneId: 'zone_2', aggroRange: 120, attackRange: 35, moveSpeed: 100 },
-    { id: 'boar', name: '野猪', level: 15, hp: 200, attack: 30, defense: 12, expReward: 80, silverReward: 20, zoneId: 'zone_2', aggroRange: 100, attackRange: 30, moveSpeed: 90 },
-    { id: 'deer', name: '鹿', level: 10, hp: 100, attack: 15, defense: 5, expReward: 40, silverReward: 10, zoneId: 'zone_2', aggroRange: 60, attackRange: 20, moveSpeed: 110 },
+    // 平原旷野 (Lv10-25) - zone_2
+    { id: 'goblin', name: '哥布林', level: 12, hp: 150, attack: 25, defense: 8, expReward: 60, silverReward: 15, zoneId: 'zone_2', aggroRange: 120, attackRange: 35, moveSpeed: 100, size: 0.9 },
+    { id: 'wolf', name: '野狼', level: 15, hp: 180, attack: 30, defense: 10, expReward: 75, silverReward: 20, zoneId: 'zone_2', aggroRange: 130, attackRange: 40, moveSpeed: 110, size: 1.0 },
+    { id: 'snake', name: '毒蛇', level: 10, hp: 120, attack: 22, defense: 6, expReward: 50, silverReward: 12, zoneId: 'zone_2', aggroRange: 100, attackRange: 30, moveSpeed: 95, size: 0.7 },
     
-    // 迷雾森林 (Lv25-40)
-    { id: 'spider', name: '毒蜘蛛', level: 28, hp: 280, attack: 45, defense: 15, expReward: 120, silverReward: 30, zoneId: 'zone_3', aggroRange: 130, attackRange: 40, moveSpeed: 95 },
-    { id: 'bear', name: '黑熊', level: 35, hp: 450, attack: 60, defense: 25, expReward: 180, silverReward: 45, zoneId: 'zone_3', aggroRange: 150, attackRange: 45, moveSpeed: 85 },
+    // 迷雾森林 (Lv25-40) - zone_3
+    { id: 'spider', name: '毒蜘蛛', level: 28, hp: 280, attack: 45, defense: 15, expReward: 120, silverReward: 30, zoneId: 'zone_3', aggroRange: 130, attackRange: 40, moveSpeed: 95, size: 0.8 },
+    { id: 'ghost', name: '幽灵', level: 32, hp: 320, attack: 50, defense: 12, expReward: 140, silverReward: 35, zoneId: 'zone_3', aggroRange: 140, attackRange: 45, moveSpeed: 90, size: 1.0 },
+    { id: 'skeleton', name: '骷髅兵', level: 35, hp: 380, attack: 55, defense: 18, expReward: 160, silverReward: 40, zoneId: 'zone_3', aggroRange: 120, attackRange: 35, moveSpeed: 85, size: 1.0 },
     
-    // 巨龙山脉 (Lv40-60)
-    { id: 'dragon_whelp', name: '幼龙', level: 45, hp: 600, attack: 80, defense: 35, expReward: 250, silverReward: 60, zoneId: 'zone_4', aggroRange: 180, attackRange: 50, moveSpeed: 100 },
-    { id: 'stone_golem', name: '石头傀儡', level: 50, hp: 800, attack: 90, defense: 50, expReward: 300, silverReward: 75, zoneId: 'zone_4', aggroRange: 140, attackRange: 40, moveSpeed: 60 },
+    // 巨龙山脉 (Lv40-60) - zone_4
+    { id: 'orc', name: '兽人', level: 45, hp: 600, attack: 80, defense: 35, expReward: 250, silverReward: 60, zoneId: 'zone_4', aggroRange: 180, attackRange: 50, moveSpeed: 85, size: 1.2 },
+    { id: 'lizard', name: '蜥蜴人', level: 42, hp: 520, attack: 70, defense: 30, expReward: 220, silverReward: 50, zoneId: 'zone_4', aggroRange: 160, attackRange: 45, moveSpeed: 100, size: 1.0 },
+    { id: 'medusa', name: '美杜莎', level: 50, hp: 750, attack: 95, defense: 40, expReward: 300, silverReward: 75, zoneId: 'zone_4', aggroRange: 170, attackRange: 55, moveSpeed: 80, size: 1.1 },
     
-    // 深渊遗迹 (Lv60+)
-    { id: 'skeleton_king', name: '骷髅王', level: 65, hp: 1200, attack: 120, defense: 60, expReward: 500, silverReward: 120, zoneId: 'zone_5', aggroRange: 200, attackRange: 60, moveSpeed: 70 },
-    { id: 'demon', name: '恶魔', level: 70, hp: 1500, attack: 150, defense: 70, expReward: 650, silverReward: 150, zoneId: 'zone_5', aggroRange: 220, attackRange: 80, moveSpeed: 90 },
+    // 深渊遗迹 (Lv60+) - zone_5
+    { id: 'demon', name: '恶魔', level: 65, hp: 1200, attack: 120, defense: 60, expReward: 500, silverReward: 120, zoneId: 'zone_5', aggroRange: 200, attackRange: 60, moveSpeed: 90, size: 1.3 },
+    { id: 'dragon', name: '巨龙', level: 75, hp: 2000, attack: 180, defense: 90, expReward: 800, silverReward: 200, zoneId: 'zone_5', aggroRange: 250, attackRange: 100, moveSpeed: 70, size: 2.0 },
+    { id: 'mummy', name: '木乃伊', level: 60, hp: 900, attack: 100, defense: 50, expReward: 400, silverReward: 90, zoneId: 'zone_5', aggroRange: 180, attackRange: 50, moveSpeed: 75, size: 1.0 },
+    { id: 'zombie', name: '僵尸', level: 55, hp: 800, attack: 90, defense: 45, expReward: 350, silverReward: 80, zoneId: 'zone_5', aggroRange: 160, attackRange: 45, moveSpeed: 65, size: 1.0 },
   ]
 
   constructor() {
@@ -150,6 +178,8 @@ export class MonsterAI extends EventEmitter {
       state: 'idle',
       patrolPoints: this.generatePatrolPoints(data.x, data.y, 100),
       currentPatrolIndex: 0,
+      type: template.id, // 用于渲染的怪物类型
+      size: template.size || 1.0, // 缩放比例
     }
 
     this.monsters.set(monster.id, monster)

@@ -99,7 +99,7 @@ export class CombatRenderer {
     const app = this.gameRenderer.getApp()
     if (!app) return
 
-    const monsterRenderer = new MonsterRenderer(app)
+    const monsterRenderer = new MonsterRenderer(app, '')
     monsterRenderer.setMonster(monster)
     
     const layer = this.gameRenderer.getLayer('characters')

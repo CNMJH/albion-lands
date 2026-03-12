@@ -2,26 +2,72 @@ import * as PIXI from 'pixi.js'
 import { Monster } from '../systems/MonsterAI'
 
 /**
+ * 怪物纹理配置
+ * 包含永久素材和临时替代映射
+ */
+export const MONSTER_TEXTURES: Record<string, string> = {
+  // ✅ 核心怪物 (已有素材)
+  'slime': 'assets/monsters/slime.png',           // 蓝色史莱姆
+  'bat': 'assets/monsters/bat.png',               // 黑色蝙蝠
+  'ghost': 'assets/monsters/ghost.png',           // 半透明幽灵
+  'demon': 'assets/monsters/demon_idle.png',      // 红色恶魔
+  'dragon': 'assets/monsters/dragon_idle.png',    // 红色巨龙
+  
+  // 🔄 临时替代方案
+  'goblin': 'assets/monsters/lizard_idle.png',    // 绿色哥布林 → 蜥蜴
+  'skeleton': 'assets/monsters/ghost.png',        // 白色骷髅兵 → 幽灵
+  'spider': 'assets/monsters/bee.png',            // 棕色蜘蛛 → 蜜蜂
+  'wolf': 'assets/monsters/snake.png',            // 灰色野狼 → 蛇
+  'mummy': 'assets/monsters/ghost.png',           // 绷带木乃伊 → 幽灵 (变色)
+  'orc': 'assets/monsters/demon_idle.png',        // 棕色兽人 → 恶魔
+  'zombie': 'assets/monsters/slime.png',          // 绿色僵尸 → 史莱姆 (变色)
+  
+  // ✨ 额外怪物 (可用于扩展)
+  'bee': 'assets/monsters/bee.png',
+  'big_worm': 'assets/monsters/big_worm.png',
+  'eyeball': 'assets/monsters/eyeball.png',
+  'jinn': 'assets/monsters/jinn_animation_idle.png',
+  'lizard': 'assets/monsters/lizard_idle.png',
+  'man_eater_flower': 'assets/monsters/man_eater_flower.png',
+  'medusa': 'assets/monsters/medusa_idle.png',
+  'pumpking': 'assets/monsters/pumpking.png',
+  'small_dragon': 'assets/monsters/small_dragon_idle.png',
+  'small_worm': 'assets/monsters/small_worm.png',
+  'snake': 'assets/monsters/snake.png',
+}
+
+/**
+ * 怪物颜色调整 (用于临时替代)
+ */
+export const MONSTER_COLOR_ADJUSTMENTS: Record<string, number[]> = {
+  // [色调偏移，饱和度，亮度]
+  'mummy': [0, -50, 20],      // 木乃伊：降低饱和度，提高亮度 (绷带色)
+  'zombie': [60, 30, -10],    // 僵尸：绿色调 (腐烂感)
+  'goblin': [40, 20, 0],      // 哥布林：绿色调
+  'skeleton': [0, -100, 50],  // 骷髅：去色，提高亮度
+}
+
+/**
  * 怪物渲染器
  * 负责渲染怪物及其血条
  */
 export class MonsterRenderer {
   private container: PIXI.Container
-  private sprite: PIXI.Sprite
+  private sprite: PIXI.Sprite | null = null
   private hpBarBg: PIXI.Graphics
   private hpBar: PIXI.Graphics
   private nameText: PIXI.Text
   private levelText: PIXI.Text
   private monster: Monster | null = null
+  private textureCache: Map<string, PIXI.Texture>
 
-  constructor(private app: PIXI.Application) {
+  constructor(
+    private app: PIXI.Application,
+    private assetsPath: string = ''
+  ) {
     this.container = new PIXI.Container()
+    this.textureCache = new Map()
     
-    // 创建怪物精灵（临时用色块代替）
-    this.sprite = new PIXI.Sprite(this.createMonsterTexture())
-    this.sprite.anchor.set(0.5)
-    this.container.addChild(this.sprite)
-
     // 创建血条背景
     this.hpBarBg = new PIXI.Graphics()
     this.hpBarBg.y = -30
@@ -56,33 +102,74 @@ export class MonsterRenderer {
   }
 
   /**
-   * 创建怪物纹理（临时）
+   * 加载怪物纹理
    */
-  private createMonsterTexture(): PIXI.Texture {
-    const graphics = new PIXI.Graphics()
-    
-    // 根据等级设置颜色
-    const colors = {
-      'slime_t1': 0x00FF00, // 绿色史莱姆
-      'slime_t2': 0x0000FF, // 蓝色史莱姆
-      'rabbit': 0xFFA500,   // 野兔 - 橙色
-      'wolf': 0x808080,     // 灰狼
-      'boar': 0x8B4513,     // 野猪 - 棕色
-      'deer': 0xDEB887,     // 鹿 - 米色
-      'spider': 0x4B0082,   // 毒蜘蛛 - 靛蓝
-      'bear': 0x000000,     // 黑熊
-      'dragon_whelp': 0xFF0000, // 幼龙 - 红色
-      'stone_golem': 0x696969,  // 石头傀儡 - 暗灰
-      'skeleton_king': 0xFFFFFF, // 骷髅王 - 白色
-      'demon': 0x8B0000,    // 恶魔 - 深红
+  private async loadMonsterTexture(type: string): Promise<PIXI.Texture> {
+    // 检查缓存
+    if (this.textureCache.has(type)) {
+      return this.textureCache.get(type)!
     }
 
-    const color = colors['slime_t1' as keyof typeof colors] || 0xFF00FF
+    const assetPath = MONSTER_TEXTURES[type] || MONSTER_TEXTURES['slime']
+    const fullPath = this.assetsPath + assetPath
+
+    try {
+      // 从资源加载
+      const texture = await PIXI.Assets.load(fullPath)
+      this.textureCache.set(type, texture)
+      return texture
+    } catch (error) {
+      console.warn(`Failed to load monster texture: ${fullPath}`, error)
+      // 返回临时色块纹理
+      return this.createFallbackTexture(type)
+    }
+  }
+
+  /**
+   * 创建临时纹理 (回退方案)
+   */
+  private createFallbackTexture(type: string): PIXI.Texture {
+    const graphics = new PIXI.Graphics()
     
-    // 绘制圆形怪物
-    graphics.beginFill(color)
-    graphics.drawCircle(0, 0, 25)
-    graphics.endFill()
+    // 根据类型设置颜色
+    const colors: Record<string, number> = {
+      'slime': 0x00FF00,
+      'bat': 0x000000,
+      'ghost': 0xFFFFFF,
+      'demon': 0xFF0000,
+      'dragon': 0xFF0000,
+      'goblin': 0x00FF00,
+      'skeleton': 0xFFFFFF,
+      'spider': 0x8B4513,
+      'wolf': 0x808080,
+      'mummy': 0xF5DEB3,
+      'orc': 0x8B4513,
+      'zombie': 0x32CD32,
+    }
+
+    const color = colors[type] || 0xFF00FF
+    
+    // 绘制圆形/方形怪物
+    if (type === 'bat' || type === 'spider') {
+      // 飞行/昆虫类：菱形
+      graphics.beginFill(color)
+      graphics.moveTo(0, -20)
+      graphics.lineTo(15, 0)
+      graphics.lineTo(0, 20)
+      graphics.lineTo(-15, 0)
+      graphics.closePath()
+      graphics.endFill()
+    } else if (type === 'ghost' || type === 'mummy') {
+      // 幽灵类：椭圆形
+      graphics.beginFill(color, 0.7)
+      graphics.drawEllipse(0, 0, 20, 25)
+      graphics.endFill()
+    } else {
+      // 普通类：圆形
+      graphics.beginFill(color)
+      graphics.drawCircle(0, 0, 25)
+      graphics.endFill()
+    }
 
     // 添加眼睛
     graphics.beginFill(0xFFFFFF)
@@ -99,10 +186,50 @@ export class MonsterRenderer {
   }
 
   /**
+   * 应用颜色调整
+   */
+  private applyColorAdjustment(sprite: PIXI.Sprite, type: string): void {
+    const adjustment = MONSTER_COLOR_ADJUSTMENTS[type]
+    if (!adjustment) return
+
+    // 简单实现：使用 tint
+    // 完整实现需要使用 PIXI.filters.ColorMatrixFilter
+    if (type === 'mummy') {
+      sprite.tint = 0xF5DEB3 // 小麦色 (绷带)
+    } else if (type === 'zombie') {
+      sprite.tint = 0x32CD32 // 绿黄色 (腐烂)
+    } else if (type === 'goblin') {
+      sprite.tint = 0x228B22 // 森林绿
+    } else if (type === 'skeleton') {
+      sprite.tint = 0xF0F0F0 // 灰白色
+    }
+  }
+
+  /**
    * 设置怪物数据
    */
-  public setMonster(monster: Monster): void {
+  public async setMonster(monster: Monster): Promise<void> {
     this.monster = monster
+    
+    // 移除旧精灵
+    if (this.sprite) {
+      this.container.removeChild(this.sprite)
+      this.sprite.destroy()
+    }
+
+    // 加载新纹理
+    const texture = await this.loadMonsterTexture(monster.type)
+    this.sprite = new PIXI.Sprite(texture)
+    this.sprite.anchor.set(0.5)
+    
+    // 应用颜色调整
+    this.applyColorAdjustment(this.sprite, monster.type)
+    
+    // 根据怪物大小缩放
+    const size = monster.size || 1
+    this.sprite.scale.set(size)
+    
+    this.container.addChildAt(this.sprite, 0) // 添加到最底层
     this.updateDisplay()
   }
 
@@ -176,6 +303,9 @@ export class MonsterRenderer {
    * 销毁
    */
   public destroy(): void {
+    if (this.sprite) {
+      this.sprite.destroy()
+    }
     this.container.destroy({ children: true })
   }
 }

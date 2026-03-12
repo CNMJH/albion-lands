@@ -113,6 +113,9 @@ interface SocialState {
   sendMessage: (type: string, content: string, options?: any) => void
   addMessage: (message: ChatMessage) => void
   fetchChatHistory: (type: string, targetId?: string) => Promise<void>
+  
+  // WebSocket 内部方法
+  handleWebSocketMessage: (message: any) => void
 }
 
 /**
