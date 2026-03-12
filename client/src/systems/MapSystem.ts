@@ -24,35 +24,38 @@ export class MapSystem {
   public async init(): Promise<void> {
     console.log('MapSystem: 开始初始化地图...')
     
+    // 先创建默认绿色纹理（保证一定有背景）
+    this.createDefaultTexture()
+    
     try {
-      // 加载地砖纹理
+      // 然后尝试加载真实地砖
       await this.loadTileTexture()
-      
-      // 创建地面
-      this.createGround()
-      
-      console.log('MapSystem: 地图初始化完成')
+      console.log('MapSystem: 地砖纹理加载成功，重新创建地面')
     } catch (error) {
-      console.error('MapSystem: 地图初始化失败', error)
+      console.warn('MapSystem: 地砖纹理加载失败，使用默认绿色背景', error)
     }
+    
+    // 创建地面
+    this.createGround()
+    
+    console.log('MapSystem: 地图初始化完成')
   }
   
   /**
    * 加载地砖纹理
    */
   private async loadTileTexture(): Promise<void> {
-    try {
-      // 使用草地地砖作为默认地面
-      const texturePath = 'assets/tiles/grass_tile.png'
-      console.log('MapSystem: 加载地砖纹理:', texturePath)
-      
-      this.tileTexture = await PIXI.Texture.from(texturePath)
-      console.log('MapSystem: 地砖纹理加载成功')
-    } catch (error) {
-      console.error('MapSystem: 地砖纹理加载失败，使用默认纹理', error)
-      // 创建默认纹理
-      this.createDefaultTexture()
+    const texturePath = '/assets/tiles/grass_tile.png'
+    console.log('MapSystem: 尝试加载地砖纹理:', texturePath)
+    
+    // 检查纹理是否存在
+    const response = await fetch(texturePath)
+    if (!response.ok) {
+      throw new Error(`地砖纹理不存在：${texturePath}`)
     }
+    
+    this.tileTexture = await PIXI.Texture.from(texturePath)
+    console.log('MapSystem: 地砖纹理加载成功')
   }
   
   /**
@@ -87,8 +90,10 @@ export class MapSystem {
    * 创建地面
    */
   private createGround(): void {
+    console.log('MapSystem: 开始创建地面...')
+    
     if (!this.tileTexture) {
-      console.error('MapSystem: 地砖纹理不存在')
+      console.error('MapSystem: 地砖纹理不存在，无法创建地面')
       return
     }
     
@@ -97,6 +102,9 @@ export class MapSystem {
       console.error('MapSystem: ground 图层不存在')
       return
     }
+    
+    // 清除图层中已有的内容
+    groundLayer.removeChildren()
     
     // 创建平铺纹理
     const tilingSprite = new PIXI.TilingSprite(
