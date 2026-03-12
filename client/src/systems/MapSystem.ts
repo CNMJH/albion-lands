@@ -127,12 +127,17 @@ export class MapSystem {
       this.mapHeight * this.tileSize
     )
     
-    tilingSprite.x = -(this.mapWidth * this.tileSize) / 2
-    tilingSprite.y = -(this.mapHeight * this.tileSize) / 2
+    // 设置锚点为中心
+    tilingSprite.anchor.set(0.5)
+    
+    // 居中放置
+    tilingSprite.x = 0
+    tilingSprite.y = 0
     
     groundLayer.addChild(tilingSprite)
     
     console.log(`MapSystem: 地面创建完成 (${this.mapWidth}x${this.mapHeight} 地砖)`)
+    console.log('🗺️ 地面尺寸:', { width: this.mapWidth * this.tileSize, height: this.mapHeight * this.tileSize })
   }
   
   /**
