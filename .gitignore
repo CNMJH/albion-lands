@@ -121,3 +121,4 @@ game-data/local/
 # Screenshots (temporary)
 *.png
 !assets/**/*.png
+!client/public/assets/**/*.png
