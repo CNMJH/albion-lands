@@ -693,10 +693,16 @@ export class PlayerControlsSystem {
    * 发送缓冲的移动数据
    */
   private sendMoveBuffer(): void {
-    if (!this.moveBuffer) return
+    if (!this.moveBuffer) {
+      console.log('⚠️ 没有缓冲的移动数据')
+      return
+    }
 
     const state = useGameStore.getState()
-    if (!state.player) return
+    if (!state.player) {
+      console.warn('⚠️ 玩家不存在，无法发送移动')
+      return
+    }
 
     // 发送累积的移动增量
     network.send('move', {
@@ -705,6 +711,7 @@ export class PlayerControlsSystem {
       timestamp: Date.now(),
     })
 
+    console.log(`📍 移动已发送: dx=${this.moveBuffer.dx.toFixed(1)}, dy=${this.moveBuffer.dy.toFixed(1)}`)
     this.moveBuffer = null
     this.lastMoveSendTime = Date.now()
   }
@@ -714,7 +721,10 @@ export class PlayerControlsSystem {
    */
   private sendMoveTo(x: number, y: number): void {
     const state = useGameStore.getState()
-    if (!state.player) return
+    if (!state.player) {
+      console.warn('⚠️ 玩家不存在，无法发送移动')
+      return
+    }
 
     console.log(`🎯 玩家移动到 (${x.toFixed(0)}, ${y.toFixed(0)})`)
 
@@ -735,6 +745,10 @@ export class PlayerControlsSystem {
         targetY: y,
         timestamp: Date.now(),
       })
+      
+      console.log(`📍 移动目标已发送: target=(${x.toFixed(0)}, ${y.toFixed(0)}), distance=${distance.toFixed(0)}`)
+    } else {
+      console.log(`⚠️ 距离过近 (${distance.toFixed(0)}px)，跳过移动`)
     }
   }
 }

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket 移动测试工具</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+    
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    .status-box {
+      background: #f7fafc;
+      border-left: 4px solid #cbd5e0;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    
+    .status-box.connected {
+      border-left-color: #48bb78;
+      background: #f0fff4;
+    }
+    
+    .status-box.disconnected {
+      border-left-color: #f56565;
+      background: #fff5f5;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-indicator.connected {
+      background: #48bb78;
+      box-shadow: 0 0 10px #48bb78;
+    }
+    
+    .status-indicator.disconnected {
+      background: #f56565;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-danger {
+      background: #f56565;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #e53e3e;
+    }
+    
+    .log-container {
+      background: #1a202c;
+      color: #e2e8f0;
+      border-radius: 6px;
+      padding: 15px;
+      height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    
+    .log-entry {
+      margin-bottom: 5px;
+      padding: 3px 0;
+      border-bottom: 1px solid #2d3748;
+    }
+    
+    .log-entry.error {
+      color: #fc8181;
+    }
+    
+    .log-entry.success {
+      color: #68d391;
+    }
+    
+    .log-entry.info {
+      color: #63b3ed;
+    }
+    
+    .log-entry.warning {
+      color: #f6ad55;
+    }
+    
+    .timestamp {
+      color: #718096;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔌 WebSocket 移动测试工具</h1>
+      <p>测试游戏 WebSocket 连接和移动消息发送</p>
+    </div>
+    
+    <div class="content">
+      <div id="statusBox" class="status-box disconnected">
+        <span id="statusIndicator" class="status-indicator disconnected"></span>
+        <span id="statusText">未连接</span>
+      </div>
+      
+      <div class="button-group">
+        <button id="connectBtn" class="btn-primary" onclick="connect()">连接 WebSocket</button>
+        <button id="disconnectBtn" class="btn-danger" onclick="disconnect()" disabled>断开连接</button>
+      </div>
+      
+      <div class="button-group">
+        <button onclick="sendMoveTest()" disabled id="moveBtn">发送移动测试</button>
+        <button onclick="clearLog()" disabled id="clearBtn">清空日志</button>
+      </div>
+      
+      <div class="log-container" id="logContainer">
+        <div class="log-entry">
+          <span class="timestamp">[等待]</span>
+          <span>准备就绪，点击"连接 WebSocket"开始测试...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let ws = null;
+    const WS_URL = 'ws://localhost:3002/ws';
+    const logContainer = document.getElementById('logContainer');
+    const statusBox = document.getElementById('statusBox');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const connectBtn = document.getElementById('connectBtn');
+    const disconnectBtn = document.getElementById('disconnectBtn');
+    const moveBtn = document.getElementById('moveBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    
+    function log(message, type = 'info') {
+      const now = new Date();
+      const timestamp = now.toLocaleTimeString('zh-CN', { hour12: false }) + '.' + now.getMilliseconds().toString().padStart(3, '0');
+      
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.innerHTML = `<span class="timestamp">[${timestamp}]</span><span>${message}</span>`;
+      
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+    
+    function updateStatus(connected) {
+      if (connected) {
+        statusBox.className = 'status-box connected';
+        statusIndicator.className = 'status-indicator connected';
+        statusText.textContent = '已连接';
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        moveBtn.disabled = false;
+        clearBtn.disabled = false;
+      } else {
+        statusBox.className = 'status-box disconnected';
+        statusIndicator.className = 'status-indicator disconnected';
+        statusText.textContent = '未连接';
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+        moveBtn.disabled = true;
+        clearBtn.disabled = true;
+      }
+    }
+    
+    function connect() {
+      log(`正在连接到 ${WS_URL}...`, 'info');
+      
+      try {
+        ws = new WebSocket(WS_URL);
+        
+        ws.onopen = () => {
+          log('✅ WebSocket 连接成功！', 'success');
+          updateStatus(true);
+        };
+        
+        ws.onmessage = (event) => {
+          try {
+            const packet = JSON.parse(event.data);
+            log(`📥 收到消息 [${packet.type}]: ${JSON.stringify(packet.payload)}`, 'info');
+          } catch (e) {
+            log(`📥 收到原始消息：${event.data}`, 'info');
+          }
+        };
+        
+        ws.onclose = (event) => {
+          log(`❌ WebSocket 连接关闭：${event.code} ${event.reason}`, 'error');
+          updateStatus(false);
+        };
+        
+        ws.onerror = (error) => {
+          log(`⚠️ WebSocket 错误：${error}`, 'error');
+        };
+      } catch (error) {
+        log(`❌ 连接失败：${error.message}`, 'error');
+      }
+    }
+    
+    function disconnect() {
+      if (ws) {
+        log('正在断开连接...', 'warning');
+        ws.close(1000, '用户主动断开');
+        ws = null;
+        updateStatus(false);
+        log('✅ 已断开连接', 'success');
+      }
+    }
+    
+    function sendMoveTest() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        log('❌ WebSocket 未连接，无法发送消息', 'error');
+        return;
+      }
+      
+      const testMoves = [
+        { dx: 10, dy: 0, targetX: 320, targetY: 200 },
+        { dx: 0, dy: 10, targetX: 320, targetY: 210 },
+        { dx: -10, dy: 0, targetX: 310, targetY: 210 },
+        { dx: 0, dy: -10, targetX: 310, targetY: 200 },
+      ];
+      
+      testMoves.forEach((move, index) => {
+        setTimeout(() => {
+          const packet = {
+            seq: index,
+            type: 'move',
+            payload: move,
+            timestamp: Date.now(),
+          };
+          
+          ws.send(JSON.stringify(packet));
+          log(`📡 发送移动 [${index}]: dx=${move.dx}, dy=${move.dy}, target=(${move.targetX}, ${move.targetY})`, 'success');
+        }, index * 500);
+      });
+      
+      log('🎯 已发送 4 个移动测试消息（间隔 500ms）', 'info');
+    }
+    
+    function clearLog() {
+      logContainer.innerHTML = '';
+      log('🧹 日志已清空', 'info');
+    }
+    
+    // 初始化
+    updateStatus(false);
+  </script>
+</body>
+</html>

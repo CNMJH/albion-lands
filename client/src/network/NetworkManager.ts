@@ -131,7 +131,8 @@ export class NetworkManager extends EventEmitter {
    */
   public send(type: string, payload: any = {}): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('WebSocket 未连接，消息发送失败:', type)
+      console.warn('❌ WebSocket 未连接，消息发送失败:', type)
+      console.log('WebSocket 状态:', this.ws?.readyState)
       return
     }
 
@@ -143,7 +144,7 @@ export class NetworkManager extends EventEmitter {
     }
 
     this.ws.send(JSON.stringify(packet))
-    console.log(`发送消息 [${type}]:`, payload)
+    console.log(`📡 发送消息 [${type}]:`, payload)
   }
 
   /**
