@@ -1,5 +1,5 @@
 import { useGameStore } from '../stores/gameStore'
-import './CharacterInfo.css'
+import './CharacterInfo-optimized.css'
 
 /**
  * 角色信息组件

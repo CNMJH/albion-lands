@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import './SkillBar.css'
+import './SkillBar-optimized.css'
 
 /**
  * 技能栏组件

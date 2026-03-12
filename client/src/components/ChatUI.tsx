@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useSocialStore } from '../systems/SocialSystem'
-import './ChatUI.css'
+import './ChatUI-optimized.css'
 
 /**
  * 聊天 UI 组件

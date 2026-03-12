@@ -7,7 +7,7 @@ import { Inventory } from './Inventory'
 import { FriendsUI } from './FriendsUI'
 import { ChatUI } from './ChatUI'
 import { EquipmentPanel } from './EquipmentPanel'
-import './UIOverlay.css'
+import './UIOverlay-optimized.css'
 
 /**
  * UI 覆盖层组件
