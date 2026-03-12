@@ -51,7 +51,7 @@ async function start() {
     await wsServer.start()
 
     // 启动 HTTP 服务器
-    const port = parseInt(process.env.PORT || '3000')
+    const port = parseInt(process.env.PORT || '3002')
     const host = process.env.HOST || '0.0.0.0'
 
     await fastify.listen({ port, host })
