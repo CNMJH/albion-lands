@@ -93,6 +93,13 @@ export function GameCanvas() {
         clearTimeout(resizeTimeout)
       }
       
+      // 从容器中移除 canvas（防止 React 严格模式导致重复）
+      if (containerRef.current) {
+        const canvases = containerRef.current.querySelectorAll('canvas')
+        canvases.forEach(canvas => canvas.remove())
+        console.log('GameCanvas: 移除了', canvases.length, '个 canvas')
+      }
+      
       // 清理渲染器
       try {
         if (combatRendererRef.current) {
