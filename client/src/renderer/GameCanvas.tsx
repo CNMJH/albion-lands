@@ -20,7 +20,7 @@ export function GameCanvas() {
   const playerControlsRef = useRef<ReturnType<typeof playerControls.init> | null>(null)
   const minimapRef = useRef<MinimapRenderer | null>(null)
   const deathSystemRef = useRef<DeathSystem | null>(null)
-  const { player } = useGameStore()
+  const { player, characterId, setDeathSystem } = useGameStore()
   
   // 使用 useRef 存储渲染器，避免闭包问题
   const rendererInstance = useRef<GameRenderer | null>(null)
@@ -94,9 +94,10 @@ export function GameCanvas() {
     console.log('🗺️ 小地图已创建')
 
     // 初始化死亡系统
-    const deathSystem = new DeathSystem(renderer)
+    const deathSystem = new DeathSystem(renderer, characterId || 'unknown')
     deathSystemRef.current = deathSystem
-    console.log('💀 死亡系统已创建')
+    setDeathSystem(deathSystem)
+    console.log('💀 死亡系统已创建 (characterId:', characterId + ')')
 
     // 初始化玩家操作系统
     const controls = playerControls.init(renderer)

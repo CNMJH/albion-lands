@@ -49,6 +49,7 @@ interface GameState {
   // 玩家信息
   player: Player | null
   isLoggedIn: boolean
+  characterId: string | null
   
   // 背包
   inventory: {
@@ -71,6 +72,9 @@ interface GameState {
   monsters: Monster[]
   combatLog: string[]
   
+  // 死亡系统引用
+  deathSystem: any | null
+  
   // 动作
   initialize: () => void
   setPlayer: (player: Partial<Player>) => void
@@ -80,6 +84,7 @@ interface GameState {
   addSkill: (skillId: string) => void
   setParty: (party: any) => void
   addFriend: (friend: any) => void
+  setDeathSystem: (deathSystem: any) => void
   
   // 战斗相关
   addMonster: (monster: Monster) => void
@@ -114,6 +119,8 @@ export const useGameStore = create<GameState>()(
     // 初始状态
     player: null,
     isLoggedIn: false,
+    characterId: null,
+    deathSystem: null,
     inventory: {
       slots: Array(50).fill(null),
       capacity: 50,
@@ -193,6 +200,11 @@ export const useGameStore = create<GameState>()(
       set((state) => ({
         friends: [...state.friends, friend],
       }))
+    },
+    
+    // 设置死亡系统
+    setDeathSystem: (deathSystem) => {
+      set({ deathSystem })
     },
     
     // 添加怪物

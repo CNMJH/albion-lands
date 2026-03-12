@@ -295,6 +295,12 @@ export class PlayerControlsSystem {
       this.toggleUI('chat')
       return
     }
+
+    // E - 拾取掉落物（死亡掉落系统）
+    if (code === 'KeyE') {
+      this.pickupDrop()
+      return
+    }
   }
 
   /**
@@ -749,6 +755,46 @@ export class PlayerControlsSystem {
       console.log(`📍 移动目标已发送: target=(${x.toFixed(0)}, ${y.toFixed(0)}), distance=${distance.toFixed(0)}`)
     } else {
       console.log(`⚠️ 距离过近 (${distance.toFixed(0)}px)，跳过移动`)
+    }
+  }
+
+  /**
+   * 拾取掉落物（E 键）
+   */
+  private async pickupDrop(): Promise<void> {
+    console.log('🤲 尝试拾取掉落物...')
+    
+    // 获取 deathSystem 实例
+    const state = useGameStore.getState()
+    const deathSystem = (state as any).deathSystem;
+    
+    if (!deathSystem) {
+      console.warn('⚠️ DeathSystem 未初始化')
+      return
+    }
+
+    // 获取玩家位置
+    const player = state.player;
+    if (!player) {
+      console.warn('⚠️ 玩家不存在')
+      return
+    }
+
+    // 查找最近的掉落物
+    const nearestDropId = deathSystem.getNearestDrop(player.x, player.y, this.config.interactRange);
+    
+    if (!nearestDropId) {
+      console.log('⚠️ 范围内没有掉落物')
+      return
+    }
+
+    // 拾取掉落物
+    const success = await deathSystem.pickupDrop(nearestDropId);
+    
+    if (success) {
+      console.log('✅ 拾取成功')
+    } else {
+      console.error('❌ 拾取失败')
     }
   }
 }
