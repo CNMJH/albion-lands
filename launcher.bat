@@ -49,18 +49,21 @@ echo   ✓ Git 已安装
 echo   ✓ Node.js 已安装
 echo.
 
-:: 检查是否是第一次运行
-if not exist "albion-lands" (
+:: 检查是否是第一次运行（从根目录运行）
+if not exist "server" (
     echo [信息] 首次运行，正在克隆项目...
-    git clone https://github.com/CNMJH/albion-lands.git
-    if errorlevel 1 (
-        echo [错误] 克隆项目失败
-        pause
-        exit /b 1
+    cd ..
+    if not exist "albion-lands" (
+        git clone https://github.com/CNMJH/albion-lands.git
+        if errorlevel 1 (
+            echo [错误] 克隆项目失败
+            pause
+            exit /b 1
+        )
     )
     cd albion-lands
+    echo [信息] 项目已克隆，正在拉取最新代码...
 ) else (
-    cd albion-lands
     echo [信息] 项目已存在，正在拉取最新代码...
 )
 
