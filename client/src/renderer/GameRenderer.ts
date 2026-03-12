@@ -314,9 +314,6 @@ export class GameRenderer extends EventEmitter {
     }
   }
 
-    console.log('渲染器已销毁')
-  }
-
   /**
    * 获取应用实例
    */
