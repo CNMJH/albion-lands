@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GM 工具 - 拍卖行测试</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e4e4e4;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ffd700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .card h2 {
+      margin-bottom: 15px;
+      color: #4ecca3;
+      border-bottom: 1px solid rgba(78, 204, 163, 0.3);
+      padding-bottom: 10px;
+    }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; color: #a0a0a0; }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #e4e4e4;
+      font-size: 14px;
+    }
+    input:focus, select:focus { outline: none; border-color: #4ecca3; }
+    button {
+      background: linear-gradient(135deg, #4ecca3 0%, #38a169 100%);
+      color: #1a1a2e;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(78, 204, 163, 0.4);
+    }
+    button.danger { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+    button.danger:hover { box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
+    button.info { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+    button.info:hover { box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); }
+    .result {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .result pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #e4e4e4;
+    }
+    .success { color: #4ecca3; }
+    .error { color: #e74c3c; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 8px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    th { background: rgba(78, 204, 163, 0.2); color: #4ecca3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏪 GM 工具 - 拍卖行测试</h1>
+
+    <div class="grid-2">
+      <!-- 创建订单 -->
+      <div class="card">
+        <h2>📝 创建订单</h2>
+        <div class="form-group">
+          <label>卖家 ID:</label>
+          <select id="sellerId">
+            <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+            <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+            <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>物品 ID:</label>
+          <input type="text" id="itemId" placeholder="输入物品 ID">
+        </div>
+        <div class="form-group">
+          <label>数量:</label>
+          <input type="number" id="quantity" value="10" min="1">
+        </div>
+        <div class="form-group">
+          <label>单价:</label>
+          <input type="number" id="unitPrice" value="50" min="1">
+        </div>
+        <div class="form-group">
+          <label>类型:</label>
+          <select id="orderType">
+            <option value="SELL">出售</option>
+            <option value="BUY">购买</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>有效期 (小时):</label>
+          <select id="duration">
+            <option value="24">24 小时</option>
+            <option value="48">48 小时</option>
+            <option value="72">72 小时</option>
+          </select>
+        </div>
+        <button onclick="createOrder()">📝 创建订单</button>
+        <div id="createResult" class="result"></div>
+      </div>
+
+      <!-- 查询市场 -->
+      <div class="card">
+        <h2>🔍 查询市场</h2>
+        <div class="form-group">
+          <label>物品 ID (可选):</label>
+          <input type="text" id="searchItemId" placeholder="留空查询所有">
+        </div>
+        <div class="form-group">
+          <label>类型:</label>
+          <select id="searchType">
+            <option value="SELL">出售</option>
+            <option value="BUY">购买</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>排序:</label>
+          <select id="sortBy">
+            <option value="price">价格</option>
+            <option value="time">时间</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>顺序:</label>
+          <select id="sortOrder">
+            <option value="asc">升序</option>
+            <option value="desc">降序</option>
+          </select>
+        </div>
+        <button class="info" onclick="searchMarket()">🔍 查询市场</button>
+        <div id="searchResult" class="result"></div>
+      </div>
+    </div>
+
+    <!-- 购买物品 -->
+    <div class="card">
+      <h2>🛒 购买物品</h2>
+      <div class="form-group">
+        <label>订单 ID:</label>
+        <input type="text" id="buyOrderId" placeholder="输入订单 ID">
+      </div>
+      <div class="form-group">
+        <label>买家 ID:</label>
+        <select id="buyerId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>数量:</label>
+        <input type="number" id="buyQuantity" value="1" min="1">
+      </div>
+      <button onclick="buyItem()">🛒 购买</button>
+      <div id="buyResult" class="result"></div>
+    </div>
+
+    <!-- 取消订单 -->
+    <div class="card">
+      <h2>❌ 取消订单</h2>
+      <div class="form-group">
+        <label>订单 ID:</label>
+        <input type="text" id="cancelOrderId" placeholder="输入订单 ID">
+      </div>
+      <div class="form-group">
+        <label>卖家 ID:</label>
+        <select id="cancelSellerId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <button class="danger" onclick="cancelOrder()">❌ 取消订单</button>
+      <div id="cancelResult" class="result"></div>
+    </div>
+
+    <!-- 我的订单 -->
+    <div class="card">
+      <h2>📋 我的订单</h2>
+      <div class="form-group">
+        <label>卖家 ID:</label>
+        <select id="myOrdersSellerId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <button class="info" onclick="getMyOrders()">📋 查询我的订单</button>
+      <div id="myOrdersResult" class="result"></div>
+    </div>
+
+    <!-- 交易历史 -->
+    <div class="card">
+      <h2>📜 交易历史</h2>
+      <div class="form-group">
+        <label>角色 ID:</label>
+        <select id="historyCharacterId">
+          <option value="1fc5bfa9-a54b-406c-abaa-adb032a3f59a">测试玩家 1</option>
+          <option value="d066765f-7f8a-4c00-a72f-0a29113a843b">测试玩家 2</option>
+          <option value="c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1">测试玩家 3</option>
+        </select>
+      </div>
+      <button class="info" onclick="getHistory()">📜 查询历史</button>
+      <div id="historyResult" class="result"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3002/api/v1';
+
+    async function createOrder() {
+      const sellerId = document.getElementById('sellerId').value;
+      const itemId = document.getElementById('itemId').value;
+      const quantity = parseInt(document.getElementById('quantity').value);
+      const unitPrice = parseInt(document.getElementById('unitPrice').value);
+      const type = document.getElementById('orderType').value;
+      const duration = parseInt(document.getElementById('duration').value);
+      const resultDiv = document.getElementById('createResult');
+      resultDiv.innerHTML = '<p>正在创建...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/market/order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sellerId, itemId, quantity, unitPrice, type, duration }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ 订单创建成功! ID: ${result.order.id}</p><pre>${JSON.stringify(result.order, null, 2)}</pre>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function searchMarket() {
+      const itemId = document.getElementById('searchItemId').value;
+      const type = document.getElementById('searchType').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const sortOrder = document.getElementById('sortOrder').value;
+      const resultDiv = document.getElementById('searchResult');
+      resultDiv.innerHTML = '<p>正在查询...</p>';
+
+      try {
+        let url = `${API_BASE}/market/orders?type=${type}&sortBy=${sortBy}&sortOrder=${sortOrder}`;
+        if (itemId) url += `&itemId=${itemId}`;
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.success && result.orders.length > 0) {
+          let html = '<table><thead><tr><th>物品</th><th>数量</th><th>单价</th><th>总价</th><th>卖家</th><th>类型</th></tr></thead><tbody>';
+          result.orders.forEach(order => {
+            html += `<tr>
+              <td>${order.itemName}</td>
+              <td>x${order.quantity}</td>
+              <td>💰${order.unitPrice}</td>
+              <td>💰${order.totalPrice}</td>
+              <td>${order.sellerName}</td>
+              <td>${order.type}</td>
+            </tr>`;
+          });
+          html += '</tbody></table>';
+          resultDiv.innerHTML = html;
+        } else {
+          resultDiv.innerHTML = '<p>暂无订单</p>';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function buyItem() {
+      const orderId = document.getElementById('buyOrderId').value;
+      const buyerId = document.getElementById('buyerId').value;
+      const quantity = parseInt(document.getElementById('buyQuantity').value);
+      const resultDiv = document.getElementById('buyResult');
+      resultDiv.innerHTML = '<p>正在购买...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/market/buy`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, buyerId, quantity }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ 购买成功! 数量：${result.quantity}, 总价：💰${result.totalPrice}, 税费：💰${result.tax}</p>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function cancelOrder() {
+      const orderId = document.getElementById('cancelOrderId').value;
+      const sellerId = document.getElementById('cancelSellerId').value;
+      const resultDiv = document.getElementById('cancelResult');
+      resultDiv.innerHTML = '<p>正在取消...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/market/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, sellerId }),
+        });
+        const result = await response.json();
+        
+        resultDiv.innerHTML = result.success
+          ? `<p class="success">✅ 订单已取消</p>`
+          : `<p class="error">❌ 失败：${result.message}</p>`;
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function getMyOrders() {
+      const sellerId = document.getElementById('myOrdersSellerId').value;
+      const resultDiv = document.getElementById('myOrdersResult');
+      resultDiv.innerHTML = '<p>正在查询...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/market/seller/${sellerId}`);
+        const result = await response.json();
+        
+        if (result.success && result.orders.length > 0) {
+          let html = '<table><thead><tr><th>物品</th><th>数量</th><th>单价</th><th>状态</th><th>过期时间</th></tr></thead><tbody>';
+          result.orders.forEach(order => {
+            html += `<tr>
+              <td>${order.itemName}</td>
+              <td>x${order.quantity}</td>
+              <td>💰${order.unitPrice}</td>
+              <td>${order.status}</td>
+              <td>${new Date(order.expiresAt).toLocaleString('zh-CN')}</td>
+            </tr>`;
+          });
+          html += '</tbody></table>';
+          resultDiv.innerHTML = html;
+        } else {
+          resultDiv.innerHTML = '<p>暂无订单</p>';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+
+    async function getHistory() {
+      const characterId = document.getElementById('historyCharacterId').value;
+      const resultDiv = document.getElementById('historyResult');
+      resultDiv.innerHTML = '<p>正在查询...</p>';
+
+      try {
+        const response = await fetch(`${API_BASE}/market/history/${characterId}`);
+        const result = await response.json();
+        
+        if (result.success && result.history.length > 0) {
+          let html = '<table><thead><tr><th>物品</th><th>数量</th><th>单价</th><th>总价</th><th>税费</th><th>交易方</th><th>时间</th></tr></thead><tbody>';
+          result.history.forEach(tx => {
+            html += `<tr>
+              <td>${tx.itemName}</td>
+              <td>x${tx.quantity}</td>
+              <td>💰${tx.price}</td>
+              <td>💰${tx.totalPrice}</td>
+              <td>💰${tx.tax}</td>
+              <td>${tx.otherPartyName}</td>
+              <td>${new Date(tx.createdAt).toLocaleString('zh-CN')}</td>
+            </tr>`;
+          });
+          html += '</tbody></table>';
+          resultDiv.innerHTML = html;
+        } else {
+          resultDiv.innerHTML = '<p>暂无交易记录</p>';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">❌ 请求失败：${error.message}</p>`;
+      }
+    }
+  </script>
+</body>
+</html>

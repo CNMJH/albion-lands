@@ -47,6 +47,9 @@ model Character {
   pvpStats        PVPStats?       // PVP 统计
   kills           PlayerKill[]    @relation("KillerKills")
   deaths          PlayerKill[]    @relation("VictimKills")
+  marketOrders    MarketOrder[]
+  soldItems       TransactionHistory[] @relation("SellerTransactions")
+  boughtItems     TransactionHistory[] @relation("BuyerTransactions")
 }
 
 model Item {
@@ -91,9 +94,18 @@ model MarketOrder {
   item      Item     @relation(fields: [itemId], references: [id])
   quantity  Int
   unitPrice Int
-  status    String   @default("Pending")
+  type      String   @default("SELL") // SELL, BUY
+  status    String   @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED, EXPIRED
+  expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  seller    Character @relation(fields: [sellerId], references: [id])
+  
+  @@index([sellerId])
+  @@index([itemId])
+  @@index([status])
+  @@index([type])
 }
 
 model Zone {
@@ -482,4 +494,25 @@ model TradeItem {
   
   @@index([tradeId])
   @@index([slot])
+}
+
+// 交易历史
+model TransactionHistory {
+  id        String   @id @default(uuid())
+  orderId   String
+  buyerId   String
+  sellerId  String
+  itemId    String
+  quantity  Int
+  price     Int      // 成交价
+  tax       Int      @default(0) // 税费
+  createdAt DateTime @default(now())
+  
+  seller    Character @relation("SellerTransactions", fields: [sellerId], references: [id])
+  buyer     Character @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  
+  @@index([orderId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([createdAt])
 }
