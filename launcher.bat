@@ -124,6 +124,10 @@ if not exist "client\node_modules" (
 :: 停止之前的进程
 echo.
 echo [5/6] 清理旧进程...
+echo   正在停止 Node.js 进程...
+taskkill /F /IM node.exe >nul 2>nul
+timeout /t 3 /nobreak >nul
+:: 再次检查确保清理完成
 taskkill /F /IM node.exe >nul 2>nul
 timeout /t 2 /nobreak >nul
 echo   ✓ 已清理旧进程
