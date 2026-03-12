@@ -272,6 +272,50 @@ export class QuestService {
   }
 
   /**
+   * 更新任务进度（按类型和目标自动查找匹配的任务）
+   */
+  public static async updateProgressByType(
+    characterId: string,
+    objectiveType: string,
+    targetId: string,
+    amount: number = 1
+  ): Promise<void> {
+    // 获取角色所有进行中的任务
+    const progresses = await prisma.questProgress.findMany({
+      where: {
+        characterId,
+        status: 'in_progress',
+      },
+      include: {
+        quest: true,
+      },
+    });
+
+    // 遍历所有任务，更新匹配的目标
+    for (const progress of progresses) {
+      if (!progress.quest.objectives) continue;
+
+      const objectives: QuestObjective[] = JSON.parse(progress.quest.objectives);
+      
+      // 检查是否有匹配的目标
+      const hasMatchingObjective = objectives.some(
+        obj => obj.type === objectiveType && obj.targetId === targetId
+      );
+
+      if (hasMatchingObjective) {
+        // 调用原有的 updateProgress 方法
+        await this.updateProgress(
+          characterId,
+          progress.questId,
+          objectiveType,
+          targetId,
+          amount
+        );
+      }
+    }
+  }
+
+  /**
    * 更新任务进度
    */
   public static async updateProgress(

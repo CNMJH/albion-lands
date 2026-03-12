@@ -3,11 +3,16 @@ import { GameCanvas } from './renderer/GameCanvas'
 import { UIOverlay } from './components/UIOverlay'
 import { GatheringUI } from './components/GatheringUI'
 import { CraftingUI } from './components/CraftingUI'
+import { QuestTracker } from './components/ui/QuestTracker'
+import { QuestPanel } from './components/ui/QuestPanel'
+import { AchievementPanel } from './components/ui/AchievementPanel'
 import { useGameStore } from './stores/gameStore'
+import { useQuestStore } from './stores/QuestSystem'
 import { NetworkManager } from './network/NetworkManager'
 import { combatSystem } from './systems/CombatSystem'
 import { monsterAI } from './systems/MonsterAI'
 import './App.css'
+import './styles/quest-system.css'
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -90,6 +95,11 @@ function App() {
       
       {/* 制造 UI */}
       <CraftingUI />
+      
+      {/* 任务系统 UI */}
+      <QuestTracker />
+      <QuestPanel />
+      <AchievementPanel />
     </div>
   )
 }
@@ -98,6 +108,7 @@ function App() {
 function setupNetworkHandlers() {
   const network = NetworkManager.getInstance()
   const { setPlayer, addMonster, updateMonster, removeMonster, addCombatLog, updatePlayerHP } = useGameStore.getState()
+  const { fetchAvailableQuests, fetchCharacterQuests, fetchAchievements, fetchAchievementProgress, fetchNPCs } = useQuestStore.getState()
 
   // 监听欢迎消息
   network.onMessage('welcome', (data) => {
@@ -109,6 +120,28 @@ function setupNetworkHandlers() {
     console.log('玩家更新:', data)
     if (data.exp || data.silver) {
       addCombatLog(`获得 ${data.exp || 0} 经验，${data.silver || 0} 银币`)
+    }
+  })
+
+  // 监听任务进度更新
+  network.onMessage('questProgress', (data) => {
+    console.log('任务进度更新:', data)
+    if (data.characterId) {
+      // 刷新角色任务列表
+      fetchCharacterQuests(data.characterId)
+      addCombatLog(`任务进度更新：${data.questName}`)
+    }
+  })
+
+  // 监听成就解锁
+  network.onMessage('achievementUnlocked', (data) => {
+    console.log('成就解锁:', data)
+    if (data.achievementName) {
+      addCombatLog(`🏆 解锁成就：${data.achievementName}`)
+      // 刷新成就进度
+      if (data.characterId) {
+        fetchAchievementProgress(data.characterId)
+      }
     }
   })
 
@@ -162,8 +195,8 @@ function setupNetworkHandlers() {
 
   // 模拟玩家数据（临时）
   setTimeout(() => {
-    setPlayer({
-      id: 'player_1',
+    const playerData = {
+      id: 'test-character-id',
       name: '测试角色',
       level: 10,
       exp: 1000,
@@ -176,7 +209,15 @@ function setupNetworkHandlers() {
       y: 300,
       zoneId: 'zone_1',
       isBot: false,
-    })
+    }
+    setPlayer(playerData)
+    
+    // 初始化任务系统数据
+    fetchAvailableQuests()
+    fetchCharacterQuests(playerData.id)
+    fetchAchievements()
+    fetchAchievementProgress(playerData.id)
+    fetchNPCs()
   }, 1000)
 }
 

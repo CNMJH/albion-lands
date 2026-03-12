@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import { WebSocket } from 'ws'
 import { randomUUID } from 'crypto'
-import { CombatService } from '../services/CombatService'
-import { GatheringService } from '../services/GatheringService'
+import { CombatService, setWebSocketBroadcast as setCombatBroadcast } from '../services/CombatService'
+import { GatheringService, setWebSocketBroadcast as setGatheringBroadcast } from '../services/GatheringService'
 import { CraftingService } from '../services/CraftingService'
 import { ChatService } from '../services/ChatService'
 import { PartyService } from '../services/PartyService'
@@ -46,9 +46,30 @@ export class WebSocketServer {
   }
 
   /**
+   * 根据角色 ID 发送消息
+   */
+  sendToCharacter(characterId: string, type: string, data: any): void {
+    // 查找对应的客户端
+    for (const [clientId, client] of this.clients.entries()) {
+      if (client.characterId === characterId) {
+        this.send(clientId, { type, data })
+        break
+      }
+    }
+  }
+
+  /**
    * 启动 WebSocket 服务器
    */
   async start(): Promise<void> {
+    // 设置 WebSocket 广播函数
+    setCombatBroadcast((characterId, type, data) => {
+      this.sendToCharacter(characterId, type, data)
+    })
+    setGatheringBroadcast((characterId, type, data) => {
+      this.sendToCharacter(characterId, type, data)
+    })
+
     // 注册 WebSocket 路由
     this.fastify.register(async (fastify) => {
       fastify.get('/ws', { websocket: true }, (connection, req: FastifyRequest) => {

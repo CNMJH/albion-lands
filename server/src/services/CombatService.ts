@@ -1,4 +1,6 @@
 import { prisma } from '../prisma'
+import { QuestService } from './QuestService'
+import { AchievementService } from './AchievementService'
 
 interface MonsterInstance {
   id: string
@@ -19,6 +21,13 @@ interface MonsterInstance {
 
 // 活跃怪物列表（内存缓存）
 const activeMonsters = new Map<string, MonsterInstance>()
+
+// WebSocket 广播函数（由外部设置）
+let broadcastToCharacter: ((characterId: string, type: string, data: any) => void) | null = null
+
+export function setWebSocketBroadcast(fn: (characterId: string, type: string, data: any) => void) {
+  broadcastToCharacter = fn
+}
 
 /**
  * 战斗服务
@@ -102,6 +111,43 @@ export class CombatService {
           silver: character.silver + silverGained,
         },
       })
+
+      // 更新任务进度（击杀目标）
+      await QuestService.updateProgressByType(
+        characterId,
+        'kill',
+        monster.templateId,
+        1
+      )
+
+      // 更新成就进度（击杀成就）
+      const achievementUpdate = await AchievementService.updateProgress(
+        characterId,
+        'kill',
+        monster.templateId,
+        1
+      )
+
+      // 通知客户端
+      if (broadcastToCharacter) {
+        broadcastToCharacter(characterId, 'monsterDeath', {
+          monsterId,
+          templateId: monster.templateId,
+          expGained,
+          silverGained,
+        })
+
+        // 如果有成就解锁，发送通知
+        if (achievementUpdate.completed && achievementUpdate.completed.length > 0) {
+          achievementUpdate.completed.forEach((ach: any) => {
+            broadcastToCharacter!(characterId, 'achievementUnlocked', {
+              achievementId: ach.id,
+              achievementName: ach.name,
+              characterId,
+            })
+          })
+        }
+      }
 
       // 移除怪物
       await this.removeMonster(monsterId)

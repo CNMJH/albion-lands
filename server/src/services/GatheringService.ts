@@ -1,5 +1,14 @@
 import { prisma } from '../prisma'
 import { ItemService } from './ItemService'
+import { QuestService } from './QuestService'
+import { AchievementService } from './AchievementService'
+
+// WebSocket 广播函数（由外部设置）
+let broadcastToCharacter: ((characterId: string, type: string, data: any) => void) | null = null
+
+export function setWebSocketBroadcast(fn: (characterId: string, type: string, data: any) => void) {
+  broadcastToCharacter = fn
+}
 
 /**
  * 资源类型
@@ -282,6 +291,43 @@ export class GatheringService {
 
       // 增加采集经验
       await this.addGatheringExp(characterId, exp, node.type)
+
+      // 更新任务进度（采集目标）
+      await QuestService.updateProgressByType(
+        characterId,
+        'collect',
+        drop?.itemId || node.id,
+        drop?.quantity || 1
+      )
+
+      // 更新成就进度（采集成就）
+      const achievementUpdate = await AchievementService.updateProgress(
+        characterId,
+        'collect',
+        node.type.toLowerCase(),
+        1
+      )
+
+      // 通知客户端
+      if (broadcastToCharacter) {
+        broadcastToCharacter(characterId, 'gatheringComplete', {
+          nodeId,
+          itemId: drop?.itemId,
+          quantity: drop?.quantity,
+          exp,
+        })
+
+        // 如果有成就解锁，发送通知
+        if (achievementUpdate.completed && achievementUpdate.completed.length > 0) {
+          achievementUpdate.completed.forEach((ach: any) => {
+            broadcastToCharacter!(characterId, 'achievementUnlocked', {
+              achievementId: ach.id,
+              achievementName: ach.name,
+              characterId,
+            })
+          })
+        }
+      }
 
       // 移除节点（准备重生）
       this.activeNodes.delete(nodeId)
