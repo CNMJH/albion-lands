@@ -117,3 +117,7 @@ openclaw/profiles/
 
 # Game data (local)
 game-data/local/
+
+# Screenshots (temporary)
+*.png
+!assets/**/*.png
