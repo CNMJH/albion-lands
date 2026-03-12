@@ -29,7 +29,8 @@ model Character {
   zoneId          String          @default("zone_1")
   x               Float           @default(0)
   y               Float           @default(0)
-  equipment       String? // JSON string
+  equipment       String? // JSON string: {"MainHand": "uuid", "OffHand": "uuid", ...}
+  stats           String? // JSON string: {"attack": 100, "defense": 50, "hp": 500, ...}
   isOnline        Boolean         @default(false)
   lastLoginAt     DateTime?
   createdAt       DateTime        @default(now())
@@ -47,15 +48,19 @@ model Character {
 model Item {
   id             String          @id @default(uuid())
   name           String
-  type           String // Weapon, Armor, Material...
-  rarity         String // Common, Uncommon...
-  stats          String? // JSON string
-  slot           String? // MainHand, Armor...
+  type           String // Weapon, Armor, Material, Tool, Consumable...
+  rarity         String // Common, Uncommon, Rare, Legendary
+  stats          String? // JSON string: {"attack": 50, "defense": 0, "hp": 0}
+  slot           String? // MainHand, OffHand, Armor, Legs, Boots, Accessory
+  equipmentType  String? // Weapon, Armor, Accessory, Tool
   icon           String?
   description    String?
   minLevel       Int             @default(1)
   stackSize      Int             @default(99)
   basePrice      Int             @default(0)
+  tier           String          @default("T1") // T1, T2, T3, T4, T5
+  quality        String          @default("Common") // Common, Uncommon, Legendary
+  specialEffect  String? // 特殊效果描述
   createdAt      DateTime        @default(now())
   inventoryItems InventoryItem[]
   marketOrders   MarketOrder[]

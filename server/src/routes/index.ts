@@ -9,6 +9,7 @@ import { gmRoutes } from './gm'
 import { socialRoutes } from './social'
 import { questRoutes } from './quests'
 import { skillsRoutes } from './skills'
+import { equipmentRoutes } from './equipment'
 
 /**
  * 注册所有 HTTP 路由
@@ -57,4 +58,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 技能路由
   fastify.register(skillsRoutes, { prefix: '/api/v1/skills' })
+  
+  // 装备路由
+  fastify.register(equipmentRoutes, { prefix: '/api/v1/equipment' })
 }
