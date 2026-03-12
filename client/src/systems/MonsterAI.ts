@@ -218,6 +218,17 @@ export class MonsterAI extends EventEmitter {
   }
 
   /**
+   * 更新怪物属性 (HP 等)
+   */
+  public updateMonster(monsterId: string, updates: Partial<Pick<Monster, 'hp'>>): void {
+    const monster = this.monsters.get(monsterId)
+    if (monster && updates.hp !== undefined) {
+      monster.hp = updates.hp
+      this.emit('monsterMoved', monster) // 触发渲染更新
+    }
+  }
+
+  /**
    * 移除怪物
    */
   public removeMonster(monsterId: string): void {

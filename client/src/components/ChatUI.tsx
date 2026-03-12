@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useSocialStore, ChatMessage } from '../systems/SocialSystem'
+import { useSocialStore } from '../systems/SocialSystem'
 import './ChatUI.css'
 
 /**
@@ -14,7 +14,6 @@ export const ChatUI: React.FC = () => {
     messages,
     currentParty,
     sendMessage,
-    addMessage,
   } = useSocialStore()
 
   const messagesEndRef = useRef<HTMLDivElement>(null)

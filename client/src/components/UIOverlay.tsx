@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { CharacterInfo } from './CharacterInfo'
 import { SkillBar } from './SkillBar'
 import { MiniMap } from './MiniMap'
-import { ChatBox } from './ChatBox'
 import { MenuBar } from './MenuBar'
 import { Inventory } from './Inventory'
 import { FriendsUI } from './FriendsUI'
@@ -14,7 +13,7 @@ import './UIOverlay.css'
  * 包含所有游戏 UI 元素
  */
 export function UIOverlay() {
-  const [showInventory, setShowInventory] = useState(false)
+  const [_showInventory, setShowInventory] = useState(false)
   const [showCharacter, setShowCharacter] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
 

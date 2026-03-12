@@ -1,6 +1,38 @@
-import { EventEmitter } from 'events'
 import { network } from '../network/NetworkManager'
 import { useGameStore } from '../stores/gameStore'
+
+/**
+ * 简单的事件发射器 (浏览器环境)
+ */
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map()
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, [])
+    }
+    this.events.get(event)!.push(listener)
+  }
+
+  off(event: string, listener: (...args: any[]) => void): void {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      const index = listeners.indexOf(listener)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      listeners.forEach(listener => listener(...args))
+      return true
+    }
+    return false
+  }
+}
 
 /**
  * 资源类型
@@ -47,7 +79,7 @@ export class GatheringSystem extends EventEmitter {
   private resourceNodes: Map<string, ResourceNode> = new Map()
   private isGathering: boolean = false
   private currentTarget: ResourceNode | null = null
-  private gatherTimer: NodeJS.Timeout | null = null
+  private gatherTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(config: GatheringConfig = { 
     gatherRange: 50, 
@@ -254,7 +286,7 @@ export class GatheringSystem extends EventEmitter {
   /**
    * 检查是否有工具
    */
-  private hasTool(toolType: string): boolean {
+  private hasTool(_toolType: string): boolean {
     // 简化处理：暂时返回 true
     // 实际项目中应检查背包中是否有对应工具
     return true
@@ -263,14 +295,14 @@ export class GatheringSystem extends EventEmitter {
   /**
    * 获取工具名称
    */
-  private getToolName(toolType: string): string {
+  private getToolName(_toolType: string): string {
     const names: Record<string, string> = {
       'pickaxe': '镐',
       'axe': '斧',
       'sickle': '镰刀',
       'rod': '鱼竿',
     }
-    return names[toolType] || toolType
+    return names[_toolType] || _toolType
   }
 
   /**

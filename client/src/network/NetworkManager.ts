@@ -1,4 +1,33 @@
-import { EventEmitter } from 'events'
+// 简单的事件发射器 (浏览器环境)
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map()
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, [])
+    }
+    this.events.get(event)!.push(listener)
+  }
+
+  off(event: string, listener: (...args: any[]) => void): void {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      const index = listeners.indexOf(listener)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      listeners.forEach(listener => listener(...args))
+      return true
+    }
+    return false
+  }
+}
 
 // 消息包接口
 export interface GamePacket {
@@ -28,8 +57,8 @@ export class NetworkManager extends EventEmitter {
   private reconnectAttempts: number = 0
   private maxReconnectAttempts: number = 5
   private heartbeatInterval: number = 30000
-  private heartbeatTimer: NodeJS.Timeout | null = null
-  private messageHandlers: Map<string, (payload: any) => void> = new Map()
+  private heartbeatTimer: ReturnType<typeof setTimeout> | null = null
+  private messageHandlers: Map<string, Array<(payload: any) => void>> = new Map()
   private connectionPromise: Promise<void> | null = null
 
   private constructor() {
@@ -121,7 +150,23 @@ export class NetworkManager extends EventEmitter {
    * 注册消息处理器
    */
   public onMessage(type: string, handler: (payload: any) => void): void {
-    this.messageHandlers.set(type, handler)
+    if (!this.messageHandlers.has(type)) {
+      this.messageHandlers.set(type, [])
+    }
+    this.messageHandlers.get(type)!.push(handler)
+  }
+
+  /**
+   * 移除消息处理器
+   */
+  public offMessage(type: string, handler: (payload: any) => void): void {
+    const handlers = this.messageHandlers.get(type)
+    if (handlers) {
+      const index = handlers.indexOf(handler)
+      if (index > -1) {
+        handlers.splice(index, 1)
+      }
+    }
   }
 
   /**
@@ -145,9 +190,9 @@ export class NetworkManager extends EventEmitter {
       console.log(`接收消息 [${packet.type}]:`, packet.payload)
 
       // 调用对应的处理器
-      const handler = this.messageHandlers.get(packet.type)
-      if (handler) {
-        handler(packet.payload)
+      const handlers = this.messageHandlers.get(packet.type)
+      if (handlers) {
+        handlers.forEach(handler => handler(packet.payload))
       }
 
       // 触发通用消息事件

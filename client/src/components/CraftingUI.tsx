@@ -113,7 +113,7 @@ export function CraftingUI() {
     if (!inventory) return false
     
     for (const required of recipe.requiredItems) {
-      const item = inventory.items.find(i => i.itemId === required.itemId)
+      const item = inventory.slots.find(i => i && i.templateId === required.itemId)
       if (!item || item.quantity < required.quantity) {
         return false
       }
@@ -206,7 +206,7 @@ export function CraftingUI() {
                 <div className="recipe-materials">
                   <h4>所需材料:</h4>
                   {selectedRecipe.requiredItems.map(mat => {
-                    const have = inventory?.items.find(i => i.itemId === mat.itemId)
+                    const have = inventory?.slots.find(i => i && i.templateId === mat.itemId)
                     const hasEnough = (have?.quantity || 0) >= mat.quantity
                     return (
                       <div key={mat.itemId} className={`material-item ${hasEnough ? '' : 'missing'}`}>

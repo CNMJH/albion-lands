@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { GameCanvas } from './renderer/GameCanvas'
 import { UIOverlay } from './components/UIOverlay'
 import { GatheringUI } from './components/GatheringUI'
@@ -14,11 +14,13 @@ import { monsterAI } from './systems/MonsterAI'
 import './App.css'
 import './styles/quest-system.css'
 
+// 游戏循环引用 (模块级别)
+let gameLoopRef: number | undefined
+
 function App() {
   const [loading, setLoading] = useState(true)
   const [loadingProgress, setLoadingProgress] = useState(0)
-  const { initialize, setPlayer, addMonster, updateMonster, removeMonster } = useGameStore()
-  const gameLoopRef = useRef<number>()
+  const { initialize } = useGameStore()
 
   useEffect(() => {
     // 初始化游戏
@@ -58,8 +60,8 @@ function App() {
 
     // 清理
     return () => {
-      if (gameLoopRef.current) {
-        cancelAnimationFrame(gameLoopRef.current)
+      if (gameLoopRef) {
+        cancelAnimationFrame(gameLoopRef)
       }
     }
   }, [])
@@ -107,7 +109,7 @@ function App() {
 // 设置网络消息处理器
 function setupNetworkHandlers() {
   const network = NetworkManager.getInstance()
-  const { setPlayer, addMonster, updateMonster, removeMonster, addCombatLog, updatePlayerHP } = useGameStore.getState()
+  const { setPlayer, addMonster, removeMonster, addCombatLog, updatePlayerHP } = useGameStore.getState()
   const { fetchAvailableQuests, fetchCharacterQuests, fetchAchievements, fetchAchievementProgress, fetchNPCs } = useQuestStore.getState()
 
   // 监听欢迎消息
@@ -238,10 +240,10 @@ function startGameLoop() {
       monsterAI.update(deltaTime, { x: state.player.x, y: state.player.y })
     }
 
-    gameLoopRef.current = requestAnimationFrame(gameLoop)
+    gameLoopRef = requestAnimationFrame(gameLoop)
   }
 
-  gameLoopRef.current = requestAnimationFrame(gameLoop)
+  gameLoopRef = requestAnimationFrame(gameLoop)
 }
 
 // 模拟资源加载

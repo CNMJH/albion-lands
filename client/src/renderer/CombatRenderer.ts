@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import { GameRenderer, GameObject } from './GameRenderer'
+import { GameRenderer } from './GameRenderer'
 import { combatSystem } from '../systems/CombatSystem'
 import { monsterAI, Monster } from '../systems/MonsterAI'
 import { MonsterRenderer, CombatEffectManager } from './MonsterRenderer'

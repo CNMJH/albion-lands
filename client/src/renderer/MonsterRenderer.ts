@@ -217,13 +217,14 @@ export class MonsterRenderer {
       this.sprite.destroy()
     }
 
-    // 加载新纹理
-    const texture = await this.loadMonsterTexture(monster.type)
+    // 加载新纹理 (使用 templateId 作为回退)
+    const monsterType = monster.type || monster.templateId || 'slime'
+    const texture = await this.loadMonsterTexture(monsterType)
     this.sprite = new PIXI.Sprite(texture)
     this.sprite.anchor.set(0.5)
     
     // 应用颜色调整
-    this.applyColorAdjustment(this.sprite, monster.type)
+    this.applyColorAdjustment(this.sprite, monsterType)
     
     // 根据怪物大小缩放
     const size = monster.size || 1
@@ -320,10 +321,10 @@ export class DamageNumber {
   private velocity: { x: number; y: number }
 
   constructor(
-    private app: PIXI.Application,
+    _app: PIXI.Application,
     x: number,
     y: number,
-    private damage: number,
+    damage: number,
     isCritical: boolean = false
   ) {
     this.createdAt = Date.now()

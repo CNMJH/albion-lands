@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { gatheringSystem, ResourceNode } from '../systems/GatheringSystem'
-import { useGameStore } from '../stores/gameStore'
 import './GatheringUI.css'
 
 /**
@@ -11,7 +10,6 @@ export function GatheringUI() {
   const [visible, setVisible] = useState(false)
   const [currentNode, setCurrentNode] = useState<ResourceNode | null>(null)
   const [progress, setProgress] = useState(0)
-  const player = useGameStore((state) => state.player)
 
   useEffect(() => {
     // 监听采集事件

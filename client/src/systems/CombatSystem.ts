@@ -1,6 +1,27 @@
-import { EventEmitter } from 'events'
-import { GameObject } from '../renderer/GameRenderer'
 import { network } from '../network/NetworkManager'
+
+/**
+ * 简单的事件发射器 (浏览器环境)
+ */
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map()
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, [])
+    }
+    this.events.get(event)!.push(listener)
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      listeners.forEach(listener => listener(...args))
+      return true
+    }
+    return false
+  }
+}
 
 /**
  * 战斗系统
@@ -12,6 +33,13 @@ export class CombatSystem extends EventEmitter {
   private isAttacking: boolean = false
   private attackCooldown: number = 0
   private attackCooldownTime: number = 1000 // 毫秒
+
+  /**
+   * 检查是否正在攻击
+   */
+  public getIsAttacking(): boolean {
+    return this.isAttacking
+  }
 
   // 输入状态
   private keys: Set<string> = new Set()

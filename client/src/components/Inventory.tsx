@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useGameStore, Item as StoreItem } from '../stores/gameStore'
 import { inventorySystem, InventoryItem } from '../systems/InventorySystem'
 import './Inventory.css'
 

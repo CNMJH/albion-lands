@@ -1,5 +1,4 @@
 import { network } from '../network/NetworkManager'
-import { useGameStore } from '../stores/gameStore'
 
 /**
  * 简单的事件发射器 (浏览器环境)
@@ -12,6 +11,16 @@ class EventEmitter {
       this.events.set(event, [])
     }
     this.events.get(event)!.push(listener)
+  }
+
+  off(event: string, listener: (...args: any[]) => void): void {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      const index = listeners.indexOf(listener)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
   }
 
   emit(event: string, ...args: any[]): boolean {
@@ -497,7 +506,8 @@ export class InventorySystem extends EventEmitter {
    * 检查是否可以堆叠
    */
   private canStack(item: Item): boolean {
-    return item.type !== 'Equipment' && item.type !== 'Quest'
+    // 装备和任务物品不能堆叠
+    return item.type !== 'Weapon' && item.type !== 'Armor' && item.type !== 'Tool' && item.type !== 'Quest'
   }
 
   /**
@@ -505,8 +515,7 @@ export class InventorySystem extends EventEmitter {
    */
   private canStackItems(item1: Item, item2: Item): boolean {
     return item1.templateId === item2.templateId &&
-           item1.type !== 'Equipment' &&
-           item1.type !== 'Quest'
+           item1.type !== 'Weapon' && item1.type !== 'Armor' && item1.type !== 'Tool' && item1.type !== 'Quest'
   }
 
   /**

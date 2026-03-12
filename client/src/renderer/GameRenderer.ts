@@ -1,5 +1,37 @@
 import * as PIXI from 'pixi.js'
-import { EventEmitter } from 'events'
+
+/**
+ * 简单的事件发射器 (浏览器环境)
+ */
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map()
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, [])
+    }
+    this.events.get(event)!.push(listener)
+  }
+
+  off(event: string, listener: (...args: any[]) => void): void {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      const index = listeners.indexOf(listener)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      listeners.forEach(listener => listener(...args))
+      return true
+    }
+    return false
+  }
+}
 
 /**
  * 游戏渲染器配置
@@ -73,7 +105,7 @@ export class GameRenderer extends EventEmitter {
       const layer = new PIXI.Container()
       layer.name = name
       this.stages.set(name, layer)
-      this.app.stage.addChild(layer)
+      this.app?.stage.addChild(layer)
     })
   }
 
@@ -124,7 +156,7 @@ export class GameRenderer extends EventEmitter {
     this.lastFrameTime = performance.now()
 
     // 启动渲染循环
-    this.app.ticker.add((delta) => {
+    this.app.ticker.add((_delta) => {
       const now = performance.now()
       const deltaTime = (now - this.lastFrameTime) / 1000
       this.lastFrameTime = now
@@ -354,7 +386,7 @@ export class GameObject {
   /**
    * 更新对象
    */
-  public update(deltaTime: number): void {
+  public update(_deltaTime: number): void {
     // 子类实现
   }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuestStore } from '../stores/QuestSystem';
+import { useQuestStore } from '../../stores/QuestSystem';
 
 interface NPCDialogueProps {
   npcId: string;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuestStore } from '../stores/QuestSystem';
+import { useQuestStore } from '../../stores/QuestSystem';
 
 /**
  * 成就面板

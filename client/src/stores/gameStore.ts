@@ -107,7 +107,7 @@ const initialPlayer: Player = {
 
 // 创建游戏状态 store
 export const useGameStore = create<GameState>()(
-  subscribeWithSelector((set, get) => ({
+  subscribeWithSelector((set, _get) => ({
     // 初始状态
     player: null,
     isLoggedIn: false,
