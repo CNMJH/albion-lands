@@ -1,0 +1,220 @@
+{
+  "monsters": {
+    "demon": {
+      "attack": {
+        "texture": "assets/monsters/demon/attack.png",
+        "frames": 4,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "death": {
+        "texture": "assets/monsters/demon/death.png",
+        "frames": 6,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "hurt": {
+        "texture": "assets/monsters/demon/hurt.png",
+        "frames": 2,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "idle": {
+        "texture": "assets/monsters/demon/idle.png",
+        "frames": 3,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "walk": {
+        "texture": "assets/monsters/demon/walk.png",
+        "frames": 6,
+        "frameWidth": 256,
+        "frameHeight": 256
+      }
+    },
+    "dragon": {
+      "attack": {
+        "texture": "assets/monsters/dragon/attack.png",
+        "frames": 4,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "death": {
+        "texture": "assets/monsters/dragon/death.png",
+        "frames": 5,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "fire_attack": {
+        "texture": "assets/monsters/dragon/fire_attack.png",
+        "frames": 6,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "hurt": {
+        "texture": "assets/monsters/dragon/hurt.png",
+        "frames": 2,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "idle": {
+        "texture": "assets/monsters/dragon/idle.png",
+        "frames": 3,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "walk": {
+        "texture": "assets/monsters/dragon/walk.png",
+        "frames": 5,
+        "frameWidth": 256,
+        "frameHeight": 256
+      }
+    },
+    "jinn_animation": {
+      "attack": {
+        "texture": "assets/monsters/jinn_animation/attack.png",
+        "frames": 4,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "death": {
+        "texture": "assets/monsters/jinn_animation/death.png",
+        "frames": 6,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "flight": {
+        "texture": "assets/monsters/jinn_animation/flight.png",
+        "frames": 4,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "hurt": {
+        "texture": "assets/monsters/jinn_animation/hurt.png",
+        "frames": 2,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "idle": {
+        "texture": "assets/monsters/jinn_animation/idle.png",
+        "frames": 3,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "magic_attack": {
+        "texture": "assets/monsters/jinn_animation/magic_attack.png",
+        "frames": 13,
+        "frameWidth": 256,
+        "frameHeight": 256
+      }
+    },
+    "lizard": {
+      "attack": {
+        "texture": "assets/monsters/lizard/attack.png",
+        "frames": 5,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "death": {
+        "texture": "assets/monsters/lizard/death.png",
+        "frames": 6,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "hurt": {
+        "texture": "assets/monsters/lizard/hurt.png",
+        "frames": 2,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "idle": {
+        "texture": "assets/monsters/lizard/idle.png",
+        "frames": 3,
+        "frameWidth": 256,
+        "frameHeight": 256
+      },
+      "walk": {
+        "texture": "assets/monsters/lizard/walk.png",
+        "frames": 6,
+        "frameWidth": 256,
+        "frameHeight": 256
+      }
+    },
+    "medusa": {
+      "attack": {
+        "texture": "assets/monsters/medusa/attack.png",
+        "frames": 6,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "death": {
+        "texture": "assets/monsters/medusa/death.png",
+        "frames": 6,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "hurt": {
+        "texture": "assets/monsters/medusa/hurt.png",
+        "frames": 2,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "idle": {
+        "texture": "assets/monsters/medusa/idle.png",
+        "frames": 3,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "stone": {
+        "texture": "assets/monsters/medusa/stone.png",
+        "frames": 8,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "walk": {
+        "texture": "assets/monsters/medusa/walk.png",
+        "frames": 4,
+        "frameWidth": 128,
+        "frameHeight": 128
+      }
+    },
+    "small_dragon": {
+      "attack": {
+        "texture": "assets/monsters/small_dragon/attack.png",
+        "frames": 3,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "death": {
+        "texture": "assets/monsters/small_dragon/death.png",
+        "frames": 4,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "fire_attack": {
+        "texture": "assets/monsters/small_dragon/fire_attack.png",
+        "frames": 9,
+        "frameWidth": 64,
+        "frameHeight": 64
+      },
+      "hurt": {
+        "texture": "assets/monsters/small_dragon/hurt.png",
+        "frames": 2,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "idle": {
+        "texture": "assets/monsters/small_dragon/idle.png",
+        "frames": 3,
+        "frameWidth": 128,
+        "frameHeight": 128
+      },
+      "walk": {
+        "texture": "assets/monsters/small_dragon/walk.png",
+        "frames": 4,
+        "frameWidth": 128,
+        "frameHeight": 128
+      }
+    }
+  }
+}

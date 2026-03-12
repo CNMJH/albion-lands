@@ -1,5 +1,84 @@
 import * as PIXI from 'pixi.js'
 import { Monster } from '../systems/MonsterAI'
+import { SpriteAnimator } from './SpriteAnimator'
+
+/**
+ * 战斗效果管理器
+ * 显示伤害数字、特效等
+ */
+export class CombatEffectManager {
+  private container: PIXI.Container
+  private effects: Map<number, PIXI.Container> = new Map()
+
+  constructor(private app: PIXI.Application) {
+    this.container = new PIXI.Container()
+    this.container.zIndex = 100
+    app.stage.addChild(this.container)
+  }
+
+  /**
+   * 显示伤害数字
+   */
+  public showDamage(x: number, y: number, damage: number, isPlayer: boolean): void {
+    const text = new PIXI.Text(damage.toString(), {
+      fontSize: 24,
+      fill: isPlayer ? 0xFF0000 : 0xFFFFFF,
+      stroke: isPlayer ? 0xFFFFFF : 0x000000,
+      strokeThickness: 3,
+      fontWeight: 'bold'
+    })
+    
+    text.anchor.set(0.5)
+    text.x = x
+    text.y = y
+    
+    this.container.addChild(text)
+    
+    // 动画 ID
+    const effectId = Date.now() + Math.random()
+    this.effects.set(effectId, text)
+    
+    // 移除效果（1 秒后）
+    setTimeout(() => {
+      this.removeEffect(effectId)
+    }, 1000)
+  }
+
+  /**
+   * 移除效果
+   */
+  private removeEffect(effectId: number): void {
+    const effect = this.effects.get(effectId)
+    if (effect) {
+      this.container.removeChild(effect)
+      effect.destroy()
+      this.effects.delete(effectId)
+    }
+  }
+
+  /**
+   * 更新效果
+   */
+  public update(_deltaTime: number): void {
+    this.effects.forEach((effect, _id) => {
+      effect.y -= 1 // 向上浮动
+      effect.alpha -= 0.02 // 淡出
+    })
+  }
+
+  /**
+   * 销毁
+   */
+  public destroy(): void {
+    this.effects.forEach((effect) => {
+      this.container.removeChild(effect)
+      effect.destroy()
+    })
+    this.effects.clear()
+    this.app.stage.removeChild(this.container)
+    this.container.destroy()
+  }
+}
 
 /**
  * 怪物纹理配置
@@ -10,28 +89,28 @@ export const MONSTER_TEXTURES: Record<string, string> = {
   'slime': 'assets/monsters/slime.png',           // 蓝色史莱姆
   'bat': 'assets/monsters/bat.png',               // 黑色蝙蝠
   'ghost': 'assets/monsters/ghost.png',           // 半透明幽灵
-  'demon': 'assets/monsters/demon_idle.png',      // 红色恶魔
-  'dragon': 'assets/monsters/dragon_idle.png',    // 红色巨龙
+  'demon': 'assets/monsters/demon/idle.png',      // 红色恶魔
+  'dragon': 'assets/monsters/dragon/idle.png',    // 红色巨龙
   
   // 🔄 临时替代方案
-  'goblin': 'assets/monsters/lizard_idle.png',    // 绿色哥布林 → 蜥蜴
+  'goblin': 'assets/monsters/lizard/idle.png',    // 绿色哥布林 → 蜥蜴
   'skeleton': 'assets/monsters/ghost.png',        // 白色骷髅兵 → 幽灵
   'spider': 'assets/monsters/bee.png',            // 棕色蜘蛛 → 蜜蜂
   'wolf': 'assets/monsters/snake.png',            // 灰色野狼 → 蛇
   'mummy': 'assets/monsters/ghost.png',           // 绷带木乃伊 → 幽灵 (变色)
-  'orc': 'assets/monsters/demon_idle.png',        // 棕色兽人 → 恶魔
+  'orc': 'assets/monsters/demon/idle.png',        // 棕色兽人 → 恶魔
   'zombie': 'assets/monsters/slime.png',          // 绿色僵尸 → 史莱姆 (变色)
   
   // ✨ 额外怪物 (可用于扩展)
   'bee': 'assets/monsters/bee.png',
   'big_worm': 'assets/monsters/big_worm.png',
   'eyeball': 'assets/monsters/eyeball.png',
-  'jinn': 'assets/monsters/jinn_animation_idle.png',
-  'lizard': 'assets/monsters/lizard_idle.png',
+  'jinn': 'assets/monsters/jinn_animation/idle.png',
+  'lizard': 'assets/monsters/lizard/idle.png',
   'man_eater_flower': 'assets/monsters/man_eater_flower.png',
-  'medusa': 'assets/monsters/medusa_idle.png',
+  'medusa': 'assets/monsters/medusa/idle.png',
   'pumpking': 'assets/monsters/pumpking.png',
-  'small_dragon': 'assets/monsters/small_dragon_idle.png',
+  'small_dragon': 'assets/monsters/small_dragon/idle.png',
   'small_worm': 'assets/monsters/small_worm.png',
   'snake': 'assets/monsters/snake.png',
 }
@@ -48,6 +127,23 @@ export const MONSTER_COLOR_ADJUSTMENTS: Record<string, number[]> = {
 }
 
 /**
+ * 怪物动画配置 (从 JSON 加载)
+ */
+export interface MonsterAnimationConfig {
+  texture: string
+  frames: number
+  frameWidth: number
+  frameHeight: number
+}
+
+/**
+ * 怪物动画数据
+ */
+export interface MonsterAnimations {
+  monsters: Record<string, Record<string, MonsterAnimationConfig>>
+}
+
+/**
  * 怪物渲染器
  * 负责渲染怪物及其血条
  */
@@ -60,10 +156,12 @@ export class MonsterRenderer {
   private levelText: PIXI.Text
   private monster: Monster | null = null
   private textureCache: Map<string, PIXI.Texture>
+  private animator: SpriteAnimator | null = null
+  private animationConfigs: MonsterAnimations | null = null
+  private colorAdjustment: number[] | null = null
 
   constructor(
-    private app: PIXI.Application,
-    private assetsPath: string = ''
+    private app: PIXI.Application
   ) {
     this.container = new PIXI.Container()
     this.textureCache = new Map()
@@ -78,15 +176,16 @@ export class MonsterRenderer {
     this.hpBar.y = -30
     this.container.addChild(this.hpBar)
 
-    // 创建名字文本
+    // 创建名称文本
     this.nameText = new PIXI.Text('', {
       fontSize: 12,
       fill: 0xFFFFFF,
       stroke: 0x000000,
       strokeThickness: 3,
+      align: 'center'
     })
-    this.nameText.anchor.set(0.5)
-    this.nameText.y = -45
+    this.nameText.anchor.set(0.5, 1)
+    this.nameText.y = -35
     this.container.addChild(this.nameText)
 
     // 创建等级文本
@@ -95,195 +194,356 @@ export class MonsterRenderer {
       fill: 0xFFFF00,
       stroke: 0x000000,
       strokeThickness: 2,
+      align: 'center'
     })
-    this.levelText.anchor.set(0.5)
-    this.levelText.y = -58
+    this.levelText.anchor.set(0.5, 0)
+    this.levelText.y = -20
     this.container.addChild(this.levelText)
+
+    this.app.stage.addChild(this.container)
   }
 
   /**
-   * 加载怪物纹理
+   * 加载怪物动画配置
    */
-  private async loadMonsterTexture(type: string): Promise<PIXI.Texture> {
-    // 检查缓存
-    if (this.textureCache.has(type)) {
-      return this.textureCache.get(type)!
-    }
-
-    const assetPath = MONSTER_TEXTURES[type] || MONSTER_TEXTURES['slime']
-    const fullPath = this.assetsPath + assetPath
-
+  public async loadAnimationConfigs(): Promise<void> {
     try {
-      // 从资源加载
-      const texture = await PIXI.Assets.load(fullPath)
-      this.textureCache.set(type, texture)
-      return texture
+      const response = await fetch('assets/monsters/monster_animations.json')
+      if (!response.ok) {
+        console.warn('无法加载怪物动画配置')
+        return
+      }
+      this.animationConfigs = await response.json()
+      console.log('✓ 怪物动画配置已加载')
     } catch (error) {
-      console.warn(`Failed to load monster texture: ${fullPath}`, error)
-      // 返回临时色块纹理
-      return this.createFallbackTexture(type)
+      console.warn('加载怪物动画配置失败:', error)
     }
   }
 
   /**
-   * 创建临时纹理 (回退方案)
+   * 设置怪物
    */
-  private createFallbackTexture(type: string): PIXI.Texture {
-    const graphics = new PIXI.Graphics()
+  public setMonster(monster: Monster): void {
+    this.monster = monster
+    this.updateName()
+    this.updateLevel()
     
-    // 根据类型设置颜色
-    const colors: Record<string, number> = {
-      'slime': 0x00FF00,
-      'bat': 0x000000,
-      'ghost': 0xFFFFFF,
-      'demon': 0xFF0000,
-      'dragon': 0xFF0000,
-      'goblin': 0x00FF00,
-      'skeleton': 0xFFFFFF,
-      'spider': 0x8B4513,
-      'wolf': 0x808080,
-      'mummy': 0xF5DEB3,
-      'orc': 0x8B4513,
-      'zombie': 0x32CD32,
+    // 应用颜色调整
+    if (monster.type) {
+      const adjustment = MONSTER_COLOR_ADJUSTMENTS[monster.type]
+      this.colorAdjustment = adjustment || null
+      
+      // 加载动画
+      this.loadMonsterAnimation(monster.type)
+    }
+  }
+
+  /**
+   * 加载怪物动画
+   */
+  private async loadMonsterAnimation(monsterType: string): Promise<void> {
+    // 清理旧的动画器
+    if (this.animator) {
+      this.animator.destroy()
+      this.animator = null
     }
 
-    const color = colors[type] || 0xFF00FF
-    
-    // 绘制圆形/方形怪物
-    if (type === 'bat' || type === 'spider') {
-      // 飞行/昆虫类：菱形
-      graphics.beginFill(color)
-      graphics.moveTo(0, -20)
-      graphics.lineTo(15, 0)
-      graphics.lineTo(0, 20)
-      graphics.lineTo(-15, 0)
-      graphics.closePath()
-      graphics.endFill()
-    } else if (type === 'ghost' || type === 'mummy') {
-      // 幽灵类：椭圆形
-      graphics.beginFill(color, 0.7)
-      graphics.drawEllipse(0, 0, 20, 25)
-      graphics.endFill()
+    // 检查是否有动画配置
+    const monsterAnim = this.animationConfigs?.monsters[monsterType]
+    if (!monsterAnim) {
+      // 使用静态纹理
+      this.loadStaticTexture(monsterType)
+      return
+    }
+
+    // 创建精灵
+    if (!this.sprite) {
+      this.sprite = new PIXI.Sprite()
+      this.sprite.anchor.set(0.5, 0.5)
+      this.container.addChildAt(this.sprite, 0)
+    }
+
+    // 创建动画器
+    this.animator = new SpriteAnimator(this.sprite)
+
+    // 加载 idle 动画
+    const idleConfig = monsterAnim.idle
+    if (idleConfig) {
+      await this.animator.loadAnimation(
+        idleConfig.texture,
+        idleConfig.frames,
+        idleConfig.frameWidth,
+        idleConfig.frameHeight
+      )
+      
+      // 应用颜色调整
+      if (this.colorAdjustment) {
+        this.applyColorAdjustment()
+      }
+      
+      // 播放 idle 动画
+      this.animator.play(true)
     } else {
-      // 普通类：圆形
-      graphics.beginFill(color)
-      graphics.drawCircle(0, 0, 25)
-      graphics.endFill()
+      // 没有 idle 动画，使用静态纹理
+      this.loadStaticTexture(monsterType)
+    }
+  }
+
+  /**
+   * 加载静态纹理（回退方案）
+   */
+  private loadStaticTexture(monsterType: string): void {
+    const texturePath = MONSTER_TEXTURES[monsterType]
+    if (!texturePath) {
+      console.warn(`未知怪物类型：${monsterType}`)
+      return
     }
 
-    // 添加眼睛
-    graphics.beginFill(0xFFFFFF)
-    graphics.drawCircle(-8, -5, 5)
-    graphics.drawCircle(8, -5, 5)
-    graphics.endFill()
+    if (!this.sprite) {
+      this.sprite = new PIXI.Sprite()
+      this.sprite.anchor.set(0.5, 0.5)
+      this.container.addChildAt(this.sprite, 0)
+    }
 
-    graphics.beginFill(0x000000)
-    graphics.drawCircle(-8, -5, 2)
-    graphics.drawCircle(8, -5, 2)
-    graphics.endFill()
-
-    return this.app.renderer.generateTexture(graphics)
+    // 加载纹理
+    if (this.textureCache.has(texturePath)) {
+      this.sprite.texture = this.textureCache.get(texturePath)!
+    } else {
+      PIXI.Assets.load(texturePath).then(texture => {
+        this.textureCache.set(texturePath, texture)
+        this.sprite!.texture = texture
+        
+        // 应用颜色调整
+        if (this.colorAdjustment) {
+          this.applyColorAdjustment()
+        }
+      }).catch(error => {
+        console.warn(`加载纹理失败：${texturePath}`, error)
+        // 使用占位符
+        this.sprite!.texture = this.createPlaceholderTexture()
+      })
+    }
   }
 
   /**
    * 应用颜色调整
    */
-  private applyColorAdjustment(sprite: PIXI.Sprite, type: string): void {
-    const adjustment = MONSTER_COLOR_ADJUSTMENTS[type]
-    if (!adjustment) return
+  private applyColorAdjustment(): void {
+    if (!this.sprite || !this.colorAdjustment) return
 
-    // 简单实现：使用 tint
-    // 完整实现需要使用 PIXI.filters.ColorMatrixFilter
-    if (type === 'mummy') {
-      sprite.tint = 0xF5DEB3 // 小麦色 (绷带)
-    } else if (type === 'zombie') {
-      sprite.tint = 0x32CD32 // 绿黄色 (腐烂)
-    } else if (type === 'goblin') {
-      sprite.tint = 0x228B22 // 森林绿
-    } else if (type === 'skeleton') {
-      sprite.tint = 0xF0F0F0 // 灰白色
+    const [hue, saturation, brightness] = this.colorAdjustment
+    
+    // 使用 PIXI 的 colorMatrix
+    const matrix = new PIXI.ColorMatrixFilter()
+    
+    // 调整色相
+    if (hue !== 0) {
+      matrix.hue(hue / 360, false)
     }
+    
+    // 调整饱和度
+    if (saturation !== 0) {
+      matrix.saturate(saturation / 100, false)
+    }
+    
+    // 调整亮度
+    if (brightness !== 0) {
+      matrix.brightness(brightness / 100, false)
+    }
+    
+    this.sprite.filters = [matrix]
   }
 
   /**
-   * 设置怪物数据
+   * 播放攻击动画
    */
-  public async setMonster(monster: Monster): Promise<void> {
-    this.monster = monster
-    
-    // 移除旧精灵
-    if (this.sprite) {
-      this.container.removeChild(this.sprite)
-      this.sprite.destroy()
-    }
+  public playAttack(): void {
+    if (!this.animator || !this.animationConfigs) return
 
-    // 加载新纹理 (使用 templateId 作为回退)
-    const monsterType = monster.type || monster.templateId || 'slime'
-    const texture = await this.loadMonsterTexture(monsterType)
-    this.sprite = new PIXI.Sprite(texture)
-    this.sprite.anchor.set(0.5)
-    
-    // 应用颜色调整
-    this.applyColorAdjustment(this.sprite, monsterType)
-    
-    // 根据怪物大小缩放
-    const size = monster.size || 1
-    this.sprite.scale.set(size)
-    
-    this.container.addChildAt(this.sprite, 0) // 添加到最底层
-    this.updateDisplay()
+    const monsterType = this.monster?.type
+    if (!monsterType) return
+
+    const attackConfig = this.animationConfigs.monsters[monsterType].attack
+    if (!attackConfig) return
+
+    // 加载攻击动画
+    this.animator.loadAnimation(
+      attackConfig.texture,
+      attackConfig.frames,
+      attackConfig.frameWidth,
+      attackConfig.frameHeight
+    ).then(() => {
+      // 播放一次，不循环
+      this.animator!.play(false, () => {
+        // 动画完成后回到 idle
+        this.playIdle()
+      })
+    })
   }
 
   /**
-   * 更新显示
+   * 播放受伤动画
    */
-  private updateDisplay(): void {
+  public playHurt(): void {
+    if (!this.animator || !this.animationConfigs) return
+
+    const monsterType = this.monster?.type
+    if (!monsterType) return
+
+    const hurtConfig = this.animationConfigs.monsters[monsterType].hurt
+    if (!hurtConfig) return
+
+    // 加载受伤动画
+    this.animator.loadAnimation(
+      hurtConfig.texture,
+      hurtConfig.frames,
+      hurtConfig.frameWidth,
+      hurtConfig.frameHeight
+    ).then(() => {
+      // 播放一次，不循环
+      this.animator!.play(false, () => {
+        // 动画完成后回到 idle
+        this.playIdle()
+      })
+    })
+  }
+
+  /**
+   * 播放死亡动画
+   */
+  public playDeath(): void {
+    if (!this.animator || !this.animationConfigs) return
+
+    const monsterType = this.monster?.type
+    if (!monsterType) return
+
+    const deathConfig = this.animationConfigs.monsters[monsterType].death
+    if (!deathConfig) return
+
+    // 加载死亡动画
+    this.animator.loadAnimation(
+      deathConfig.texture,
+      deathConfig.frames,
+      deathConfig.frameWidth,
+      deathConfig.frameHeight
+    ).then(() => {
+      // 播放一次，不循环
+      this.animator!.play(false)
+    })
+  }
+
+  /**
+   * 播放 idle 动画
+   */
+  private playIdle(): void {
+    if (!this.animator || !this.animationConfigs) return
+
+    const monsterType = this.monster?.type
+    if (!monsterType) return
+
+    const idleConfig = this.animationConfigs.monsters[monsterType].idle
+    if (!idleConfig) return
+
+    // 加载 idle 动画
+    this.animator.loadAnimation(
+      idleConfig.texture,
+      idleConfig.frames,
+      idleConfig.frameWidth,
+      idleConfig.frameHeight
+    ).then(() => {
+      // 循环播放
+      this.animator!.play(true)
+    })
+  }
+
+  /**
+   * 创建占位符纹理
+   */
+  private createPlaceholderTexture(): PIXI.Texture {
+    const canvas = document.createElement('canvas')
+    canvas.width = 64
+    canvas.height = 64
+    const ctx = canvas.getContext('2d')!
+    
+    // 绘制粉色方块
+    ctx.fillStyle = '#FF69B4'
+    ctx.fillRect(0, 0, 64, 64)
+    
+    return PIXI.Texture.from(canvas)
+  }
+
+  /**
+   * 更新名称
+   */
+  private updateName(): void {
     if (!this.monster) return
-
-    // 更新位置
-    this.container.x = this.monster.x
-    this.container.y = this.monster.y
-
-    // 更新名字和等级
     this.nameText.text = this.monster.name
-    this.levelText.text = `Lv.${this.monster.level}`
+  }
 
-    // 更新血条
-    this.updateHPBar()
+  /**
+   * 更新等级
+   */
+  private updateLevel(): void {
+    if (!this.monster) return
+    this.levelText.text = `Lv.${this.monster.level}`
   }
 
   /**
    * 更新血条
    */
-  public updateHPBar(): void {
+  public updateHP(): void {
     if (!this.monster) return
 
-    const hpPercent = this.monster.hp / this.monster.maxHp
+    const maxHP = this.monster.maxHp
+    const currentHP = this.monster.hp
+    const hpPercent = Math.max(0, Math.min(1, currentHP / maxHP))
 
-    // 血条背景
+    // 绘制血条背景
     this.hpBarBg.clear()
     this.hpBarBg.beginFill(0x000000, 0.5)
-    this.hpBarBg.drawRect(-25, 0, 50, 6)
+    this.hpBarBg.drawRoundedRect(-25, 0, 50, 6, 3)
     this.hpBarBg.endFill()
 
-    // 血条
+    // 绘制血条
     this.hpBar.clear()
-    const hpColor = hpPercent > 0.5 ? 0x00FF00 : hpPercent > 0.25 ? 0xFFFF00 : 0xFF0000
-    this.hpBar.beginFill(hpColor)
-    this.hpBar.drawRect(-25, 0, 50 * hpPercent, 6)
+    this.hpBar.beginFill(this.getHPColor(hpPercent))
+    this.hpBar.drawRoundedRect(-24, 1, 48 * hpPercent, 4, 2)
     this.hpBar.endFill()
+  }
+
+  /**
+   * 获取血条颜色
+   */
+  private getHPColor(percent: number): number {
+    if (percent > 0.6) return 0x00FF00 // 绿色
+    if (percent > 0.3) return 0xFFFF00 // 黄色
+    return 0xFF0000 // 红色
   }
 
   /**
    * 更新位置
    */
-  public updatePosition(x: number, y: number): void {
+  public updatePosition(deltaTime: number): void {
+    if (!this.monster) return
+
+    // 更新动画
+    if (this.animator) {
+      this.animator.update(deltaTime)
+    }
+
+    // 平滑移动
+    const targetX = this.monster.x
+    const targetY = this.monster.y
+    this.container.x += (targetX - this.container.x) * 0.1
+    this.container.y += (targetY - this.container.y) * 0.1
+  }
+
+  /**
+   * 设置位置
+   */
+  public setPosition(x: number, y: number): void {
     this.container.x = x
     this.container.y = y
-    if (this.monster) {
-      this.monster.x = x
-      this.monster.y = y
-    }
   }
 
   /**
@@ -294,137 +554,30 @@ export class MonsterRenderer {
   }
 
   /**
-   * 设置可见性
-   */
-  public setVisible(visible: boolean): void {
-    this.container.visible = visible
-  }
-
-  /**
    * 销毁
    */
   public destroy(): void {
+    if (this.animator) {
+      this.animator.destroy()
+      this.animator = null
+    }
+    
     if (this.sprite) {
-      this.sprite.destroy()
+      this.container.removeChild(this.sprite)
+      this.sprite = null
     }
-    this.container.destroy({ children: true })
-  }
-}
-
-/**
- * 伤害数字效果
- */
-export class DamageNumber {
-  private text: PIXI.Text
-  private lifetime: number = 1000 // 毫秒
-  private createdAt: number
-  private velocity: { x: number; y: number }
-
-  constructor(
-    _app: PIXI.Application,
-    x: number,
-    y: number,
-    damage: number,
-    isCritical: boolean = false
-  ) {
-    this.createdAt = Date.now()
-    this.velocity = {
-      x: (Math.random() - 0.5) * 50,
-      y: -100 - Math.random() * 50,
-    }
-
-    this.text = new PIXI.Text(damage.toString(), {
-      fontSize: isCritical ? 24 : 18,
-      fill: isCritical ? 0xFFFF00 : 0xFFFFFF,
-      stroke: 0x000000,
-      strokeThickness: 4,
-      fontWeight: 'bold',
-    })
-    this.text.anchor.set(0.5)
-    this.text.x = x
-    this.text.y = y
-    this.text.scale.set(isCritical ? 1.5 : 1)
-  }
-
-  /**
-   * 更新
-   */
-  public update(deltaTime: number): boolean {
-    const age = Date.now() - this.createdAt
     
-    // 更新位置
-    this.text.x += this.velocity.x * deltaTime
-    this.text.y += this.velocity.y * deltaTime
+    this.container.removeChild(this.hpBarBg)
+    this.container.removeChild(this.hpBar)
+    this.container.removeChild(this.nameText)
+    this.container.removeChild(this.levelText)
     
-    // 重力
-    this.velocity.y += 200 * deltaTime
-
-    // 淡出
-    const alpha = 1 - (age / this.lifetime)
-    this.text.alpha = alpha
-
-    return age < this.lifetime
-  }
-
-  /**
-   * 获取文本对象
-   */
-  public getText(): PIXI.Text {
-    return this.text
-  }
-
-  /**
-   * 是否存活
-   */
-  public isAlive(): boolean {
-    return Date.now() - this.createdAt < this.lifetime
-  }
-}
-
-/**
- * 战斗特效管理器
- */
-export class CombatEffectManager {
-  private damageNumbers: DamageNumber[] = []
-  private effectsContainer: PIXI.Container
-
-  constructor(private app: PIXI.Application) {
-    this.effectsContainer = new PIXI.Container()
-    app.stage.addChild(this.effectsContainer)
-  }
-
-  /**
-   * 显示伤害数字
-   */
-  public showDamage(x: number, y: number, damage: number, isCritical: boolean = false): void {
-    const damageNumber = new DamageNumber(this.app, x, y, damage, isCritical)
-    this.damageNumbers.push(damageNumber)
-    this.effectsContainer.addChild(damageNumber.getText())
-  }
-
-  /**
-   * 更新
-   */
-  public update(deltaTime: number): void {
-    // 更新伤害数字
-    this.damageNumbers = this.damageNumbers.filter(dn => {
-      const alive = dn.update(deltaTime)
-      if (!alive) {
-        this.effectsContainer.removeChild(dn.getText())
-        dn.getText().destroy()
-      }
-      return alive
-    })
-  }
-
-  /**
-   * 清除所有
-   */
-  public clear(): void {
-    this.damageNumbers.forEach(dn => {
-      this.effectsContainer.removeChild(dn.getText())
-      dn.getText().destroy()
-    })
-    this.damageNumbers = []
+    this.app.stage.removeChild(this.container)
+    
+    this.hpBarBg.destroy()
+    this.hpBar.destroy()
+    this.nameText.destroy()
+    this.levelText.destroy()
+    this.container.destroy()
   }
 }

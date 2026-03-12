@@ -70,7 +70,7 @@ export class CombatRenderer {
       monsterAI.updateMonster(payload.monsterId, { hp: payload.hp })
       const renderer = this.monsterRenderers.get(payload.monsterId)
       if (renderer) {
-        renderer.updateHPBar()
+        renderer.updateHP()
       }
     })
 
@@ -95,11 +95,14 @@ export class CombatRenderer {
   /**
    * 生成怪物
    */
-  private spawnMonster(monster: Monster): void {
+  private async spawnMonster(monster: Monster): Promise<void> {
     const app = this.gameRenderer.getApp()
     if (!app) return
 
-    const monsterRenderer = new MonsterRenderer(app, '')
+    const monsterRenderer = new MonsterRenderer(app)
+    
+    // 加载动画配置（如果尚未加载）
+    await monsterRenderer.loadAnimationConfigs()
     monsterRenderer.setMonster(monster)
     
     const layer = this.gameRenderer.getLayer('characters')
@@ -133,8 +136,8 @@ export class CombatRenderer {
   private updateMonsterPosition(monster: Monster): void {
     const renderer = this.monsterRenderers.get(monster.id)
     if (renderer) {
-      renderer.updatePosition(monster.x, monster.y)
-      renderer.updateHPBar()
+      renderer.updatePosition(16) // deltaTime 用于动画更新
+      renderer.updateHP()
     }
   }
 
@@ -188,11 +191,12 @@ export class CombatRenderer {
       this.effectManager.update(deltaTime)
     }
 
-    // 更新所有怪物血条（如果有变化）
+    // 更新所有怪物血条和动画（如果有变化）
     this.monsterRenderers.forEach((renderer, id) => {
       const monster = monsterAI.getMonster(id)
       if (monster) {
-        renderer.updateHPBar()
+        renderer.updatePosition(16) // 更新动画和位置
+        renderer.updateHP()
       }
     })
   }
@@ -207,7 +211,7 @@ export class CombatRenderer {
     this.monsterRenderers.clear()
     
     if (this.effectManager) {
-      this.effectManager.clear()
+      this.effectManager.destroy()
     }
 
     if (this.playerSprite) {
