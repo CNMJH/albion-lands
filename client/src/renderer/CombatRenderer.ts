@@ -5,6 +5,7 @@ import { monsterAI, Monster } from '../systems/MonsterAI'
 import { MonsterRenderer, CombatEffectManager } from './MonsterRenderer'
 import { useGameStore } from '../stores/gameStore'
 import { network } from '../network/NetworkManager'
+import { AttackEffectRenderer } from './AttackEffectRenderer'
 
 /**
  * 战斗渲染集成
@@ -14,10 +15,12 @@ export class CombatRenderer {
   private gameRenderer: GameRenderer
   private monsterRenderers: Map<string, MonsterRenderer> = new Map()
   private effectManager: CombatEffectManager | null = null
+  private attackEffectRenderer: AttackEffectRenderer | null = null
   private playerSprite: PIXI.Sprite | null = null
 
   constructor(gameRenderer: GameRenderer) {
     this.gameRenderer = gameRenderer
+    this.attackEffectRenderer = new AttackEffectRenderer(gameRenderer)
     this.setupEventListeners()
   }
 
@@ -192,6 +195,11 @@ export class CombatRenderer {
    * 更新
    */
   public update(deltaTime: number): void {
+    // 更新攻击效果
+    if (this.attackEffectRenderer) {
+      this.attackEffectRenderer.update(deltaTime)
+    }
+
     // 更新伤害数字
     if (this.effectManager) {
       this.effectManager.update(deltaTime)
@@ -218,6 +226,10 @@ export class CombatRenderer {
     
     if (this.effectManager) {
       this.effectManager.destroy()
+    }
+
+    if (this.attackEffectRenderer) {
+      this.attackEffectRenderer.clear()
     }
 
     if (this.playerSprite) {

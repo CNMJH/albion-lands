@@ -4,23 +4,14 @@ import { network } from '../network/NetworkManager'
 import { skillSystem } from './SkillSystem'
 
 /**
- * 玩家操作类型
- */
-export type PlayerAction = 
-  | 'move'          // 移动
-  | 'attack'        // 攻击
-  | 'interact'      // 交互/采集
-  | 'useSkill'      // 使用技能
-  | 'openUI'        // 打开 UI
-  | 'chat'          // 聊天
-
-/**
  * 玩家操作配置
  */
 export interface PlayerControlsConfig {
-  moveSpeed: number
-  attackRange: number
-  interactRange: number
+  moveSpeed: number        // 移动速度（像素/秒）
+  attackRange: number      // 攻击范围（像素）
+  interactRange: number    // 交互范围（像素）
+  attackCooldown: number   // 攻击冷却时间（毫秒）
+  moveSendInterval: number // 移动发送间隔（毫秒）
 }
 
 /**
@@ -28,27 +19,25 @@ export interface PlayerControlsConfig {
  * 统一管理所有玩家输入和操作
  * 
  * 控制方案：
- * - 移动：WASD 或 方向键
+ * - 移动：WASD 或 方向键 / 鼠标右键点击
  * - 攻击：鼠标左键 或 空格键
  * - 交互：E 键（采集、NPC 对话等）
  * - 技能：数字键 1-8
- * - UI 快捷键：
- *   - B: 背包
- *   - C: 制作
- *   - Q: 任务
- *   - F: 好友
- *   - M: 地图（待实现）
- *   - L: 排行榜（待实现）
- * - 聊天：Enter 键
+ * - UI 快捷键：B 背包、C 制作、Q 任务、F 好友、Enter 聊天
  */
 export class PlayerControlsSystem {
   private gameRenderer: GameRenderer
   private config: PlayerControlsConfig
   private keysPressed: Set<string> = new Set()
+  
+  // 攻击状态
   private attackCooldown: number = 0
-  private attackCooldownTime: number = 1000 // 毫秒
-  private lastMoveTime: number = 0
-  private moveInterval: number = 50 // 移动更新间隔 (ms)
+  private isAttacking: boolean = false
+  private attackAnimationTime: number = 0
+  
+  // 移动状态
+  private lastMoveSendTime: number = 0
+  private moveBuffer: { dx: number; dy: number } | null = null
   
   // UI 状态跟踪
   private uiState: {
@@ -68,13 +57,15 @@ export class PlayerControlsSystem {
   constructor(gameRenderer: GameRenderer, config?: Partial<PlayerControlsConfig>) {
     this.gameRenderer = gameRenderer
     this.config = {
-      moveSpeed: 200,
-      attackRange: 50,
-      interactRange: 60,
+      moveSpeed: 200,          // 200 像素/秒
+      attackRange: 60,         // 60 像素攻击范围
+      interactRange: 80,       // 80 像素交互范围
+      attackCooldown: 800,     // 800ms 攻击冷却
+      moveSendInterval: 100,   // 100ms 发送一次移动
       ...config,
     }
     this.setupInputHandlers()
-    console.log('玩家操作系统初始化完成')
+    console.log('✅ 玩家操作系统初始化完成')
   }
 
   /**
@@ -94,7 +85,7 @@ export class PlayerControlsSystem {
       const gameKeys = [
         'KeyW', 'KeyA', 'KeyS', 'KeyD',
         'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-        'Space', 'KeyE', 'KeyB', 'KeyC', 'KeyQ', 'KeyF', 'KeyM', 'KeyL',
+        'Space', 'KeyE', 'KeyB', 'KeyC', 'KeyQ', 'KeyF',
         'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8',
         'Enter'
       ]
@@ -133,7 +124,7 @@ export class PlayerControlsSystem {
       e.preventDefault()
     })
 
-    console.log('玩家操作系统：输入监听已设置')
+    console.log('📡 玩家操作系统：输入监听已设置')
   }
 
   /**
@@ -193,14 +184,14 @@ export class PlayerControlsSystem {
     // 如果当前 UI 是激活的，关闭它
     if (this.uiState[uiType]) {
       this.uiState[uiType] = false
-      console.log(`关闭 ${uiType} UI`)
+      console.log(`❌ 关闭 ${uiType} UI`)
     } else {
       // 关闭其他 UI，打开当前 UI
       Object.keys(this.uiState).forEach(key => {
         this.uiState[key as keyof typeof this.uiState] = false
       })
       this.uiState[uiType] = true
-      console.log(`打开 ${uiType} UI`)
+      console.log(`✅ 打开 ${uiType} UI`)
     }
 
     // 触发 UI 切换事件（UI 组件可以监听）
@@ -228,9 +219,15 @@ export class PlayerControlsSystem {
     const state = useGameStore.getState()
     if (!state.player) return
 
-    // 更新攻击冷却
+    // 更新攻击冷却和动画
     if (this.attackCooldown > 0) {
       this.attackCooldown -= deltaTime * 1000
+    }
+    if (this.attackAnimationTime > 0) {
+      this.attackAnimationTime -= deltaTime * 1000
+      if (this.attackAnimationTime <= 0) {
+        this.isAttacking = false
+      }
     }
 
     // 更新技能冷却
@@ -244,10 +241,6 @@ export class PlayerControlsSystem {
    * 处理移动
    */
   private handleMovement(deltaTime: number, state: any): void {
-    const now = Date.now()
-    if (now - this.lastMoveTime < this.moveInterval) return
-    this.lastMoveTime = now
-
     let dx = 0
     let dy = 0
 
@@ -277,19 +270,45 @@ export class PlayerControlsSystem {
       const moveDx = dx * moveDistance
       const moveDy = dy * moveDistance
 
-      // 计算新位置
+      // 更新本地位置（立即反馈）
       const newX = state.player.x + moveDx
       const newY = state.player.y + moveDy
-
-      // 更新玩家位置（本地）
       state.updatePlayer({ x: newX, y: newY })
 
-      // 发送移动消息到服务器（发送增量）
-      network.send('move', {
-        dx: moveDx,
-        dy: moveDy,
-      })
+      // 缓冲移动增量
+      if (this.moveBuffer) {
+        this.moveBuffer.dx += moveDx
+        this.moveBuffer.dy += moveDy
+      } else {
+        this.moveBuffer = { dx: moveDx, dy: moveDy }
+      }
+
+      // 定期发送到服务器
+      const now = Date.now()
+      if (now - this.lastMoveSendTime >= this.config.moveSendInterval) {
+        this.sendMoveBuffer()
+      }
     }
+  }
+
+  /**
+   * 发送缓冲的移动数据
+   */
+  private sendMoveBuffer(): void {
+    if (!this.moveBuffer) return
+
+    const state = useGameStore.getState()
+    if (!state.player) return
+
+    // 发送累积的移动增量
+    network.send('move', {
+      dx: this.moveBuffer.dx,
+      dy: this.moveBuffer.dy,
+      timestamp: Date.now(),
+    })
+
+    this.moveBuffer = null
+    this.lastMoveSendTime = Date.now()
   }
 
   /**
@@ -297,31 +316,36 @@ export class PlayerControlsSystem {
    */
   public performAttack(): void {
     if (this.attackCooldown > 0) {
-      console.log('攻击冷却中')
+      console.log('⏳ 攻击冷却中')
       return
     }
 
     const state = useGameStore.getState()
     if (!state.player) return
 
-    // 发送攻击指令
+    // 设置攻击状态
+    this.isAttacking = true
+    this.attackAnimationTime = 300 // 300ms 攻击动画
+    this.attackCooldown = this.config.attackCooldown
+
+    // 发送攻击指令到服务器
     network.send('attack', {
       type: 'basic',
       x: state.player.x,
       y: state.player.y,
+      range: this.config.attackRange,
       timestamp: Date.now(),
     })
-
-    this.attackCooldown = this.attackCooldownTime
     
-    // 触发攻击事件（CombatRenderer 可以监听）
+    // 触发攻击事件（CombatRenderer 监听并播放动画）
     this.gameRenderer.emit('playerAttack', {
       x: state.player.x,
       y: state.player.y,
+      range: this.config.attackRange,
       type: 'basic',
     })
 
-    console.log('玩家执行攻击')
+    console.log('⚔️ 玩家执行攻击')
   }
 
   /**
@@ -331,7 +355,7 @@ export class PlayerControlsSystem {
     const state = useGameStore.getState()
     if (!state.player) return
 
-    console.log('玩家尝试交互')
+    console.log('🤝 玩家尝试交互')
 
     // 发送交互指令
     network.send('interact', {
@@ -356,16 +380,16 @@ export class PlayerControlsSystem {
     const state = useGameStore.getState()
     if (!state.player) return
 
-    // 获取玩家的技能栏配置（从玩家数据中）
+    // 获取玩家的技能栏配置
     const skillIds = state.player.skills || []
     if (skillIndex >= skillIds.length) {
-      console.warn(`技能索引 ${skillIndex} 超出范围`)
+      console.warn(`⚠️ 技能索引 ${skillIndex} 超出范围`)
       return
     }
 
     const skillId = skillIds[skillIndex]
     if (!skillId) {
-      console.warn(`技能栏 ${skillIndex + 1} 未配置技能`)
+      console.warn(`⚠️ 技能栏 ${skillIndex + 1} 未配置技能`)
       return
     }
 
@@ -380,7 +404,7 @@ export class PlayerControlsSystem {
         x: state.player.x,
         y: state.player.y,
       })
-      console.log(`技能释放成功：${skillId}`)
+      console.log(`✨ 技能释放成功：${skillId}`)
     }
   }
 
@@ -391,7 +415,7 @@ export class PlayerControlsSystem {
     const state = useGameStore.getState()
     if (!state.player) return
 
-    console.log(`玩家移动到 (${x.toFixed(0)}, ${y.toFixed(0)})`)
+    console.log(`🎯 玩家移动到 (${x.toFixed(0)}, ${y.toFixed(0)})`)
 
     // 计算方向
     const dx = x - state.player.x
@@ -417,6 +441,13 @@ export class PlayerControlsSystem {
     const dy = targetY - playerY
     const distance = Math.sqrt(dx * dx + dy * dy)
     return distance <= this.config.attackRange
+  }
+
+  /**
+   * 检查是否正在攻击
+   */
+  public getIsAttacking(): boolean {
+    return this.isAttacking
   }
 
   /**
