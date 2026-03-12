@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GM 工具 - 死亡测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #e74c3c;
+      font-size: 2em;
+      text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .section h2 {
+      margin-bottom: 15px;
+      color: #3498db;
+      font-size: 1.3em;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #3a4a5a;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      font-size: 14px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .result {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .result pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .success {
+      border-left: 4px solid #2ecc71;
+    }
+
+    .error {
+      border-left: 4px solid #e74c3c;
+    }
+
+    .info-box {
+      background: rgba(52, 152, 219, 0.2);
+      border: 1px solid #3498db;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
+    .info-box p {
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💀 GM 工具 - 死亡测试</h1>
+
+    <!-- 角色选择 -->
+    <div class="section">
+      <h2>👤 选择角色</h2>
+      <div class="info-box">
+        <p><strong>测试账号:</strong></p>
+        <p>test1@example.com / password123 → 测试玩家 1</p>
+        <p>test2@example.com / password123 → 测试玩家 2</p>
+      </div>
+      <div class="form-group">
+        <label>角色 ID:</label>
+        <input type="text" id="characterId" placeholder="输入角色 ID 或从下方选择" />
+      </div>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="selectCharacter('1fc5bfa9-a54b-406c-abaa-adb032a3f59a')">
+          测试玩家 1
+        </button>
+        <button class="btn btn-primary" onclick="selectCharacter('d066765f-7f8a-4c00-a72f-0a29113a843b')">
+          测试玩家 2
+        </button>
+        <button class="btn btn-primary" onclick="selectCharacter('c25a68c1-8b14-4084-b6c2-3f4a7ee81fd1')">
+          测试玩家 3
+        </button>
+      </div>
+    </div>
+
+    <!-- 死亡测试 -->
+    <div class="section">
+      <h2>💀 死亡测试</h2>
+      <div class="form-group">
+        <label>地图 ID:</label>
+        <select id="mapId">
+          <option value="zone_1">区域 1: 新手村庄 (安全等级 9-10)</option>
+          <option value="zone_2">区域 2: 平原旷野 (安全等级 6-8)</option>
+          <option value="zone_3">区域 3: 迷雾森林 (安全等级 3-4)</option>
+          <option value="zone_4" selected>区域 4: 巨龙山脉 (安全等级 1-2)</option>
+          <option value="zone_5">区域 5: 深渊遗迹 (安全等级 0)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>安全等级:</label>
+        <input type="number" id="safetyLevel" value="2" min="0" max="10" />
+      </div>
+      <div class="form-group">
+        <label>死亡原因:</label>
+        <select id="deathCause">
+          <option value="PVE">PVE (被怪物击败)</option>
+          <option value="PVP">PVP (被玩家击败)</option>
+          <option value="ENV">环境 (坠落/溺水等)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>击杀者 ID (可选，PVP 时填写):</label>
+        <input type="text" id="killerId" placeholder="击杀者角色 ID" />
+      </div>
+      <div class="button-group">
+        <button class="btn btn-danger" onclick="testDeath()">💀 触发死亡</button>
+        <button class="btn btn-success" onclick="checkDrops()">🎁 查询掉落物</button>
+      </div>
+      <div id="deathResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 拾取测试 -->
+    <div class="section">
+      <h2>🤲 拾取测试</h2>
+      <div class="form-group">
+        <label>掉落物 ID:</label>
+        <input type="text" id="droppedItemId" placeholder="输入掉落物 ID" />
+      </div>
+      <button class="btn btn-success" onclick="testLoot()">🤲 拾取掉落物</button>
+      <div id="lootResult" class="result" style="display: none;"></div>
+    </div>
+
+    <!-- 耐久度测试 -->
+    <div class="section">
+      <h2>🛠️ 耐久度测试</h2>
+      <button class="btn btn-primary" onclick="checkDurability()">📊 检查装备耐久度</button>
+      <div id="durabilityResult" class="result" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const SERVER_URL = 'http://localhost:3002';
+
+    function selectCharacter(charId) {
+      document.getElementById('characterId').value = charId;
+    }
+
+    function showResult(elementId, data, isError = false) {
+      const resultDiv = document.getElementById(elementId);
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'result ' + (isError ? 'error' : 'success');
+      resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+    }
+
+    async function testDeath() {
+      const characterId = document.getElementById('characterId').value;
+      const mapId = document.getElementById('mapId').value;
+      const safetyLevel = parseInt(document.getElementById('safetyLevel').value);
+      const deathCause = document.getElementById('deathCause').value;
+      const killerId = document.getElementById('killerId').value || undefined;
+
+      if (!characterId) {
+        alert('请选择或输入角色 ID');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${SERVER_URL}/api/v1/combat/death`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            characterId,
+            mapId,
+            safetyLevel,
+            cause: deathCause,
+            killerId,
+          }),
+        });
+
+        const result = await response.json();
+        showResult('deathResult', result, !result.success);
+
+        if (result.success) {
+          // 自动填充掉落物 ID 到拾取测试
+          if (result.droppedItems && result.droppedItems.length > 0) {
+            console.log('掉落物:', result.droppedItems);
+          }
+        }
+      } catch (error) {
+        showResult('deathResult', { error: error.message }, true);
+      }
+    }
+
+    async function checkDrops() {
+      const mapId = document.getElementById('mapId').value;
+
+      try {
+        const response = await fetch(`${SERVER_URL}/api/v1/combat/drops/${mapId}`);
+        const result = await response.json();
+        showResult('deathResult', result, !result.success);
+      } catch (error) {
+        showResult('deathResult', { error: error.message }, true);
+      }
+    }
+
+    async function testLoot() {
+      const characterId = document.getElementById('characterId').value;
+      const droppedItemId = document.getElementById('droppedItemId').value;
+
+      if (!characterId || !droppedItemId) {
+        alert('请填写角色 ID 和掉落物 ID');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${SERVER_URL}/api/v1/combat/loot`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            characterId,
+            droppedItemId,
+          }),
+        });
+
+        const result = await response.json();
+        showResult('lootResult', result, !result.success);
+      } catch (error) {
+        showResult('lootResult', { error: error.message }, true);
+      }
+    }
+
+    async function checkDurability() {
+      const characterId = document.getElementById('characterId').value;
+
+      if (!characterId) {
+        alert('请选择或输入角色 ID');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${SERVER_URL}/api/v1/equipment/${characterId}/stats`);
+        const result = await response.json();
+        showResult('durabilityResult', result, !result.success);
+      } catch (error) {
+        showResult('durabilityResult', { error: error.message }, true);
+      }
+    }
+  </script>
+</body>
+</html>
