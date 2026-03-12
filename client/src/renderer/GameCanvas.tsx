@@ -6,6 +6,7 @@ import { AttackEffectRenderer } from './AttackEffectRenderer'
 import { MinimapRenderer } from './MinimapRenderer'
 import { MapSystem } from '../systems/MapSystem'
 import { playerControls } from '../systems/PlayerControlsSystem'
+import './GameCanvas.css'
 
 /**
  * 游戏画布组件
@@ -53,7 +54,21 @@ export function GameCanvas() {
       const canvas = renderer.getApp()?.view as HTMLCanvasElement
       if (canvas) {
         canvas.focus()
-        console.log('GameCanvas: Canvas 已 focus，可以接收键盘事件')
+        canvas.tabIndex = 0
+        console.log('🎮 GameCanvas: Canvas 已 focus，可以接收键盘事件')
+        
+        // 添加点击事件，确保点击 Canvas 时获得焦点
+        canvas.addEventListener('click', () => {
+          canvas.focus()
+          console.log('🖱️ Canvas 被点击，重新获得焦点')
+        })
+        
+        // 测试键盘事件
+        canvas.addEventListener('keydown', (e) => {
+          console.log('⌨️ [Canvas 原生] 键盘按下:', e.code)
+        })
+      } else {
+        console.error('❌ GameCanvas: 无法获取 Canvas 元素')
       }
     }, 100)
 

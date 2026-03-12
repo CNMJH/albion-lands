@@ -1,0 +1,47 @@
+/**
+ * 游戏画布样式
+ * 确保 Canvas 能正确接收输入
+ */
+
+#game-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  outline: none;
+  touch-action: none;
+}
+
+/* 确保 Canvas 元素本身能接收焦点 */
+#game-canvas canvas {
+  outline: none;
+  cursor: crosshair;
+}
+
+/* 当 Canvas 获得焦点时的样式 */
+#game-canvas:focus {
+  outline: none;
+}
+
+/* 确保 UI 在 Canvas 之上但不阻挡输入 */
+#ui-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* UI 子元素可以接收输入 */
+#ui-overlay > * {
+  pointer-events: auto;
+}
+
+/* 聊天框激活时，Canvas 不应该接收键盘事件 */
+#game-canvas.chat-active {
+  pointer-events: none;
+}
