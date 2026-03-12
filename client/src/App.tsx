@@ -22,6 +22,8 @@ function App() {
   const { initialize } = useGameStore()
 
   useEffect(() => {
+    console.log('===== App useEffect 开始执行 =====')
+    
     // 初始化游戏
     const initGame = async () => {
       console.log('App: 开始初始化游戏...')
@@ -33,30 +35,35 @@ function App() {
 
         // 2. 初始化网络
         const network = NetworkManager.getInstance()
+        console.log('App: 准备连接 WebSocket...')
         await network.connect('ws://localhost:3002/ws')
         console.log('App: 网络连接完成')
         setLoadingProgress(40)
 
         // 3. 加载资源配置
+        console.log('App: 准备加载资源...')
         await loadResources()
         console.log('App: 资源加载完成')
         setLoadingProgress(80)
 
         // 4. 设置网络消息处理器
+        console.log('App: 准备设置网络处理器...')
         setupNetworkHandlers()
         console.log('App: 网络处理器设置完成')
         
         // 5. 启动游戏循环
+        console.log('App: 准备启动游戏循环...')
         startGameLoop()
         console.log('App: 游戏循环启动')
         setLoadingProgress(100)
         
         // 移除加载界面
-        console.log('App: 准备移除加载界面...')
-        setTimeout(() => {
-          console.log('App: 设置 loading = false')
-          setLoading(false)
-        }, 100)
+        console.log('App: 准备移除加载界面，当前 loading=', true)
+        console.log('App: 将在 100ms 后设置 loading=false')
+        
+        // 直接设置，不用 setTimeout
+        setLoading(false)
+        console.log('App: 已设置 loading=false')
       } catch (error) {
         console.error('游戏初始化失败:', error)
         alert('游戏加载失败，请刷新页面重试')
@@ -67,7 +74,7 @@ function App() {
 
     // 清理
     return () => {
-      console.log('App: 清理函数被调用')
+      console.log('===== App useEffect 清理函数被调用 =====')
       if (gameLoopRef) {
         cancelAnimationFrame(gameLoopRef)
       }
