@@ -46,7 +46,7 @@ export async function playerRoutes(fastify: any) {
         success: true,
         message: '断线保存成功',
         position: {
-          mapId: character.mapId,
+          zoneId: character.zoneId,
           x: character.x,
           y: character.y
         }
@@ -89,8 +89,7 @@ export async function playerRoutes(fastify: any) {
             include: {
               item: true
             }
-          },
-          equipment: true
+          }
         }
       })
 
@@ -108,13 +107,12 @@ export async function playerRoutes(fastify: any) {
           name: character.name,
           level: character.level,
           exp: character.exp,
-          mapId: character.mapId,
+          zoneId: character.zoneId,
           x: character.x,
           y: character.y,
           silver: character.silver,
           gold: character.gold,
-          inventory: character.inventory,
-          equipment: character.equipment
+          inventory: character.inventory
         }
       })
     } catch (error: any) {

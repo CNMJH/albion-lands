@@ -21,9 +21,9 @@ import { gatheringRoutes } from './gathering'
 import { craftingRoutes } from './crafting'
 import { dailyQuestRoutes } from './daily-quests'
 import { achievementRoutes } from './achievements'
-// import { leaderboardRoutes } from './leaderboard'  // 暂时注释 - TS 错误修复中
+import { leaderboardRoutes } from './leaderboard'
 import { bankRoutes } from './bank'
-// import { playerRoutes } from './player'  // 暂时注释 - TS 错误修复中
+import { playerRoutes } from './player'
 import { itemDetailRoutes } from './item-detail'
 
 /**
