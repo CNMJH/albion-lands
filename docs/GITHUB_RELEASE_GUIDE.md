@@ -1,267 +1,217 @@
-# GitHub Release 创建指南
+# 🚀 GitHub Release 发布指南
 
-## 📋 发布步骤
+**版本**: v0.3.0-alpha  
+**日期**: 2026-03-13  
+**提交**: `52f64e7` (最新)
 
-### 1. 访问发布页面
-打开浏览器访问：https://github.com/CNMJH/albion-lands/releases/new
+---
 
-### 2. 登录 GitHub
-使用账号密码登录 GitHub
+## 📋 发布清单
 
-### 3. 填写发布信息
-
-#### Tag version
-```
-v0.1.0-alpha
-```
-
-#### Target
-```
-main
+### 1. 推送到 GitHub ✅
+```bash
+cd /home/tenbox/albion-lands
+git push origin main
 ```
 
-#### Release title
-```
-呼噜大陆 v0.1.0-alpha - Alpha 测试版发布
-```
+### 2. 创建 GitHub Release ⏳
 
-#### Description
-复制以下内容：
+访问：https://github.com/CNMJH/albion-lands/releases/new
+
+**Tag version**: `v0.3.0-alpha`  
+**Target**: `main`  
+**Release title**: `v0.3.0-alpha - 双 100% 测试通过`
+
+**Release Notes** (复制以下内容):
 
 ```markdown
-## 🎉 发布信息
+## 🎉 双 100% 成就
 
-- **项目名称**: Hulu Lands (呼噜大陆)
-- **版本号**: v0.1.0-alpha
-- **发布日期**: 2026-03-12
-- **完成度**: 79% (106/134 功能项)
+- ✅ **API 测试**: 19/19 通过 (100%)
+- ✅ **UI 测试**: 15/15 通过 (100%)
+- ✅ **P0 核心功能**: 11/11 完成 (100%)
+- ✅ **P1 游戏内容**: 5/5 完成 (100%)
+- ✅ **P2 优化功能**: 6/6 完成 (100%)
+- ✅ **总进度**: 93% (143/153)
 
-## ✅ 问题修复状态
+## ✨ 核心功能
 
-### P0 问题 (阻塞发布) - 2/2 ✅
-1. ✅ 小地图实现冲突 - 统一使用 MinimapRenderer.ts
-2. ✅ 怪物渲染缺失 - CombatRenderer 内部管理
+### P0 - 核心玩法
+- LOL 风格控制（右键移动/攻击，QWER 技能）
+- 死亡掉落系统（安全区规则、耐久度）
+- PVP 系统（玩家对战、击杀公告）
+- 交易系统（原子交换、双重确认）
+- 拍卖行（市场订单、税费系统）
+- 装备系统（6 槽位、战力评分）
+- 小地图（200x200px Canvas）
 
-### P1 问题 (高优先级) - 3/3 ✅
-1. ✅ 移动功能验证 - 添加详细调试日志链路
-2. ✅ 技能释放反馈 - 添加金黄色光环特效（500ms）
-3. ✅ 网络请求重复 - 添加 100ms 防抖机制
+### P1 - 游戏内容
+- 5 区域地图、安全等级系统
+- 5 种 NPC 类型
+- 采集/制造系统
+- 每日任务系统
 
-## 🎮 核心功能
+### P2 - 优化功能
+- 成就系统（7 种类型）
+- 排行榜（5 种排名）
+- 仓库系统（100 格）
+- 断线重连
+- 物品详情统计
+- 死亡统计/复活点绑定
 
-### 玩家操作系统
-- ✅ LOL 风格控制（右键移动/攻击，QWER 技能）
-- ✅ 移动系统（200px/s，冲刺，角色旋转）
-- ✅ 攻击系统（800ms 冷却，150px 范围）
-- ✅ 交互系统（80px 范围，自动检测）
+## 🔧 技术改进
 
-### 战斗系统
-- ✅ 30 种技能（8 武器×4 技能）
-- ✅ 技能特效（金黄色光环，500ms）
-- ✅ 6 种怪物（34 动画，150+ 帧）
-- ✅ 伤害数字显示
+- Fastify 路由处理器改用内联箭头函数
+- 解决路由前缀重复和冲突问题
+- ChatUI 状态与 gameStore 同步
+- 创建 BankItem 数据库表
+- API 端点 100% 测试覆盖
+- UI 测试 100% 通过
 
-### 装备系统
-- ✅ 6 个装备槽位（主手/副手/胸甲/腿甲/鞋子/饰品）
-- ✅ 5 阶装备（T1-T5）
-- ✅ 30 件初始装备
-- ✅ 战力评分系统
+## 📊 测试成绩
 
-### 社交系统
-- ✅ 好友系统（添加/删除/列表）
-- ✅ 组队系统（创建/加入/解散）
-- ✅ 聊天系统（区域/全服）
-- ✅ 私聊系统
+### API 测试 (19/19)
+✅ 健康检查、物品、地图、NPC、背包、装备、技能、市场
+✅ 死亡记录、PVP 统计、任务、每日任务、好友
+✅ 成就、排行榜、仓库、离线奖励
 
-### 任务系统
-- ✅ 任务系统（接受/完成/追踪）
-- ✅ 成就系统（进度/奖励）
-- ✅ NPC 对话系统
+### UI 测试 (15/15)
+✅ 游戏加载、背包 (B)、装备 (C)、聊天 (Enter)
+✅ 拍卖行 (M)、小地图、技能栏
+✅ 死亡统计 (F1)、复活点 (F2)
+✅ API 验证 (5 项)、网络健康检查
 
-### 经济系统
-- ✅ 采集系统（挖矿/砍树）
-- ✅ 制作系统（装备/道具）
-- ✅ 背包系统（物品管理）
+## 🐛 关键修复
 
-### 地图与导航
-- ✅ 小地图（200x200 Canvas）
-- ✅ 玩家/怪物/队友标记
-- ✅ 地砖渲染（TilingSprite）
-- ✅ 地面网格显示
-
-## 🔧 技术特性
-
-### 客户端
-- **引擎**: Pixi.js v7 (高性能 2D 渲染)
-- **框架**: React 18 + TypeScript
-- **状态管理**: Zustand
-- **构建工具**: Vite
-
-### 服务端
-- **框架**: Fastify (高性能 HTTP 服务器)
-- **数据库**: SQLite (开发) / PostgreSQL (生产)
-- **ORM**: Prisma
-- **通信**: WebSocket + REST API
-
-## 🧪 测试结果
-
-### 编译测试
-```
-✓ 554 modules transformed.
-TypeScript errors: 0
-Build time: 2.12s
-```
-✅ **编译成功**
-
-### 浏览器测试 (7/7 通过)
-| 测试项 | 状态 |
-|--------|------|
-| 游戏加载 | ✅ 优秀 (~1 秒) |
-| 移动功能 | ✅ 正常 |
-| 技能特效 | ✅ 正常 |
-| 装备面板 | ✅ 正常 |
-| 背包功能 | ✅ 正常 |
-| 聊天框 | ✅ 正常 |
-| 小地图 | ✅ 正常 |
-
-### 网络请求测试
-- **总请求数**: 65+
-- **成功率**: **100%** ✅
-
-### 自动化测试
-```
-Tests:       12 passed, 12 total
-Test Suites: 4 passed, 4 total
-```
-✅ **100% 通过**
+1. Fastify 路由处理器签名问题
+2. 路由前缀重复（技能查询、死亡记录）
+3. 路由冲突（任务查询）
+4. UI 状态同步（ChatUI）
+5. 数据库表缺失（BankItem）
 
 ## 🚀 快速开始
 
-### Windows 用户
+### Windows
 ```batch
-# 一键启动游戏
 launcher.bat
 ```
 
-### Linux/Mac 用户
+### Linux/Mac
 ```bash
-# 启动服务端
 cd server && npm run dev
-
-# 启动客户端（新终端）
 cd client && npm run dev
-
-# 访问游戏
-http://localhost:3001
 ```
 
-### 测试账号
-- **账号**: test1@example.com
-- **密码**: password123
-- **角色**: Lv.10 测试玩家 1
+访问：http://localhost:3001
 
-## 📊 性能指标
+## 📁 文档
 
-| 指标 | 目标 | 实际 | 评价 |
-|------|------|------|------|
-| 首屏加载 | <5 秒 | ~1 秒 | ⭐⭐⭐⭐⭐ 优秀 |
-| 资源加载 | 100% 成功 | 100% 成功 | ⭐⭐⭐⭐⭐ 完美 |
-| API 请求 | 无 500 | 无 500 | ⭐⭐⭐⭐⭐ 完美 |
-| UI 响应 | <100ms | <100ms | ⭐⭐⭐⭐⭐ 优秀 |
-| 网络延迟 | <100ms | <50ms | ⭐⭐⭐⭐⭐ 优秀 |
+- [发布说明](docs/RELEASE_NOTES_v0.3.0.md)
+- [API 测试报告](docs/API_100_PERCENT_REPORT.md)
+- [UI 测试报告](docs/UI_TEST_100_PERCENT_REPORT.md)
+- [Windows 安装指南](docs/WINDOWS_SETUP.md)
+- [测试指南](docs/TESTING_GUIDE.md)
 
-## 📝 已知问题
+## 🎮 测试账号
 
-### 当前限制
-1. 美术资源使用临时素材（OpenGameArt CC-BY/CC0）
-2. 仅支持本地开发环境（SQLite）
-3. 同屏角色数限制（<20）
-4. AI 代理系统尚未集成
+- test1@example.com / password123
+- test2@example.com / password123
+- test3@example.com / password123
 
-### 优化建议 (P2-P3)
-- 🟢 Canvas 数量优化 (3 个→2 个)
-- 🟢 资源目录补充 (角色/怪物素材)
-- 🟢 错误边界处理
-- 🟢 性能监控系统
+## 📈 性能
 
-## 🎯 下一步计划
+- 首屏加载：~3 秒
+- API 响应：~50ms
+- FPS: 60
+- 编译错误：0
 
-### 短期（1 周）
-1. 收集测试玩家反馈
-2. 修复发现的 bug
-3. 优化用户体验
+## ⏭️ 未来计划
 
-### 中期（1 月）
-1. 补充美术资源（角色/怪物）
-2. AI 代理系统集成（OpenClaw）
-3. 世界 BOSS 和随机事件
+- 世界 BOSS 系统
+- 随机事件系统
+- 公会系统
+- 外观/时装系统
+- 坐骑系统
 
-### 长期（3 月）
-1. 生产环境部署（PostgreSQL + Redis）
-2. 多服务器支持（分线/跨服）
-3. 移动端适配（响应式设计）
+## 📞 反馈
 
-## 📞 反馈与支持
-
-### 问题报告
-- **GitHub Issues**: https://github.com/CNMJH/albion-lands/issues
-- **标签**: 使用 `bug` 标签报告问题
-
-### 功能建议
-- **GitHub Discussions**: https://github.com/CNMJH/albion-lands/discussions
-- **标签**: 使用 `enhancement` 标签建议功能
-
-### 开发文档
-- **完整文档**: `/docs/` 目录
-- **API 文档**: 服务端路由文件
-- **设计文档**: GAME_DESIGN_*.md
-
-## 🙏 致谢
-
-感谢所有参与开发和测试的人员！
-
-特别感谢：
-- **阿米大王** - 项目发起人和主要测试者
-- **OpenGameArt** - 提供 CC-BY/CC0 免费素材
-- **Pixi.js** - 强大的 2D 渲染引擎
-- **Fastify** - 高性能 Node.js 框架
-
-## 📄 许可证
-
-本项目采用 MIT 许可证
+- GitHub Issues: https://github.com/CNMJH/albion-lands/issues
+- 项目主页：https://github.com/CNMJH/albion-lands
 
 ---
 
-**发布人**: 波波 (AI 开发搭档)  
-**审核人**: 阿米大王  
-**发布日期**: 2026-03-12  
-**发布状态**: ✅ Alpha 测试版已发布！
+**MIT License** | **Hulu Lands Team** © 2026
 ```
 
-### 4. 选择分类
-- 勾选 **Set as the latest release**
+### 3. 发布后验证 ⏳
 
-### 5. 发布
-点击绿色按钮 **Publish release**
+```bash
+# 验证 GitHub Release 已创建
+curl -s https://api.github.com/repos/CNMJH/albion-lands/releases/latest | grep "tag_name"
+
+# 应该显示: "tag_name": "v0.3.0-alpha"
+```
+
+### 4. 通知测试玩家 ⏳
+
+在 Discord/微信群/QQ 群发布消息：
+
+```
+🎉 Hulu Lands v0.3.0-alpha 发布啦！
+
+✅ API 测试 100% (19/19)
+✅ UI 测试 100% (15/15)
+✅ P0+P1+P2 功能 93% 完成
+
+🎮 立即体验：
+https://github.com/CNMJH/albion-lands/releases/tag/v0.3.0-alpha
+
+📋 测试账号：
+test1@example.com / password123
+
+欢迎反馈 Bug 和建议！🐛
+```
 
 ---
 
-## 🎉 发布完成
+## 📊 发布后统计
 
-发布成功后，访问：
-https://github.com/CNMJH/albion-lands/releases/tag/v0.1.0-alpha
+### GitHub 指标（目标）
+- [ ] ⭐ Stars: 10+
+- [ ] 🍴 Forks: 5+
+- [ ] 👀 Watchers: 5+
+- [ ] 📥 Downloads: 50+
 
----
-
-## 📋 发布后检查清单
-
-- [ ] Release 页面显示正常
-- [ ] 版本号正确 (v0.1.0-alpha)
-- [ ] 描述内容完整
-- [ ] 标记为 latest release
-- [ ] 通知测试玩家
+### 测试反馈（目标）
+- [ ] Bug 报告：5+
+- [ ] 功能建议：3+
+- [ ] 活跃玩家：10+
 
 ---
 
-**指南创建人**: 波波 (AI 开发搭档)  
-**创建日期**: 2026-03-12
+## 🎯 下一步行动
+
+1. ✅ 代码提交完成
+2. ✅ 发布说明撰写完成
+3. ⏳ 推送到 GitHub
+4. ⏳ 创建 GitHub Release
+5. ⏳ 通知测试玩家
+6. ⏳ 收集反馈意见
+7. ⏳ 规划 v0.4.0 功能
+
+---
+
+## 📝 发布检查清单
+
+- [x] 所有测试通过
+- [x] 文档完善
+- [x] 代码提交
+- [x] 发布说明
+- [ ] GitHub Release 创建
+- [ ] 推送代码
+- [ ] 通知玩家
+- [ ] 收集反馈
+
+---
+
+**状态**: 🎉 **准备发布** - 等待最后一步！
