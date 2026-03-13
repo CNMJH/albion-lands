@@ -88,6 +88,56 @@ const characters: FastifyPluginAsync = async (fastify) => {
         },
       })
 
+      // 创建新手装备物品模板
+      const starterItems = [
+        { name: '新手剑', type: 'Weapon', slot: 'MainHand', tier: 1, rarity: 'Common', stats: { attack: 5 }, price: 10, maxStackSize: 1 },
+        { name: '新手盾', type: 'Weapon', slot: 'OffHand', tier: 1, rarity: 'Common', stats: { defense: 3 }, price: 10, maxStackSize: 1 },
+        { name: '新手胸甲', type: 'Armor', slot: 'Armor', tier: 1, rarity: 'Common', stats: { defense: 5 }, price: 15, maxStackSize: 1 },
+        { name: '新手护腿', type: 'Armor', slot: 'Legs', tier: 1, rarity: 'Common', stats: { defense: 3 }, price: 10, maxStackSize: 1 },
+        { name: '新手靴子', type: 'Armor', slot: 'Boots', tier: 1, rarity: 'Common', stats: { defense: 2 }, price: 8, maxStackSize: 1 },
+        { name: '新手项链', type: 'Accessory', slot: 'Accessory', tier: 1, rarity: 'Common', stats: { hp: 10 }, price: 12, maxStackSize: 1 },
+        { name: '治疗药水', type: 'Consumable', tier: 1, rarity: 'Common', stats: {}, price: 5, maxStackSize: 99 },
+        { name: '法力药水', type: 'Consumable', tier: 1, rarity: 'Common', stats: {}, price: 5, maxStackSize: 99 },
+      ]
+
+      // 为每个物品创建模板并添加到背包
+      for (let i = 0; i < starterItems.length; i++) {
+        const itemData = starterItems[i]
+        
+        // 查找或创建物品模板
+        let item = await prisma.item.findFirst({
+          where: { name: itemData.name },
+        })
+
+        if (!item) {
+          item = await prisma.item.create({
+            data: {
+              name: itemData.name,
+              type: itemData.type,
+              slot: itemData.slot || null,
+              tier: itemData.tier,
+              rarity: itemData.rarity,
+              price: itemData.price,
+              maxStackSize: itemData.maxStackSize,
+              stats: itemData.stats,
+              description: `新手装备：${itemData.name}`,
+            },
+          })
+        }
+
+        // 添加到角色背包
+        await prisma.inventoryItem.create({
+          data: {
+            characterId: character.id,
+            itemId: item.id,
+            quantity: itemData.type === 'Consumable' ? 5 : 1,
+            slot: i,
+          },
+        })
+      }
+
+      console.log(`✅ 角色 "${character.name}" 获得新手装备包`)
+
       return {
         success: true,
         character: {
