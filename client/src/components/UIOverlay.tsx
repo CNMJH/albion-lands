@@ -8,6 +8,7 @@ import { ChatUI } from './ChatUI'
 import { EquipmentPanel } from './EquipmentPanel'
 import { MarketPanel } from './MarketPanel'
 import { TradePanel } from './TradePanel'
+import { DeathStatsPanel } from './DeathStatsPanel'
 import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
 
@@ -76,6 +77,9 @@ export function UIOverlay() {
 
       {/* 交易面板 */}
       {uiState.trade && <TradePanel />}
+
+      {/* 死亡统计面板 */}
+      <DeathStatsPanel />
 
       {/* 弹窗窗口 */}
       {showCharacter && (

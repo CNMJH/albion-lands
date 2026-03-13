@@ -301,6 +301,11 @@ export class PlayerControlsSystem {
       return
     }
 
+    if (code === 'F1') {
+      this.toggleUI('deathStats')
+      return
+    }
+
     // E - 拾取掉落物（死亡掉落系统）
     if (code === 'KeyE') {
       this.pickupDrop()
@@ -553,6 +558,7 @@ export class PlayerControlsSystem {
     scoreboard: boolean
     market: boolean
     trade: boolean
+    deathStats: boolean
   } = {
     inventory: false,
     crafting: false,
@@ -564,6 +570,7 @@ export class PlayerControlsSystem {
     scoreboard: false,
     market: false,
     trade: false,
+    deathStats: false,
   }
 
   /**

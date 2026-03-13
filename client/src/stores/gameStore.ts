@@ -93,6 +93,7 @@ interface GameState {
     scoreboard: boolean
     market: boolean
     trade: boolean
+    deathStats: boolean
   }
   
   // 动作
@@ -156,6 +157,7 @@ export const useGameStore = create<GameState>()(
       scoreboard: false,
       market: false,
       trade: false,
+      deathStats: false,
     },
     inventory: {
       slots: Array(50).fill(null),
