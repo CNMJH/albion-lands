@@ -14,6 +14,9 @@ export class MinimapRenderer {
   private showPlayers: boolean = true
   private showMonsters: boolean = true
   private showResources: boolean = false
+  
+  // 渲染计数（用于调试）
+  private renderCount: number = 0
 
   constructor() {
     this.canvas = document.createElement('canvas')
@@ -65,20 +68,17 @@ export class MinimapRenderer {
    */
   public render(): void {
     const state = useGameStore.getState()
-    if (!state.player) return
-
     const ctx = this.ctx
-    const player = state.player
 
     // 清空画布
     ctx.clearRect(0, 0, this.size, this.size)
 
-    // 1. 绘制背景（深色）
-    ctx.fillStyle = 'rgba(26, 26, 46, 0.9)'
+    // 1. 绘制地面背景（绿色代表可通行区域）
+    ctx.fillStyle = '#2d5016' // 深绿色地面
     ctx.fillRect(0, 0, this.size, this.size)
 
     // 2. 绘制网格线
-    ctx.strokeStyle = 'rgba(58, 58, 110, 0.3)'
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)'
     ctx.lineWidth = 0.5
     const gridSize = 64 * this.scale
     for (let x = 0; x < this.size; x += gridSize) {
@@ -94,72 +94,102 @@ export class MinimapRenderer {
       ctx.stroke()
     }
 
+    // 如果没有玩家，不继续绘制
+    if (!state.player) {
+      // 首次渲染时打印一次警告
+      if (!this.renderCount) {
+        console.log('🗺️ 小地图：等待玩家数据...')
+        this.renderCount = 1
+      }
+      return
+    }
+    
+    this.renderCount++
+
+    const player = state.player
+    const playerX = player.x * this.scale
+    const playerY = player.y * this.scale
+    
+    // 调试日志（每 60 帧打印一次）
+    if (this.renderCount % 60 === 1) {
+      console.log('🗺️ 小地图渲染:', {
+        playerX: player.x,
+        playerY: player.y,
+        scaledX: playerX,
+        scaledY: playerY,
+        monsterCount: state.monsters?.length || 0,
+      })
+    }
+
     // 3. 绘制边界
     ctx.strokeStyle = '#ff4444'
     ctx.lineWidth = 2
     ctx.strokeRect(0, 0, this.size, this.size)
 
     // 4. 绘制玩家位置（蓝色箭头）
-    const playerX = player.x * this.scale
-    const playerY = player.y * this.scale
-    
     ctx.save()
     ctx.translate(playerX, playerY)
     ctx.rotate(player.rotation || 0)
     
     // 玩家三角形
     ctx.fillStyle = '#00BFFF'
+    ctx.shadowColor = '#00BFFF'
+    ctx.shadowBlur = 8
     ctx.beginPath()
     ctx.moveTo(6, 0)
     ctx.lineTo(-4, -4)
     ctx.lineTo(-4, 4)
     ctx.closePath()
     ctx.fill()
-    
+    ctx.shadowBlur = 0
     ctx.restore()
 
     // 5. 绘制怪物位置（红色点）
-    if (this.showMonsters) {
-      state.monsters.forEach(monster => {
+    if (this.showMonsters && state.monsters && state.monsters.length > 0) {
+      state.monsters.forEach((monster, index) => {
         const mx = monster.x * this.scale
         const my = monster.y * this.scale
         
-        // 只绘制附近的怪物
-        const dx = mx - playerX
-        const dy = my - playerY
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        
-        if (dist < this.size / 2) {
+        // 只绘制在小地图范围内的怪物
+        if (mx >= 0 && mx <= this.size && my >= 0 && my <= this.size) {
           ctx.fillStyle = '#ff4444'
+          ctx.shadowColor = '#ff4444'
+          ctx.shadowBlur = 4
           ctx.beginPath()
-          ctx.arc(mx, my, 3, 0, Math.PI * 2)
+          ctx.arc(mx, my, 4, 0, Math.PI * 2)
           ctx.fill()
+          ctx.shadowBlur = 0
+          
+          // 调试：打印第一个怪物坐标
+          if (index === 0 && this.renderCount % 60 === 1) {
+            console.log('👹 怪物坐标:', { name: monster.name, x: monster.x, y: monster.y, scaledX: mx, scaledY: my })
+          }
         }
       })
     }
 
     // 6. 绘制队友位置（绿色点）
-    if (this.showPlayers && state.party) {
+    if (this.showPlayers && state.party && state.party.members) {
       state.party.members.forEach((member: any) => {
         if (member.id !== player.id) {
           const mx = member.x * this.scale
           const my = member.y * this.scale
           
-          ctx.fillStyle = '#00ff00'
-          ctx.beginPath()
-          ctx.arc(mx, my, 3, 0, Math.PI * 2)
-          ctx.fill()
+          if (mx >= 0 && mx <= this.size && my >= 0 && my <= this.size) {
+            ctx.fillStyle = '#00ff00'
+            ctx.shadowColor = '#00ff00'
+            ctx.shadowBlur = 4
+            ctx.beginPath()
+            ctx.arc(mx, my, 3, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.shadowBlur = 0
+          }
         }
       })
     }
 
-    // 7. 绘制资源点（黄色点，如果开启）
-    if (this.showResources) {
-      // TODO: 绘制附近资源
-    }
-
-    // 8. 绘制玩家视野范围（可选）
-    ctx.strokeStyle = 'rgba(0, 191, 255, 0.2)'
+    // 7. 绘制玩家视野范围
+    ctx.strokeStyle = 'rgba(0, 191, 255, 0.3)'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.arc(playerX, playerY, 30, 0, Math.PI * 2)
