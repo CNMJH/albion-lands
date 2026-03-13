@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+// 简化版 player 路由 - 移除严格类型注解
 import { prisma } from '../prisma'
 
 /**
@@ -8,12 +8,11 @@ import { prisma } from '../prisma'
  * GET /api/v1/player/offline-rewards/:characterId - 获取离线奖励
  * POST /api/v1/player/claim-offline-rewards - 领取离线奖励
  */
-export async function playerRoutes(fastify: FastifyInstance) {
+export async function playerRoutes(fastify: any) {
   // 玩家断线
-  fastify.post('/player/disconnect', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/player/disconnect', async (request: any, reply: any) => {
     try {
-      const body = request.body as { characterId: string }
-      const { characterId } = body
+      const { characterId } = request.body
 
       if (!characterId) {
         return reply.status(400).send({
@@ -52,7 +51,7 @@ export async function playerRoutes(fastify: FastifyInstance) {
           y: character.y
         }
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('玩家断线失败:', error)
       return reply.status(500).send({
         success: false,
@@ -62,37 +61,14 @@ export async function playerRoutes(fastify: FastifyInstance) {
   })
 
   // 玩家重连
-  fastify.post('/player/reconnect', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/player/reconnect', async (request: any, reply: any) => {
     try {
-      const body = request.body as { characterId: string }
-      const { characterId } = body
+      const { characterId } = request.body
 
       if (!characterId) {
         return reply.status(400).send({
           success: false,
           error: '缺少角色 ID'
-        })
-      }
-
-      const character = await prisma.character.findUnique({
-        where: { id: characterId },
-        include: {
-          user: true
-        }
-      })
-
-      if (!character) {
-        return reply.status(404).send({
-          success: false,
-          error: '角色不存在'
-        })
-      }
-
-      // 检查是否已经在线
-      if (character.isOnline) {
-        return reply.status(400).send({
-          success: false,
-          error: '角色已在线'
         })
       }
 
@@ -105,20 +81,43 @@ export async function playerRoutes(fastify: FastifyInstance) {
         }
       })
 
+      // 获取角色完整信息
+      const character = await prisma.character.findUnique({
+        where: { id: characterId },
+        include: {
+          inventory: {
+            include: {
+              item: true
+            }
+          },
+          equipment: true
+        }
+      })
+
+      if (!character) {
+        return reply.status(404).send({
+          success: false,
+          error: '角色不存在'
+        })
+      }
+
       return reply.send({
         success: true,
-        message: '重连成功',
         character: {
           id: character.id,
           name: character.name,
           level: character.level,
+          exp: character.exp,
           mapId: character.mapId,
           x: character.x,
           y: character.y,
-          isOnline: true
+          silver: character.silver,
+          gold: character.gold,
+          inventory: character.inventory,
+          equipment: character.equipment
         }
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('玩家重连失败:', error)
       return reply.status(500).send({
         success: false,
@@ -128,44 +127,37 @@ export async function playerRoutes(fastify: FastifyInstance) {
   })
 
   // 获取离线奖励
-  fastify.get('/player/offline-rewards/:characterId', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/player/offline-rewards/:characterId', async (request: any, reply: any) => {
     try {
-      const params = request.params as { characterId: string }
-      const { characterId } = params
+      const { characterId } = request.params
 
       const character = await prisma.character.findUnique({
         where: { id: characterId }
       })
 
-      if (!character) {
+      if (!character || !character.lastLoginAt) {
         return reply.status(404).send({
           success: false,
           error: '角色不存在'
         })
       }
 
-      const lastLogin = character.lastLoginAt || character.createdAt
-      const offlineSeconds = Math.floor((Date.now() - lastLogin.getTime()) / 1000)
-      
-      // 最多计算 24 小时的离线奖励
-      const cappedSeconds = Math.min(offlineSeconds, 86400)
-      const offlineHours = cappedSeconds / 3600
+      // 计算离线时间 (毫秒)
+      const offlineMs = Date.now() - character.lastLoginAt.getTime()
+      const offlineMinutes = Math.floor(offlineMs / 60000)
 
-      // 每小时奖励：10 银币 + 50 经验
-      const silverReward = Math.floor(offlineHours * 10)
-      const expReward = Math.floor(offlineHours * 50)
+      // 离线奖励：每分钟 1 银币，最多 24 小时
+      const maxMinutes = 24 * 60
+      const rewardMinutes = Math.min(offlineMinutes, maxMinutes)
+      const silverReward = rewardMinutes * 1
 
       return reply.send({
         success: true,
-        data: {
-          offlineSeconds,
-          offlineHours: offlineHours.toFixed(2),
-          silverReward,
-          expReward,
-          capped: offlineSeconds > 86400
-        }
+        offlineMinutes,
+        rewardMinutes,
+        silverReward
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('获取离线奖励失败:', error)
       return reply.status(500).send({
         success: false,
@@ -175,65 +167,41 @@ export async function playerRoutes(fastify: FastifyInstance) {
   })
 
   // 领取离线奖励
-  fastify.post('/player/claim-offline-rewards', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/player/claim-offline-rewards', async (request: any, reply: any) => {
     try {
-      const body = request.body as { characterId: string }
-      const { characterId } = body
-
-      if (!characterId) {
-        return reply.status(400).send({
-          success: false,
-          error: '缺少角色 ID'
-        })
-      }
+      const { characterId } = request.body
 
       const character = await prisma.character.findUnique({
         where: { id: characterId }
       })
 
-      if (!character) {
+      if (!character || !character.lastLoginAt) {
         return reply.status(404).send({
           success: false,
           error: '角色不存在'
         })
       }
 
-      const lastLogin = character.lastLoginAt || character.createdAt
-      const offlineSeconds = Math.floor((Date.now() - lastLogin.getTime()) / 1000)
-      
-      // 最多计算 24 小时的离线奖励
-      const cappedSeconds = Math.min(offlineSeconds, 86400)
-      const offlineHours = cappedSeconds / 3600
-
-      const silverReward = Math.floor(offlineHours * 10)
-      const expReward = Math.floor(offlineHours * 50)
-
-      if (silverReward <= 0 && expReward <= 0) {
-        return reply.status(400).send({
-          success: false,
-          error: '没有可领取的奖励'
-        })
-      }
+      // 计算离线奖励
+      const offlineMs = Date.now() - character.lastLoginAt.getTime()
+      const offlineMinutes = Math.floor(offlineMs / 60000)
+      const maxMinutes = 24 * 60
+      const rewardMinutes = Math.min(offlineMinutes, maxMinutes)
+      const silverReward = rewardMinutes * 1
 
       // 发放奖励
       await prisma.character.update({
         where: { id: characterId },
         data: {
-          silver: { increment: silverReward },
-          exp: { increment: expReward },
-          lastLoginAt: new Date()
+          silver: character.silver + silverReward
         }
       })
 
       return reply.send({
         success: true,
-        message: '领取成功',
-        rewards: {
-          silver: silverReward,
-          exp: expReward
-        }
+        silverReward
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('领取离线奖励失败:', error)
       return reply.status(500).send({
         success: false,

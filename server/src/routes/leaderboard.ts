@@ -1,57 +1,19 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+// 简化版 leaderboard 路由 - 移除严格类型注解
 import { prisma } from '../prisma'
 
 /**
  * 排行榜路由
- * GET /api/v1/leaderboard/level - 等级排行榜
  * GET /api/v1/leaderboard/pvp - PVP 排行榜
+ * GET /api/v1/leaderboard/pve - PVE 排行榜
  * GET /api/v1/leaderboard/wealth - 财富排行榜
- * GET /api/v1/leaderboard/kills - 击杀排行榜
- * GET /api/v1/leaderboard/my-rank/:characterId - 我的排名
  */
-export async function leaderboardRoutes(fastify: FastifyInstance) {
-  // 等级排行榜
-  fastify.get('/leaderboard/level', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const query = request.query as { limit?: string }
-      const limit = parseInt(query.limit || '50', 10)
-
-      const characters = await prisma.character.findMany({
-        orderBy: { level: 'desc' },
-        take: limit,
-        select: {
-          id: true,
-          name: true,
-          level: true,
-          exp: true
-        }
-      })
-
-      return reply.send({
-        success: true,
-        leaderboard: characters.map((char, index) => ({
-          rank: index + 1,
-          ...char
-        }))
-      })
-    } catch (error) {
-      console.error('获取等级排行榜失败:', error)
-      return reply.status(500).send({
-        success: false,
-        error: '获取排行榜失败'
-      })
-    }
-  })
-
+export async function leaderboardRoutes(fastify: any) {
   // PVP 排行榜
-  fastify.get('/leaderboard/pvp', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/leaderboard/pvp', async (request: any, reply: any) => {
     try {
-      const query = request.query as { limit?: string }
-      const limit = parseInt(query.limit || '50', 10)
-
-      const pvpStats = await prisma.pVPStats.findMany({
-        orderBy: { kills: 'desc' },
-        take: limit,
+      const limit = parseInt(request.query.limit) || 100
+      
+      const leaderboard = await prisma.pVPStats.findMany({
         include: {
           character: {
             select: {
@@ -60,169 +22,101 @@ export async function leaderboardRoutes(fastify: FastifyInstance) {
               level: true
             }
           }
-        }
+        },
+        orderBy: {
+          kills: 'desc'
+        },
+        take: limit
       })
 
       return reply.send({
         success: true,
-        leaderboard: pvpStats.map((stat, index) => ({
-          rank: index + 1,
-          characterId: stat.characterId,
-          name: stat.character.name,
-          level: stat.character.level,
-          kills: stat.kills,
-          deaths: stat.deaths,
-          assists: stat.assists,
-          honorPoints: stat.honorPoints,
-          kda: stat.kills > 0 ? ((stat.kills + stat.assists) / Math.max(1, stat.deaths)).toFixed(2) : '0.00'
+        leaderboard: leaderboard.map((entry: any) => ({
+          characterId: entry.characterId,
+          characterName: entry.character.name,
+          level: entry.character.level,
+          kills: entry.kills,
+          deaths: entry.deaths,
+          assists: entry.assists,
+          honorPoints: entry.honorPoints,
+          kd: entry.deaths > 0 ? (entry.kills / entry.deaths).toFixed(2) : entry.kills
         }))
       })
-    } catch (error) {
-      console.error('获取 PVP 排行榜失败:', error)
+    } catch (error: any) {
+      fastify.log.error('获取 PVP 排行榜失败：' + String(error))
       return reply.status(500).send({
         success: false,
-        error: '获取排行榜失败'
+        error: '获取 PVP 排行榜失败'
+      })
+    }
+  })
+
+  // PVE 排行榜
+  fastify.get('/leaderboard/pve', async (request: any, reply: any) => {
+    try {
+      const limit = parseInt(request.query.limit) || 100
+      
+      const leaderboard = await prisma.character.findMany({
+        select: {
+          id: true,
+          name: true,
+          level: true,
+          exp: true
+        },
+        orderBy: {
+          exp: 'desc'
+        },
+        take: limit
+      })
+
+      return reply.send({
+        success: true,
+        leaderboard
+      })
+    } catch (error: any) {
+      fastify.log.error('获取 PVE 排行榜失败：' + String(error))
+      return reply.status(500).send({
+        success: false,
+        error: '获取 PVE 排行榜失败'
       })
     }
   })
 
   // 财富排行榜
-  fastify.get('/leaderboard/wealth', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/leaderboard/wealth', async (request: any, reply: any) => {
     try {
-      const query = request.query as { limit?: string }
-      const limit = parseInt(query.limit || '50', 10)
-
-      const characters = await prisma.character.findMany({
-        orderBy: { silver: 'desc' },
-        take: limit,
+      const limit = parseInt(request.query.limit) || 100
+      
+      const leaderboard = await prisma.character.findMany({
         select: {
           id: true,
           name: true,
           level: true,
           silver: true,
           gold: true
-        }
+        },
+        orderBy: {
+          silver: 'desc'
+        },
+        take: limit
       })
 
       return reply.send({
         success: true,
-        leaderboard: characters.map((char, index) => ({
-          rank: index + 1,
-          ...char,
-          totalWealth: char.silver + char.gold * 1000
+        leaderboard: leaderboard.map((char: any) => ({
+          characterId: char.id,
+          characterName: char.name,
+          level: char.level,
+          silver: char.silver,
+          gold: char.gold,
+          total: char.silver + char.gold * 1000
         }))
       })
-    } catch (error) {
-      console.error('获取财富排行榜失败:', error)
+    } catch (error: any) {
+      fastify.log.error('获取财富排行榜失败：' + String(error))
       return reply.status(500).send({
         success: false,
-        error: '获取排行榜失败'
-      })
-    }
-  })
-
-  // 击杀排行榜
-  fastify.get('/leaderboard/kills', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const query = request.query as { limit?: string }
-      const limit = parseInt(query.limit || '50', 10)
-
-      const pvpStats = await prisma.pVPStats.findMany({
-        orderBy: { kills: 'desc' },
-        take: limit,
-        include: {
-          character: {
-            select: {
-              id: true,
-              name: true,
-              level: true
-            }
-          }
-        }
-      })
-
-      return reply.send({
-        success: true,
-        leaderboard: pvpStats.map((stat, index) => ({
-          rank: index + 1,
-          characterId: stat.characterId,
-          name: stat.character.name,
-          level: stat.character.level,
-          kills: stat.kills,
-          deaths: stat.deaths
-        }))
-      })
-    } catch (error) {
-      console.error('获取击杀排行榜失败:', error)
-      return reply.status(500).send({
-        success: false,
-        error: '获取排行榜失败'
-      })
-    }
-  })
-
-  // 我的排名
-  fastify.get('/leaderboard/my-rank/:characterId', async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const params = request.params as { characterId: string }
-      const query = request.query as { type?: string }
-      const { characterId } = params
-      const type = query.type || 'level'
-
-      const character = await prisma.character.findUnique({
-        where: { id: characterId }
-      })
-
-      if (!character) {
-        return reply.status(404).send({
-          success: false,
-          error: '角色不存在'
-        })
-      }
-
-      let rank = 0
-      let total = 0
-
-      if (type === 'level') {
-        total = await prisma.character.count()
-        const higher = await prisma.character.count({
-          where: { level: { gt: character.level } }
-        })
-        rank = higher + 1
-      } else if (type === 'wealth') {
-        total = await prisma.character.count()
-        const higher = await prisma.character.count({
-          where: { silver: { gt: character.silver } }
-        })
-        rank = higher + 1
-      } else if (type === 'pvp') {
-        const pvpStat = await prisma.pVPStats.findUnique({
-          where: { characterId }
-        })
-        if (pvpStat) {
-          total = await prisma.pVPStats.count()
-          const higher = await prisma.pVPStats.count({
-            where: { rating: { gt: pvpStat.rating } }
-          })
-          rank = higher + 1
-        }
-      }
-
-      return reply.send({
-        success: true,
-        data: {
-          characterId,
-          type,
-          rank,
-          total,
-          percentile: total > 0 ? ((rank / total) * 100).toFixed(2) : '0.00'
-        }
-      })
-    } catch (error) {
-      console.error('获取我的排名失败:', error)
-      return reply.status(500).send({
-        success: false,
-        error: '获取排名失败'
+        error: '获取财富排行榜失败'
       })
     }
   })

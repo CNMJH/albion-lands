@@ -112,7 +112,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 排行榜路由
   // @ts-ignore - Fastify type issue
-  // fastify.register(leaderboardRoutes, { prefix: '/api/v1' })  // 暂时禁用 - TS 错误修复中
+  fastify.register(leaderboardRoutes, { prefix: '/api/v1' })
   
   // 仓库路由
   // @ts-ignore - Fastify type issue
@@ -120,7 +120,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 玩家路由（断线重连）
   // @ts-ignore - Fastify type issue
-  // fastify.register(playerRoutes, { prefix: '/api/v1' })  // 暂时禁用 - TS 错误修复中
+  fastify.register(playerRoutes, { prefix: '/api/v1' })
   
   // 物品详情路由
   // @ts-ignore - Fastify type issue
