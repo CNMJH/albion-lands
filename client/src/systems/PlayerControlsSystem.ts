@@ -306,6 +306,11 @@ export class PlayerControlsSystem {
       return
     }
 
+    if (code === 'F2') {
+      this.toggleUI('respawn')
+      return
+    }
+
     // E - 拾取掉落物（死亡掉落系统）
     if (code === 'KeyE') {
       this.pickupDrop()
@@ -559,6 +564,7 @@ export class PlayerControlsSystem {
     market: boolean
     trade: boolean
     deathStats: boolean
+    respawn: boolean
   } = {
     inventory: false,
     crafting: false,
@@ -571,6 +577,7 @@ export class PlayerControlsSystem {
     market: false,
     trade: false,
     deathStats: false,
+    respawn: false,
   }
 
   /**

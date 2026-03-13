@@ -9,6 +9,7 @@ import { EquipmentPanel } from './EquipmentPanel'
 import { MarketPanel } from './MarketPanel'
 import { TradePanel } from './TradePanel'
 import { DeathStatsPanel } from './DeathStatsPanel'
+import { RespawnPanel } from './RespawnPanel'
 import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
 
@@ -80,6 +81,9 @@ export function UIOverlay() {
 
       {/* 死亡统计面板 */}
       <DeathStatsPanel />
+
+      {/* 复活点面板 */}
+      <RespawnPanel />
 
       {/* 弹窗窗口 */}
       {showCharacter && (
