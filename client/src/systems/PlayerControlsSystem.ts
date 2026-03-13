@@ -311,6 +311,18 @@ export class PlayerControlsSystem {
       return
     }
 
+    // Escape - 关闭所有 UI
+    if (code === 'Escape') {
+      this.closeAllUI()
+      return
+    }
+
+    // Tab - 计分板/排行榜
+    if (code === 'Tab') {
+      this.toggleUI('scoreboard')
+      return
+    }
+
     // E - 拾取掉落物（死亡掉落系统）
     if (code === 'KeyE') {
       this.pickupDrop()
@@ -551,6 +563,22 @@ export class PlayerControlsSystem {
     // TODO: 实现血条显示切换
   }
 
+  /**
+   * 关闭所有 UI
+   */
+  private closeAllUI(): void {
+    console.log('❌ 关闭所有 UI')
+    const store = useGameStore.getState()
+    
+    // 重置本地 UI 状态
+    Object.keys(this.uiState).forEach(key => {
+      this.uiState[key as keyof typeof this.uiState] = false
+    })
+    
+    // 同步到 store
+    store.closeAllUI()
+  }
+
   // UI 状态跟踪
   private uiState: {
     inventory: boolean
@@ -595,7 +623,7 @@ export class PlayerControlsSystem {
   }
 
   /**
-   * 切换 UI 面板
+   * 切换 UI 面板 - 遵循互斥原则（同时只打开一个 UI）
    */
   private toggleUI(uiType: keyof typeof this.uiState): void {
     const store = useGameStore.getState()
@@ -607,13 +635,33 @@ export class PlayerControlsSystem {
       this.uiState[uiType] = false
       console.log(`❌ 关闭 ${uiType} UI`)
     } else {
-      // 关闭其他 UI，打开当前 UI
+      // 互斥原则：关闭所有其他 UI，打开当前 UI
+      // 1. 先关闭本地所有 UI
       Object.keys(this.uiState).forEach(key => {
         this.uiState[key as keyof typeof this.uiState] = false
       })
+      // 2. 打开目标 UI
       this.uiState[uiType] = true
-      store.setUIState(uiType as any, true)
-      console.log(`✅ 打开 ${uiType} UI`)
+      
+      // 3. 同步到 store - 关键：先重置所有 UI 状态，再设置目标 UI
+      const newUIState = {
+        inventory: false,
+        crafting: false,
+        quest: false,
+        friends: false,
+        chat: false,
+        character: false,
+        shop: false,
+        scoreboard: false,
+        market: false,
+        trade: false,
+        deathStats: false,
+        respawn: false,
+      }
+      newUIState[uiType] = true
+      store.setUIStateAll(newUIState)
+      
+      console.log(`✅ 打开 ${uiType} UI（互斥模式）`)
     }
 
     // 触发 UI 切换事件（UI 组件可以监听）

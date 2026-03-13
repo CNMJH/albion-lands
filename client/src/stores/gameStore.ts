@@ -108,7 +108,9 @@ interface GameState {
   addFriend: (friend: any) => void
   setDeathSystem: (deathSystem: any) => void
   setUIState: (uiType: keyof GameState['uiState'], visible: boolean) => void
+  setUIStateAll: (uiState: GameState['uiState']) => void
   closeUI: (uiType: keyof GameState['uiState']) => void
+  closeAllUI: () => void
   
   // 战斗相关
   addMonster: (monster: Monster) => void
@@ -299,7 +301,7 @@ export const useGameStore = create<GameState>()(
       }))
     },
     
-    // 设置 UI 状态
+    // 设置 UI 状态（单个）
     setUIState: (uiType, visible) => {
       set((state) => ({
         uiState: {
@@ -309,7 +311,12 @@ export const useGameStore = create<GameState>()(
       }))
     },
     
-    // 关闭 UI
+    // 设置所有 UI 状态（用于互斥切换）
+    setUIStateAll: (newUIState) => {
+      set({ uiState: newUIState })
+    },
+    
+    // 关闭单个 UI
     closeUI: (uiType) => {
       set((state) => ({
         uiState: {
@@ -317,6 +324,26 @@ export const useGameStore = create<GameState>()(
           [uiType]: false,
         },
       }))
+    },
+    
+    // 关闭所有 UI
+    closeAllUI: () => {
+      set({
+        uiState: {
+          inventory: false,
+          crafting: false,
+          quest: false,
+          friends: false,
+          chat: false,
+          character: false,
+          shop: false,
+          scoreboard: false,
+          market: false,
+          trade: false,
+          deathStats: false,
+          respawn: false,
+        },
+      })
     },
   }))
 )
