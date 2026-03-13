@@ -119,7 +119,7 @@ const characters: FastifyPluginAsync = async (fastify) => {
               rarity: itemData.rarity,
               price: itemData.price,
               maxStackSize: itemData.maxStackSize,
-              stats: itemData.stats,
+              stats: JSON.stringify(itemData.stats), // 转为 JSON 字符串
               description: `新手装备：${itemData.name}`,
             },
           })

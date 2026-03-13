@@ -87,6 +87,7 @@ model InventoryItem {
   itemId      String
   item        Item      @relation(fields: [itemId], references: [id])
   quantity    Int       @default(1)
+  slot        Int?      // 背包槽位 (0-49)
   isEquipped  Boolean   @default(false)
   durability  Int       @default(100) // 耐久度 (0-100)
   createdAt   DateTime  @default(now())
