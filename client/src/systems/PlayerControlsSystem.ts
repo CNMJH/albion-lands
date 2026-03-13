@@ -83,6 +83,23 @@ export class PlayerControlsSystem {
     this.setupGlobalInput()
     
     console.log('🎮 玩家操作系统：输入监听设置完成（双模式）')
+    
+    // 添加调试信息
+    setTimeout(() => {
+      const canvas = this.gameRenderer.getApp()?.view as HTMLCanvasElement
+      if (canvas) {
+        console.log('🖼️ Canvas 元素:', {
+          width: canvas.width,
+          height: canvas.height,
+          clientWidth: canvas.clientWidth,
+          clientHeight: canvas.clientHeight,
+          tabindex: canvas.tabIndex,
+        })
+        console.log('🎯 Canvas 是否可 focus:', canvas.tabIndex >= 0)
+      } else {
+        console.error('❌ Canvas 元素不存在!')
+      }
+    }, 1000)
   }
 
   /**

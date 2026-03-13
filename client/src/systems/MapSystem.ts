@@ -97,12 +97,22 @@ export class MapSystem {
       ctx.fillStyle = '#1a1a2e'
       ctx.fillRect(0, 0, this.tileSize, this.tileSize)
       
-      // 绘制网格线（更明显）
-      ctx.strokeStyle = '#3a3a6e'
+      // 绘制网格线（更明显 - 白色边框）
+      ctx.strokeStyle = '#5a5a8e'
       ctx.lineWidth = 2
       
-      // 边框
-      ctx.strokeRect(0, 0, this.tileSize, this.tileSize)
+      // 边框（白色，非常明显）
+      ctx.strokeRect(1, 1, this.tileSize - 2, this.tileSize - 2)
+      
+      // 十字线（辅助看清移动）
+      ctx.strokeStyle = '#3a3a6e'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(this.tileSize / 2, 0)
+      ctx.lineTo(this.tileSize / 2, this.tileSize)
+      ctx.moveTo(0, this.tileSize / 2)
+      ctx.lineTo(this.tileSize, this.tileSize / 2)
+      ctx.stroke()
       
       // 对角线（辅助看清移动方向）
       ctx.strokeStyle = '#2a2a4e'
@@ -114,14 +124,22 @@ export class MapSystem {
       ctx.lineTo(0, this.tileSize)
       ctx.stroke()
       
-      // 中心点（红色，更明显）
+      // 中心点（红色，非常明显）
       ctx.fillStyle = '#ff4444'
       ctx.beginPath()
-      ctx.arc(this.tileSize / 2, this.tileSize / 2, 3, 0, Math.PI * 2)
+      ctx.arc(this.tileSize / 2, this.tileSize / 2, 4, 0, Math.PI * 2)
       ctx.fill()
+      
+      // 四个角点（白色，辅助定位）
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(2, 2, 4, 4)
+      ctx.fillRect(this.tileSize - 6, 2, 4, 4)
+      ctx.fillRect(2, this.tileSize - 6, 4, 4)
+      ctx.fillRect(this.tileSize - 6, this.tileSize - 6, 4, 4)
     }
     
     this.tileTexture = PIXI.Texture.from(canvas)
+    console.log('✅ 默认网格纹理已创建（64x64px，白色边框 + 十字线 + 中心点）')
   }
   
   /**

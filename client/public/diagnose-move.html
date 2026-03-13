@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>呼噜大陆 - 移动诊断工具</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #4ade80;
+      text-align: center;
+    }
+    .section {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0;
+    }
+    .status.ok { color: #4ade80; }
+    .status.error { color: #f87171; }
+    .status.warn { color: #fbbf24; }
+    .indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .indicator.ok { background: #4ade80; }
+    .indicator.error { background: #f87171; }
+    .indicator.warn { background: #fbbf24; }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    #log {
+      background: #0f0f1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 15px;
+      height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 3px 0;
+      padding: 2px 0;
+    }
+    .log-info { color: #60a5fa; }
+    .log-success { color: #4ade80; }
+    .log-error { color: #f87171; }
+    .log-warn { color: #fbbf24; }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-left: 3px solid;
+    }
+    .test-result.pass { border-color: #4ade80; background: rgba(74,222,128,0.1); }
+    .test-result.fail { border-color: #f87171; background: rgba(248,113,113,0.1); }
+    canvas {
+      border: 2px solid #4ade80;
+      border-radius: 6px;
+      margin: 10px 0;
+      background: #1a1a2e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 呼噜大陆 - 移动诊断工具</h1>
+    
+    <div class="section">
+      <h2>📊 系统状态检查</h2>
+      <div id="status-list"></div>
+      <button onclick="runAllChecks()">▶️ 运行所有检查</button>
+    </div>
+    
+    <div class="section">
+      <h2>🎮 移动测试</h2>
+      <canvas id="testCanvas" width="800" height="400"></canvas>
+      <div>
+        <button onclick="testRightClick()">🖱️ 测试右键点击</button>
+        <button onclick="testPlayerMove()">🚶 测试玩家移动</button>
+        <button onclick="testNetwork()">🌐 测试网络连接</button>
+        <button onclick="clearLog()">🗑️ 清空日志</button>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>📝 诊断日志</h2>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <script>
+    const log = document.getElementById('log')
+    const statusList = document.getElementById('status-list')
+    const canvas = document.getElementById('testCanvas')
+    const ctx = canvas.getContext('2d')
+
+    function addLog(message, type = 'info') {
+      const entry = document.createElement('div')
+      entry.className = `log-entry log-${type}`
+      const time = new Date().toLocaleTimeString()
+      entry.textContent = `[${time}] ${message}`
+      log.appendChild(entry)
+      log.scrollTop = log.scrollHeight
+    }
+
+    function addStatus(name, status, message) {
+      const div = document.createElement('div')
+      div.className = `status ${status}`
+      div.innerHTML = `
+        <span class="indicator ${status}"></span>
+        <strong>${name}:</strong> ${message}
+      `
+      statusList.appendChild(div)
+    }
+
+    function clearLog() {
+      log.innerHTML = ''
+      addLog('日志已清空', 'info')
+    }
+
+    function clearStatus() {
+      statusList.innerHTML = ''
+    }
+
+    // 运行所有检查
+    async function runAllChecks() {
+      clearStatus()
+      clearLog()
+      addLog('开始运行诊断检查...', 'info')
+
+      // 检查 1: Canvas 元素
+      const gameCanvas = document.querySelector('canvas')
+      if (gameCanvas) {
+        addStatus('Canvas 元素', 'ok', `存在 (${gameCanvas.width}x${gameCanvas.height})`)
+        addLog('✅ Canvas 元素存在', 'success')
+      } else {
+        addStatus('Canvas 元素', 'error', '不存在')
+        addLog('❌ Canvas 元素不存在', 'error')
+      }
+
+      // 检查 2: 游戏窗口
+      try {
+        const gameWindow = window.open('http://localhost:3001', '_blank')
+        if (gameWindow) {
+          addStatus('游戏窗口', 'ok', '可以打开')
+          addLog('✅ 游戏窗口可以打开', 'success')
+          gameWindow.close()
+        }
+      } catch (e) {
+        addStatus('游戏窗口', 'error', '无法打开')
+        addLog('❌ 无法打开游戏窗口：' + e.message, 'error')
+      }
+
+      // 检查 3: WebSocket 连接
+      addStatus('WebSocket 连接', 'warn', '测试中...')
+      const ws = new WebSocket('ws://localhost:3002/ws')
+      ws.onopen = () => {
+        addStatus('WebSocket 连接', 'ok', '连接成功')
+        addLog('✅ WebSocket 连接成功', 'success')
+        ws.close()
+      }
+      ws.onerror = () => {
+        addStatus('WebSocket 连接', 'error', '连接失败')
+        addLog('❌ WebSocket 连接失败', 'error')
+      }
+
+      // 检查 4: 玩家数据
+      addStatus('玩家数据', 'warn', '需要登录游戏后检查')
+      
+      // 检查 5: 网络请求
+      try {
+        const response = await fetch('http://localhost:3002/api/v1/health')
+        if (response.ok) {
+          addStatus('服务端 API', 'ok', '响应正常')
+          addLog('✅ 服务端 API 响应正常', 'success')
+        } else {
+          addStatus('服务端 API', 'error', '响应异常')
+          addLog('❌ 服务端 API 响应异常', 'error')
+        }
+      } catch (e) {
+        addStatus('服务端 API', 'error', '无法连接')
+        addLog('❌ 无法连接服务端 API：' + e.message, 'error')
+      }
+
+      addLog('诊断检查完成', 'info')
+    }
+
+    // 测试右键点击
+    function testRightClick() {
+      clearLog()
+      addLog('=== 右键点击测试 ===', 'info')
+      addLog('1. 在下方 Canvas 上右键点击', 'info')
+      addLog('2. 观察控制台输出', 'info')
+      addLog('3. 检查是否有阻止右键菜单', 'info')
+
+      canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault()
+        addLog('✅ 右键菜单已阻止', 'success')
+      })
+
+      canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+        addLog(`🖱️ 点击位置：(${x.toFixed(0)}, ${y.toFixed(0)})`, 'info')
+        addLog(`🖱️ 按钮：${e.button} (0=左键，2=右键)`, 'info')
+        
+        // 绘制点击标记
+        ctx.beginPath()
+        ctx.arc(x, y, 10, 0, Math.PI * 2)
+        ctx.strokeStyle = e.button === 2 ? '#ff4444' : '#44ff44'
+        ctx.lineWidth = 3
+        ctx.stroke()
+      })
+
+      addLog('✅ 点击监听器已设置', 'success')
+    }
+
+    // 测试玩家移动
+    function testPlayerMove() {
+      clearLog()
+      addLog('=== 玩家移动测试 ===', 'info')
+      
+      // 清空 Canvas
+      ctx.fillStyle = '#1a1a2e'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      
+      // 绘制网格
+      ctx.strokeStyle = '#3a3a6e'
+      ctx.lineWidth = 1
+      for (let x = 0; x < canvas.width; x += 50) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, canvas.height)
+        ctx.stroke()
+      }
+      for (let y = 0; y < canvas.height; y += 50) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(canvas.width, y)
+        ctx.stroke()
+      }
+      
+      // 绘制玩家
+      const playerX = canvas.width / 2
+      const playerY = canvas.height / 2
+      ctx.beginPath()
+      ctx.arc(playerX, playerY, 20, 0, Math.PI * 2)
+      ctx.fillStyle = '#00BFFF'
+      ctx.fill()
+      ctx.strokeStyle = '#FFFFFF'
+      ctx.lineWidth = 3
+      ctx.stroke()
+      
+      // 绘制方向指示
+      ctx.beginPath()
+      ctx.moveTo(playerX, playerY - 15)
+      ctx.lineTo(playerX - 8, playerY - 5)
+      ctx.lineTo(playerX + 8, playerY - 5)
+      ctx.closePath()
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fill()
+      
+      addLog('✅ 测试场景已绘制', 'success')
+      addLog('玩家位置：(400, 200)', 'info')
+      addLog('点击 Canvas 任意位置模拟移动目标', 'info')
+      
+      canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect()
+        const targetX = e.clientX - rect.left
+        const targetY = e.clientY - rect.top
+        
+        addLog(`🎯 移动目标：(${targetX.toFixed(0)}, ${targetY.toFixed(0)})`, 'info')
+        
+        // 绘制移动线
+        ctx.beginPath()
+        ctx.moveTo(playerX, playerY)
+        ctx.lineTo(targetX, targetY)
+        ctx.strokeStyle = '#4ade80'
+        ctx.lineWidth = 2
+        ctx.setLineDash([5, 5])
+        ctx.stroke()
+        ctx.setLineDash([])
+        
+        // 绘制目标标记
+        ctx.beginPath()
+        ctx.arc(targetX, targetY, 15, 0, Math.PI * 2)
+        ctx.strokeStyle = '#4ade80'
+        ctx.lineWidth = 3
+        ctx.stroke()
+      })
+    }
+
+    // 测试网络连接
+    function testNetwork() {
+      clearLog()
+      addLog('=== 网络连接测试 ===', 'info')
+      
+      // 测试 HTTP
+      addLog('测试 HTTP 连接...', 'info')
+      fetch('http://localhost:3002/api/v1/health')
+        .then(res => {
+          addLog(`✅ HTTP 响应：${res.status} ${res.statusText}`, 'success')
+          return res.json()
+        })
+        .then(data => {
+          addLog(`📊 响应数据：${JSON.stringify(data)}`, 'success')
+        })
+        .catch(err => {
+          addLog(`❌ HTTP 失败：${err.message}`, 'error')
+        })
+      
+      // 测试 WebSocket
+      addLog('测试 WebSocket 连接...', 'info')
+      const ws = new WebSocket('ws://localhost:3002/ws')
+      ws.onopen = () => {
+        addLog('✅ WebSocket 连接成功', 'success')
+        ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }))
+      }
+      ws.onmessage = (event) => {
+        addLog(`📩 收到消息：${event.data}`, 'success')
+        ws.close()
+      }
+      ws.onerror = () => {
+        addLog('❌ WebSocket 连接失败', 'error')
+      }
+    }
+
+    // 初始化
+    addLog('🔧 诊断工具已加载', 'success')
+    addLog('点击 "运行所有检查" 开始诊断', 'info')
+  </script>
+</body>
+</html>

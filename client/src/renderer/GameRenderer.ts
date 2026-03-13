@@ -77,6 +77,17 @@ export class GameRenderer extends EventEmitter {
     // 添加到 DOM
     container.appendChild(this.app.view as HTMLCanvasElement)
 
+    // 设置 Canvas 可 focus
+    const canvas = this.app.view as HTMLCanvasElement
+    canvas.tabIndex = 0
+    canvas.style.outline = 'none'
+    
+    // 自动 focus
+    setTimeout(() => {
+      canvas.focus()
+      console.log('✅ Canvas 已自动 focus')
+    }, 100)
+
     // 初始化图层
     this.initLayers()
 
@@ -84,6 +95,8 @@ export class GameRenderer extends EventEmitter {
     this.bindInputEvents()
 
     console.log('游戏渲染器初始化完成')
+    console.log('🖼️ Canvas 尺寸:', this.config.width, 'x', this.config.height)
+    console.log('🎯 Canvas tabindex:', canvas.tabIndex)
   }
 
   /**
