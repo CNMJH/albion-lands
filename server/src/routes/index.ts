@@ -14,6 +14,7 @@ import deathRoutes from './death'
 import { pvpRoutes } from './pvp'
 import { tradeRoutes } from './trade'
 import { deathRecordsRoutes } from './death-records'
+import { respawnRoutes } from './respawn'
 
 /**
  * 注册所有 HTTP 路由
@@ -71,6 +72,9 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 死亡记录路由
   fastify.register(deathRecordsRoutes, { prefix: '/api/v1/combat' })
+  
+  // 复活点路由
+  fastify.register(respawnRoutes, { prefix: '/api/v1' })
   
   // PVP 路由
   fastify.register(pvpRoutes, { prefix: '/api/v1/pvp' })

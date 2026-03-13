@@ -29,6 +29,9 @@ model Character {
   zoneId          String          @default("zone_1")
   x               Float           @default(0)
   y               Float           @default(0)
+  respawnMapId    String?         // 绑定的复活点地图
+  respawnX        Float?          // 复活点 X 坐标
+  respawnY        Float?          // 复活点 Y 坐标
   equipment       String? // JSON string: {"MainHand": "uuid", "OffHand": "uuid", ...}
   stats           String? // JSON string: {"attack": 100, "defense": 50, "hp": 500, ...}
   isOnline        Boolean         @default(false)
