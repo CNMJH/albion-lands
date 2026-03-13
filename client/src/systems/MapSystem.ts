@@ -22,23 +22,47 @@ export class MapSystem {
    * 初始化地图
    */
   public async init(): Promise<void> {
-    console.log('MapSystem: 开始初始化地图...')
+    console.log('🗺️ MapSystem: 开始初始化地图...')
+    console.log('🗺️ MapSystem: 地图尺寸', this.mapWidth, 'x', this.mapHeight, '地砖')
+    console.log('🗺️ MapSystem: 地砖尺寸', this.tileSize, 'px')
     
     // 先创建默认绿色纹理（保证一定有背景）
     this.createDefaultTexture()
+    console.log('✅ MapSystem: 默认纹理已创建')
     
     try {
       // 然后尝试加载真实地砖
       await this.loadTileTexture()
-      console.log('MapSystem: 地砖纹理加载成功，重新创建地面')
+      console.log('✅ MapSystem: 地砖纹理加载成功，重新创建地面')
     } catch (error) {
-      console.warn('MapSystem: 地砖纹理加载失败，使用默认绿色背景', error)
+      console.warn('⚠️ MapSystem: 地砖纹理加载失败，使用默认绿色背景', error)
     }
     
     // 创建地面
     this.createGround()
     
-    console.log('MapSystem: 地图初始化完成')
+    // 验证地面是否创建成功
+    const groundLayer = this.renderer.getStage('ground')
+    if (groundLayer) {
+      console.log('✅ MapSystem: ground 图层存在，子元素数量:', groundLayer.children.length)
+      if (groundLayer.children.length > 0) {
+        const sprite = groundLayer.children[0] as any
+        console.log('✅ MapSystem: 地面精灵已添加', {
+          type: sprite.constructor.name,
+          width: sprite.width,
+          height: sprite.height,
+          x: sprite.x,
+          y: sprite.y,
+          anchor: sprite.anchor,
+          visible: sprite.visible,
+          alpha: sprite.alpha,
+        })
+      }
+    } else {
+      console.error('❌ MapSystem: ground 图层不存在!')
+    }
+    
+    console.log('✅ MapSystem: 地图初始化完成')
   }
   
   /**
@@ -120,24 +144,38 @@ export class MapSystem {
     // 清除图层中已有的内容
     groundLayer.removeChildren()
     
-    // 创建平铺纹理
+    // 创建平铺纹理 - 尺寸要足够大，覆盖整个地图
+    const mapPixelWidth = this.mapWidth * this.tileSize
+    const mapPixelHeight = this.mapHeight * this.tileSize
+    
+    console.log('MapSystem: 创建 TilingSprite', {
+      textureSize: this.tileSize + 'x' + this.tileSize,
+      mapSize: mapPixelWidth + 'x' + mapPixelHeight,
+    })
+    
     const tilingSprite = new PIXI.TilingSprite(
       this.tileTexture,
-      this.mapWidth * this.tileSize,
-      this.mapHeight * this.tileSize
+      mapPixelWidth,
+      mapPixelHeight
     )
     
-    // 设置锚点为中心
-    tilingSprite.anchor.set(0.5)
+    // 设置锚点为 0（左上角），这样位置就是 (0, 0)
+    tilingSprite.anchor.set(0)
     
-    // 居中放置
-    tilingSprite.x = 0
-    tilingSprite.y = 0
+    // 居中放置：地图中心对准世界原点 (0, 0)
+    tilingSprite.x = -mapPixelWidth / 2
+    tilingSprite.y = -mapPixelHeight / 2
+    
+    // 确保可见
+    tilingSprite.visible = true
+    tilingSprite.alpha = 1
     
     groundLayer.addChild(tilingSprite)
     
     console.log(`MapSystem: 地面创建完成 (${this.mapWidth}x${this.mapHeight} 地砖)`)
-    console.log('🗺️ 地面尺寸:', { width: this.mapWidth * this.tileSize, height: this.mapHeight * this.tileSize })
+    console.log('🗺️ 地面尺寸:', { width: mapPixelWidth, height: mapPixelHeight })
+    console.log('🗺️ 地面位置:', { x: tilingSprite.x, y: tilingSprite.y })
+    console.log('🗺️ 地面锚点:', tilingSprite.anchor)
   }
   
   /**
