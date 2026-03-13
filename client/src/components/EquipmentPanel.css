@@ -6,7 +6,7 @@
 /* ==================== 切换按钮 ==================== */
 .equipment-toggle-btn {
   position: fixed;
-  bottom: 100px;
+  bottom: 170px;
   right: 20px;
   background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
   border: 2px solid #3a4a5a;

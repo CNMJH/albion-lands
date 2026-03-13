@@ -1,0 +1,85 @@
+/**
+ * UI 按钮布局规范
+ * 避免按钮重叠，确保清晰的视觉层次
+ */
+
+/* ==================== 右侧按钮组 ==================== */
+/* 从下到上排列，间隔 50px */
+
+/* 最底部：好友按钮 */
+.friends-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* 死亡统计按钮 - 在好友按钮上方 */
+.death-stats-toggle {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* 复活点按钮 - 在死亡统计上方 */
+.respawn-toggle {
+  position: fixed;
+  bottom: 120px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* 装备按钮 - 在复活点上方 */
+.equipment-toggle-btn {
+  position: fixed;
+  bottom: 170px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* 背包按钮 - 在装备上方 */
+.inventory-toggle-btn {
+  position: fixed;
+  bottom: 220px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* ==================== 左侧按钮组 ==================== */
+/* 聊天框固定在左下角 */
+.ui-left-bottom {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+/* ==================== 顶部按钮组 ==================== */
+/* 菜单栏在右上角 */
+.ui-top-right {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+/* ==================== 底部中央 ==================== */
+/* 技能栏在底部中央 */
+.ui-bottom-center {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+/* ==================== 角色信息 ==================== */
+/* 角色信息在顶部中央 */
+.ui-top-center {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
