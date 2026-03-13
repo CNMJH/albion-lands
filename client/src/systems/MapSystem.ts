@@ -169,6 +169,7 @@ export class MapSystem {
     // 确保可见
     tilingSprite.visible = true
     tilingSprite.alpha = 1
+    tilingSprite.zIndex = 0
     
     groundLayer.addChild(tilingSprite)
     
@@ -176,6 +177,10 @@ export class MapSystem {
     console.log('🗺️ 地面尺寸:', { width: mapPixelWidth, height: mapPixelHeight })
     console.log('🗺️ 地面位置:', { x: tilingSprite.x, y: tilingSprite.y })
     console.log('🗺️ 地面锚点:', tilingSprite.anchor)
+    console.log('🗺️ 地面可见性:', { visible: tilingSprite.visible, alpha: tilingSprite.alpha })
+    console.log('🗺️ 地面子元素数量:', groundLayer.children.length)
+    console.log('🗺️ 地面图层:', groundLayer)
+    console.log(' 地面纹理:', this.tileTexture)
   }
   
   /**

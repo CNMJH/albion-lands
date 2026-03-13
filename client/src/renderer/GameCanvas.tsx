@@ -44,7 +44,7 @@ export function GameCanvas() {
       width: window.innerWidth,
       height: window.innerHeight,
       resolution: window.devicePixelRatio,
-      backgroundColor: 0x1a1a2e,
+      backgroundColor: 0x2d5016, // 深绿色背景（确保能看到）
     })
 
     rendererRef.current = renderer

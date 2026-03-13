@@ -5,7 +5,7 @@
 
 .friends-toggle-btn {
   position: fixed;
-  bottom: 120px;
+  bottom: 20px;
   right: 20px;
   padding: 10px 16px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
