@@ -107,19 +107,26 @@ export class GameRenderer extends EventEmitter {
 
     // 创建各个图层
     const layerNames = [
-      'ground',      // 地面层
-      'objects',     // 物体层
-      'characters',  // 角色层
-      'effects',     // 特效层
-      'ui',          // UI 层
+      'ground',      // 地面层 (zIndex: 0)
+      'objects',     // 物体层 (zIndex: 10)
+      'characters',  // 角色层 (zIndex: 20)
+      'effects',     // 特效层 (zIndex: 30)
+      'ui',          // UI 层 (zIndex: 40)
     ]
 
-    layerNames.forEach((name) => {
+    layerNames.forEach((name, index) => {
       const layer = new PIXI.Container()
       layer.name = name
+      layer.zIndex = index * 10
       this.stages.set(name, layer)
       this.app?.stage.addChild(layer)
+      console.log(` 图层已创建：${name} (zIndex: ${layer.zIndex})`)
     })
+    
+    // 启用 zIndex 排序
+    this.app?.stage.sortableChildren = true
+    
+    console.log('✅ 所有图层已初始化，zIndex 排序已启用')
   }
 
   /**

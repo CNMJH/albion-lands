@@ -86,27 +86,27 @@ export class MapSystem {
    * 创建默认纹理（深色网格背景）
    */
   private createDefaultTexture(): void {
-    console.log('MapSystem: 创建深色网格背景')
+    console.log('MapSystem: 创建深色网格背景（高对比度）')
     const canvas = document.createElement('canvas')
     canvas.width = this.tileSize
     canvas.height = this.tileSize
     const ctx = canvas.getContext('2d')
     
     if (ctx) {
-      // 绘制深色背景
-      ctx.fillStyle = '#1a1a2e'
+      // 绘制深色背景（非常深）
+      ctx.fillStyle = '#0f0f1a'
       ctx.fillRect(0, 0, this.tileSize, this.tileSize)
       
-      // 绘制网格线（更明显 - 白色边框）
-      ctx.strokeStyle = '#5a5a8e'
-      ctx.lineWidth = 2
+      // 绘制网格线（高对比度 - 亮白色边框）
+      ctx.strokeStyle = '#8a8abe'
+      ctx.lineWidth = 3
       
-      // 边框（白色，非常明显）
+      // 边框（亮白色，非常明显）
       ctx.strokeRect(1, 1, this.tileSize - 2, this.tileSize - 2)
       
-      // 十字线（辅助看清移动）
-      ctx.strokeStyle = '#3a3a6e'
-      ctx.lineWidth = 1
+      // 十字线（亮色，辅助看清移动）
+      ctx.strokeStyle = '#5a5a8e'
+      ctx.lineWidth = 2
       ctx.beginPath()
       ctx.moveTo(this.tileSize / 2, 0)
       ctx.lineTo(this.tileSize / 2, this.tileSize)
@@ -115,7 +115,7 @@ export class MapSystem {
       ctx.stroke()
       
       // 对角线（辅助看清移动方向）
-      ctx.strokeStyle = '#2a2a4e'
+      ctx.strokeStyle = '#3a3a6e'
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(0, 0)
@@ -124,22 +124,31 @@ export class MapSystem {
       ctx.lineTo(0, this.tileSize)
       ctx.stroke()
       
-      // 中心点（红色，非常明显）
+      // 中心点（亮红色，非常明显）
       ctx.fillStyle = '#ff4444'
       ctx.beginPath()
-      ctx.arc(this.tileSize / 2, this.tileSize / 2, 4, 0, Math.PI * 2)
+      ctx.arc(this.tileSize / 2, this.tileSize / 2, 5, 0, Math.PI * 2)
       ctx.fill()
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 1
+      ctx.stroke()
       
-      // 四个角点（白色，辅助定位）
+      // 四个角点（亮白色，辅助定位）
       ctx.fillStyle = '#ffffff'
-      ctx.fillRect(2, 2, 4, 4)
-      ctx.fillRect(this.tileSize - 6, 2, 4, 4)
-      ctx.fillRect(2, this.tileSize - 6, 4, 4)
-      ctx.fillRect(this.tileSize - 6, this.tileSize - 6, 4, 4)
+      ctx.fillRect(2, 2, 5, 5)
+      ctx.fillRect(this.tileSize - 7, 2, 5, 5)
+      ctx.fillRect(2, this.tileSize - 7, 5, 5)
+      ctx.fillRect(this.tileSize - 7, this.tileSize - 7, 5, 5)
+      
+      // 添加坐标文字（辅助定位）
+      ctx.fillStyle = '#6a6a9e'
+      ctx.font = '10px Arial'
+      ctx.textAlign = 'center'
+      ctx.fillText('64px', this.tileSize / 2, this.tileSize / 2 + 20)
     }
     
     this.tileTexture = PIXI.Texture.from(canvas)
-    console.log('✅ 默认网格纹理已创建（64x64px，白色边框 + 十字线 + 中心点）')
+    console.log('✅ 默认网格纹理已创建（64x64px，高对比度，亮白色边框）')
   }
   
   /**
