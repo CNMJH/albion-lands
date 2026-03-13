@@ -77,6 +77,8 @@ export class MonsterAI extends EventEmitter {
   private readonly defaultTemplates: MonsterTemplate[] = [
     // 新手村庄 (Lv1-10) - zone_1
     { id: 'slime', name: '蓝色史莱姆', level: 2, hp: 50, attack: 8, defense: 2, expReward: 20, silverReward: 5, zoneId: 'zone_1', aggroRange: 100, attackRange: 30, moveSpeed: 80, size: 0.8 },
+    { id: 'slime_t1', name: '绿色史莱姆', level: 2, hp: 50, attack: 8, defense: 2, expReward: 20, silverReward: 5, zoneId: 'zone_1', aggroRange: 100, attackRange: 30, moveSpeed: 80, size: 0.8 },
+    { id: 'slime_t2', name: '蓝色史莱姆', level: 5, hp: 80, attack: 10, defense: 3, expReward: 25, silverReward: 6, zoneId: 'zone_1', aggroRange: 100, attackRange: 30, moveSpeed: 80, size: 0.8 },
     { id: 'bat', name: '黑色蝙蝠', level: 4, hp: 60, attack: 10, defense: 3, expReward: 25, silverReward: 6, zoneId: 'zone_1', aggroRange: 90, attackRange: 25, moveSpeed: 110, size: 0.6 },
     { id: 'bee', name: '蜜蜂', level: 3, hp: 40, attack: 7, defense: 2, expReward: 18, silverReward: 4, zoneId: 'zone_1', aggroRange: 80, attackRange: 20, moveSpeed: 130, size: 0.5 },
     
