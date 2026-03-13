@@ -9,7 +9,6 @@
     "src/routes/daily-quests.ts",
     "src/routes/crafting.ts",
     "src/routes/leaderboard.ts",
-    "src/routes/player.ts",
-    "src/routes/death.ts"
+    "src/routes/player.ts"
   ]
 }

@@ -1,21 +1,13 @@
-// @ts-ignore - Fastify type issue
+// 简化版 death 路由 - 移除类型注解避免编译错误
 import { FastifyPluginAsync } from 'fastify';
 import { deathService } from '../services/DeathService';
 
-// @ts-ignore - Fastify WebSocket route type issue
 export const deathRoutes: FastifyPluginAsync = async (fastify) => {
   /**
    * POST /api/v1/combat/death
    * 处理玩家死亡
    */
-  fastify.post<{
-    Body: {
-      characterId: string;
-      killerId?: string;
-      mapId: string;
-      safetyLevel: number;
-    };
-  }>('/death', async (request, reply) => {
+  fastify.post('/death', async (request: any, reply: any) => {
     try {
       const { characterId, killerId, mapId, safetyLevel } = request.body;
 
@@ -54,7 +46,7 @@ export const deathRoutes: FastifyPluginAsync = async (fastify) => {
         ...result,
       });
     } catch (error: any) {
-      fastify.log.error('处理死亡失败:', error);
+      fastify.log.error('处理死亡失败：' + String(error));
       return reply.status(500).send({
         success: false,
         message: error.message || '处理死亡失败',
@@ -66,13 +58,7 @@ export const deathRoutes: FastifyPluginAsync = async (fastify) => {
    * POST /api/v1/combat/loot
    * 拾取掉落物
    */
-  // @ts-ignore - Fastify type issue
-  fastify.post<{
-    Body: {
-      characterId: string;
-      droppedItemId: string;
-    };
-  }>('/loot', async (request, reply) => {
+  fastify.post('/loot', async (request: any, reply: any) => {
     try {
       const { characterId, droppedItemId } = request.body;
 
@@ -99,7 +85,7 @@ export const deathRoutes: FastifyPluginAsync = async (fastify) => {
 
       return reply.send(result);
     } catch (error: any) {
-      fastify.log.error('拾取掉落物失败:', error);
+      fastify.log.error('拾取掉落物失败：' + String(error));
       return reply.status(500).send({
         success: false,
         message: error.message || '拾取掉落物失败',
@@ -111,12 +97,7 @@ export const deathRoutes: FastifyPluginAsync = async (fastify) => {
    * GET /api/v1/combat/drops/:mapId
    * 查询地图上的掉落物
    */
-  // @ts-ignore - Fastify type issue
-  fastify.get<{
-    Params: {
-      mapId: string;
-    };
-  }>('/drops/:mapId', async (request, reply) => {
+  fastify.get('/drops/:mapId', async (request: any, reply: any) => {
     try {
       const { mapId } = request.params;
 
@@ -124,7 +105,7 @@ export const deathRoutes: FastifyPluginAsync = async (fastify) => {
 
       return reply.send({
         success: true,
-        drops: drops.map((drop) => ({
+        drops: drops.map((drop: any) => ({
           id: drop.id,
           x: drop.x,
           y: drop.y,
@@ -136,7 +117,7 @@ export const deathRoutes: FastifyPluginAsync = async (fastify) => {
         })),
       });
     } catch (error: any) {
-      fastify.log.error('查询掉落物失败:', error);
+      fastify.log.error('查询掉落物失败：' + String(error));
       return reply.status(500).send({
         success: false,
         message: error.message || '查询掉落物失败',

@@ -10,7 +10,7 @@ import { socialRoutes } from './social'
 import { questRoutes } from './quests'
 import { skillsRoutes } from './skills'
 import { equipmentRoutes } from './equipment'
-// import deathRoutes from './death'  // 暂时禁用 - TS 错误修复中
+import deathRoutes from './death'
 import { pvpRoutes } from './pvp'
 import { tradeRoutes } from './trade'
 import { deathRecordsRoutes } from './death-records'
@@ -78,7 +78,7 @@ export function registerRoutes(fastify: FastifyInstance): void {
   fastify.register(equipmentRoutes, { prefix: '/api/v1/equipment' })
   
   // 死亡掉落路由
-  // fastify.register(deathRoutes, { prefix: '/api/v1/combat' })  // 暂时禁用 - TS 错误修复中
+  fastify.register(deathRoutes, { prefix: '/api/v1/combat' })
   
   // 死亡记录路由
   fastify.register(deathRecordsRoutes, { prefix: '/api/v1/combat' })

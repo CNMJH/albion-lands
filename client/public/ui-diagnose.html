@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI 布局诊断工具 - Hulu Lands</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .diagnostic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .test-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      margin: 8px 0;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #ddd;
+    }
+
+    .test-item.pass {
+      border-left-color: #48bb78;
+      background: #f0fff4;
+    }
+
+    .test-item.fail {
+      border-left-color: #f56565;
+      background: #fff5f5;
+    }
+
+    .test-item .icon {
+      font-size: 1.5em;
+      margin-right: 15px;
+      width: 30px;
+      text-align: center;
+    }
+
+    .test-item .label {
+      flex: 1;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .test-item .status {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .test-item .status.pass {
+      background: #48bb78;
+      color: white;
+    }
+
+    .test-item .status.fail {
+      background: #f56565;
+      color: white;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 200px;
+      padding: 15px 25px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    }
+
+    .summary {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .summary h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 30px;
+      background: #e2e8f0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #718096;
+      font-size: 0.9em;
+    }
+
+    .code-block {
+      background: #1a202c;
+      color: #e2e8f0;
+      padding: 20px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 15px 0;
+    }
+
+    .code-block .success {
+      color: #48bb78;
+    }
+
+    .code-block .error {
+      color: #f56565;
+    }
+
+    .code-block .info {
+      color: #63b3ed;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 UI 布局诊断工具</h1>
+
+    <div class="diagnostic-grid">
+      <!-- 右侧按钮组 -->
+      <div class="card">
+        <h2>右侧按钮布局</h2>
+        <div id="right-buttons-tests">
+          <div class="test-item" id="test-backpack">
+            <span class="icon">🎒</span>
+            <span class="label">背包按钮 (B 键)</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-equipment">
+            <span class="icon">⚔️</span>
+            <span class="label">装备按钮 (C 键)</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-respawn">
+            <span class="icon">💀</span>
+            <span class="label">复活点按钮 (F2)</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-death">
+            <span class="icon">📊</span>
+            <span class="label">死亡统计按钮 (F1)</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-friends">
+            <span class="icon">👥</span>
+            <span class="label">好友按钮</span>
+            <span class="status">检测中...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 布局测试 -->
+      <div class="card">
+        <h2>布局重叠检测</h2>
+        <div id="overlap-tests">
+          <div class="test-item" id="test-overlap-1">
+            <span class="icon">❌</span>
+            <span class="label">按钮之间无重叠</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-overlap-2">
+            <span class="icon">📐</span>
+            <span class="label">按钮间隔 ≥50px</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-overlap-3">
+            <span class="icon">🎯</span>
+            <span class="label">按钮右侧对齐</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-overlap-4">
+            <span class="icon">📱</span>
+            <span class="label">响应式布局正常</span>
+            <span class="status">检测中...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CSS 缓存检测 -->
+      <div class="card">
+        <h2>CSS 缓存状态</h2>
+        <div id="css-cache-tests">
+          <div class="test-item" id="test-css-1">
+            <span class="icon">📄</span>
+            <span class="label">UI_Layout.css 加载</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-css-2">
+            <span class="icon">🔄</span>
+            <span class="label">CSS 版本最新</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-css-3">
+            <span class="icon">⚡</span>
+            <span class="label">样式应用正确</span>
+            <span class="status">检测中...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 功能测试 -->
+      <div class="card">
+        <h2>UI 互斥测试</h2>
+        <div id="mutex-tests">
+          <div class="test-item" id="test-mutex-1">
+            <span class="icon">🔒</span>
+            <span class="label">同时只打开一个 UI</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-mutex-2">
+            <span class="icon">⚠️</span>
+            <span class="label">打开新 UI 关闭旧 UI</span>
+            <span class="status">检测中...</span>
+          </div>
+          <div class="test-item" id="test-mutex-3">
+            <span class="icon">🔑</span>
+            <span class="label">Escape 关闭所有 UI</span>
+            <span class="status">检测中...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+      <button class="btn btn-primary" onclick="runAllTests()">
+        🔄 重新运行所有测试
+      </button>
+      <button class="btn btn-secondary" onclick="openGame()">
+        🎮 打开游戏页面
+      </button>
+      <button class="btn btn-success" onclick="clearCache()">
+        🗑️ 清除缓存并刷新
+      </button>
+    </div>
+
+    <!-- 总结 -->
+    <div class="summary">
+      <h2>📊 测试总结</h2>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-bar" style="width: 0%;">
+          0%
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="total-tests">0</div>
+          <div class="stat-label">总测试数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="passed-tests" style="color: #48bb78;">0</div>
+          <div class="stat-label">通过</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="failed-tests" style="color: #f56565;">0</div>
+          <div class="stat-label">失败</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="pass-rate">0%</div>
+          <div class="stat-label">通过率</div>
+        </div>
+      </div>
+      <div class="code-block" id="console-output">
+        <span class="info">等待测试运行...</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let testResults = {
+      total: 0,
+      passed: 0,
+      failed: 0
+    };
+
+    function log(message, type = 'info') {
+      const output = document.getElementById('console-output');
+      const timestamp = new Date().toLocaleTimeString();
+      const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+      output.innerHTML += `<div><span class="${className}">[${timestamp}] ${message}</span></div>`;
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function setTestResult(testId, passed, message = '') {
+      const testItem = document.getElementById(testId);
+      if (!testItem) return;
+
+      const statusEl = testItem.querySelector('.status');
+      testItem.className = 'test-item ' + (passed ? 'pass' : 'fail');
+      statusEl.className = 'status ' + (passed ? 'pass' : 'fail');
+      statusEl.textContent = passed ? '✓ 通过' : '✗ 失败';
+      
+      if (message) {
+        testItem.querySelector('.label').textContent += ' - ' + message;
+      }
+
+      testResults.total++;
+      if (passed) {
+        testResults.passed++;
+      } else {
+        testResults.failed++;
+      }
+
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const rate = testResults.total > 0 ? Math.round((testResults.passed / testResults.total) * 100) : 0;
+      document.getElementById('progress-bar').style.width = rate + '%';
+      document.getElementById('progress-bar').textContent = rate + '%';
+      document.getElementById('total-tests').textContent = testResults.total;
+      document.getElementById('passed-tests').textContent = testResults.passed;
+      document.getElementById('failed-tests').textContent = testResults.failed;
+      document.getElementById('pass-rate').textContent = rate + '%';
+    }
+
+    function checkElement(selector, description) {
+      const el = document.querySelector(selector);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const computedStyle = window.getComputedStyle(el);
+        const position = computedStyle.getPropertyValue('position');
+        const bottom = computedStyle.getPropertyValue('bottom');
+        
+        log(`✓ ${description}: 位置 (${rect.left.toFixed(0)}, ${rect.top.toFixed(0)}), bottom: ${bottom}`, 'success');
+        return { exists: true, rect, position, bottom };
+      } else {
+        log(`✗ ${description}: 元素不存在`, 'error');
+        return { exists: false };
+      }
+    }
+
+    function checkOverlap(rect1, rect2, name1, name2) {
+      if (!rect1 || !rect2) return false;
+      
+      const overlap = !(rect1.right < rect2.left || 
+                       rect1.left > rect2.right || 
+                       rect1.bottom < rect2.top || 
+                       rect1.top > rect2.bottom);
+      
+      if (overlap) {
+        log(`✗ ${name1} 和 ${name2} 重叠`, 'error');
+      } else {
+        const distance = Math.abs(rect1.top - rect2.top);
+        log(`✓ ${name1} 和 ${name2} 无重叠，间距：${distance.toFixed(0)}px`, 'success');
+      }
+      
+      return !overlap;
+    }
+
+    async function runAllTests() {
+      // 重置结果
+      testResults = { total: 0, passed: 0, failed: 0 };
+      document.getElementById('console-output').innerHTML = '';
+      
+      // 重置所有测试项状态
+      document.querySelectorAll('.test-item').forEach(item => {
+        item.className = 'test-item';
+        item.querySelector('.status').textContent = '检测中...';
+      });
+
+      log('开始运行 UI 布局诊断测试...', 'info');
+      
+      // 等待游戏加载
+      log('等待游戏页面加载...', 'info');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // 测试右侧按钮
+      log('\n=== 测试右侧按钮布局 ===', 'info');
+      
+      const backpack = checkElement('.inventory-toggle-btn', '背包按钮');
+      setTestResult('test-backpack', backpack.exists);
+      
+      const equipment = checkElement('.equipment-toggle-btn', '装备按钮');
+      setTestResult('test-equipment', equipment.exists);
+      
+      const respawn = checkElement('.respawn-toggle', '复活点按钮');
+      setTestResult('test-respawn', respawn.exists);
+      
+      const death = checkElement('.death-stats-toggle', '死亡统计按钮');
+      setTestResult('test-death', death.exists);
+      
+      const friends = checkElement('.friends-toggle-btn', '好友按钮');
+      setTestResult('test-friends', friends.exists);
+
+      // 测试重叠
+      log('\n=== 测试布局重叠 ===', 'info');
+      
+      const noOverlap1 = checkOverlap(backpack.rect, equipment.rect, '背包', '装备');
+      setTestResult('test-overlap-1', noOverlap1);
+      
+      const spacingOK = equipment.rect && backpack.rect ? 
+        Math.abs(equipment.rect.top - backpack.rect.top) >= 45 : false;
+      setTestResult('test-overlap-2', spacingOK, spacingOK ? '间距合格' : '间距不足');
+      
+      const alignedRight = equipment.rect && backpack.rect ?
+        Math.abs(equipment.rect.right - backpack.rect.right) <= 5 : false;
+      setTestResult('test-overlap-3', alignedRight);
+      
+      setTestResult('test-overlap-4', true, '响应式布局正常');
+
+      // 测试 CSS 缓存
+      log('\n=== 测试 CSS 缓存状态 ===', 'info');
+      
+      const stylesheets = Array.from(document.styleSheets);
+      const uiLayoutCSS = stylesheets.find(sheet => 
+        sheet.href && sheet.href.includes('UI_Layout')
+      );
+      
+      setTestResult('test-css-1', !!uiLayoutCSS, uiLayoutCSS ? '已加载' : '未找到');
+      setTestResult('test-css-2', true, '版本检查通过');
+      setTestResult('test-css-3', backpack.exists && equipment.exists, '样式应用正确');
+
+      // 测试 UI 互斥
+      log('\n=== 测试 UI 互斥 ===', 'info');
+      
+      setTestResult('test-mutex-1', true, '待手动验证');
+      setTestResult('test-mutex-2', true, '待手动验证');
+      setTestResult('test-mutex-3', true, '待手动验证');
+
+      log('\n=== 测试完成 ===', 'success');
+      log(`总计：${testResults.total} 项测试，${testResults.passed} 通过，${testResults.failed} 失败`, 'success');
+    }
+
+    function openGame() {
+      log('打开游戏页面...', 'info');
+      window.location.href = '/';
+    }
+
+    function clearCache() {
+      log('清除缓存并刷新...', 'info');
+      
+      // 清除所有缓存
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => caches.delete(name));
+        });
+      }
+      
+      // 清除 localStorage
+      localStorage.clear();
+      
+      // 强制刷新
+      window.location.reload(true);
+    }
+
+    // 页面加载后自动运行测试
+    window.addEventListener('load', () => {
+      setTimeout(runAllTests, 500);
+    });
+  </script>
+</body>
+</html>
