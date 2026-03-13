@@ -159,12 +159,12 @@ export class MapSystem {
       mapPixelHeight
     )
     
-    // 设置锚点为 0（左上角），这样位置就是 (0, 0)
-    tilingSprite.anchor.set(0)
+    // 设置锚点为 0.5（中心），这样位置就是中心点
+    tilingSprite.anchor.set(0.5)
     
-    // 居中放置：地图中心对准世界原点 (0, 0)
-    tilingSprite.x = -mapPixelWidth / 2
-    tilingSprite.y = -mapPixelHeight / 2
+    // 放在世界原点 (0, 0)，这样相机在 (0,0) 时就能看到
+    tilingSprite.x = 0
+    tilingSprite.y = 0
     
     // 确保可见
     tilingSprite.visible = true
