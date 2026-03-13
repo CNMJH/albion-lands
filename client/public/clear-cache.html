@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>呼噜大陆 - 强制清除缓存</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #fff;
+    }
+    h1 { color: #3498db; }
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      background: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      margin: 10px;
+      font-weight: bold;
+    }
+    .btn:hover { background: #2980b9; }
+    .step {
+      background: rgba(52, 152, 219, 0.1);
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    code {
+      background: #0f0f1a;
+      padding: 10px 15px;
+      border-radius: 4px;
+      display: block;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+    }
+    .warning {
+      background: rgba(241, 196, 15, 0.1);
+      border: 2px solid #f1c40f;
+      color: #f1c40f;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 呼噜大陆 - 强制清除缓存工具</h1>
+  
+  <div class="warning">
+    ⚠️ <strong>重要：</strong>背包 UI 样式不生效是因为浏览器 CSS 缓存！请按以下步骤操作。
+  </div>
+
+  <div class="step">
+    <h2>步骤 1: 关闭游戏页面</h2>
+    <p>完全关闭所有 <code>localhost:3001</code> 的标签页</p>
+  </div>
+
+  <div class="step">
+    <h2>步骤 2: 清除浏览器缓存</h2>
+    <p><strong>Chrome/Edge:</strong></p>
+    <code>按 Ctrl + Shift + Delete → 勾选"缓存的图像和文件" → 清除数据</code>
+    
+    <p><strong>或者使用开发者工具:</strong></p>
+    <code>F12 → Network 标签 → 勾选"Disable cache" → 刷新页面</code>
+  </div>
+
+  <div class="step">
+    <h2>步骤 3: 拉取最新代码</h2>
+    <code>cd F:\Tenbox\openclaw_1\03\albion-lands
+git pull origin main</code>
+  </div>
+
+  <div class="step">
+    <h2>步骤 4: 重启服务器</h2>
+    <code>.\force-restart.bat</code>
+    <p>或者手动执行：</p>
+    <code>taskkill /F /IM node.exe
+cd client
+npm run dev</code>
+  </div>
+
+  <div class="step">
+    <h2>步骤 5: 强制刷新浏览器</h2>
+    <p>访问 <a href="http://localhost:3001" target="_blank">http://localhost:3001</a></p>
+    <code>按 Ctrl + Shift + R (强制刷新)</code>
+    <p>或者：</p>
+    <code>F12 → 右键刷新按钮 → 清空缓存并硬性重新加载</code>
+  </div>
+
+  <div class="step">
+    <h2>步骤 6: 验证修复</h2>
+    <p>按 <strong>B 键</strong> 打开背包，应该看到：</p>
+    <ul>
+      <li>✅ 装备槽<strong>横向排列</strong>（3 列×2 行）</li>
+      <li>✅ 文字<strong>水平显示</strong>（不是竖排）</li>
+      <li>✅ 装备槽是<strong>正方形</strong>（不是竖长）</li>
+      <li>✅ 物品栏格子是<strong>正方形</strong>（不是竖长）</li>
+      <li>✅ 6 个装备槽（主手/副手/衣服/腿部/鞋子/饰品）</li>
+    </ul>
+  </div>
+
+  <div class="step">
+    <h2>🎯 快速验证链接</h2>
+    <a href="http://localhost:3001" class="btn" target="_blank"> 打开游戏</a>
+    <a href="http://localhost:3001/?nocache=" id="nocache" class="btn" target="_blank">🔄 无缓存模式</a>
+  </div>
+
+  <script>
+    // 添加时间戳防止缓存
+    document.getElementById('nocache').href += Date.now();
+  </script>
+
+  <hr style="border-color: #3498db; margin: 30px 0;">
+  <p style="color: #888; font-size: 12px;">
+    💡 <strong>提示：</strong>如果还是不行，尝试无痕模式打开游戏<br>
+    <code>Ctrl + Shift + N → 访问 http://localhost:3001</code>
+  </p>
+</body>
+</html>

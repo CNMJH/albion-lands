@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { inventorySystem, InventoryItem } from '../systems/InventorySystem'
-import './Inventory-optimized.css?v=2'
+import './Inventory-v2.css'
 
 /**
  * 背包窗口组件
@@ -93,12 +93,17 @@ export function Inventory() {
 
         <div className="inventory-content">
           {/* 装备区域 */}
-          <div className="equipment-panel">
+          <div className="equipment-section">
             <h4>装备</h4>
             <div className="equipment-grid">
               <EquipmentSlot 
                 slot="MainHand" 
                 item={equipment.get('MainHand')} 
+                onClick={handleEquipSlotClick}
+              />
+              <EquipmentSlot 
+                slot="OffHand" 
+                item={equipment.get('OffHand')} 
                 onClick={handleEquipSlotClick}
               />
               <EquipmentSlot 
@@ -114,6 +119,11 @@ export function Inventory() {
               <EquipmentSlot 
                 slot="Boots" 
                 item={equipment.get('Boots')} 
+                onClick={handleEquipSlotClick}
+              />
+              <EquipmentSlot 
+                slot="Accessory" 
+                item={equipment.get('Accessory')} 
                 onClick={handleEquipSlotClick}
               />
             </div>

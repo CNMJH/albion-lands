@@ -100,15 +100,18 @@
 
 .equipment-grid {
   display: grid;
-  grid-template-columns: repeat(3, 64px);  /* 横向 3 列 */
-  grid-template-rows: repeat(2, 64px);     /* 2 行 */
-  gap: 10px;                                /* 间隔 10px */
+  grid-template-columns: repeat(3, 1fr);  /* 横向 3 列等宽 */
+  grid-template-rows: repeat(2, 1fr);     /* 2 行等宽 */
+  gap: 10px;
   justify-content: center;
+  width: 100%;
+  max-width: 220px;
+  margin: 0 auto;
 }
 
 .equipment-slot {
-  width: 64px;
-  height: 64px;
+  aspect-ratio: 1 / 1;  /* 强制正方形 */
+  width: 100%;
   background: rgba(0, 0, 0, 0.4);
   border: 2px solid #4a5568;
   border-radius: 8px;
@@ -172,14 +175,15 @@
 
 .inventory-grid {
   display: grid;
-  grid-template-columns: repeat(10, 50px);
+  grid-template-columns: repeat(10, 1fr);  /* 10 列等宽 */
   gap: 8px;
   justify-content: center;
+  width: 100%;
 }
 
 .inventory-slot {
-  width: 50px;
-  height: 50px;
+  aspect-ratio: 1 / 1;  /* 强制正方形 */
+  width: 100%;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #4a5568;
   border-radius: 6px;
