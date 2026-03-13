@@ -45,6 +45,7 @@ model Character {
   friendsReceived Friend[]        @relation("CharacterFriendsReceived")
   questProgress   QuestProgress[]
   achievementProgress AchievementProgress[]
+  bankItems         BankItem[]
   characterSkills CharacterSkill[]
   deathRecords    DeathRecord[]   // 死亡记录
   pvpStats        PVPStats?       // PVP 统计
@@ -76,6 +77,7 @@ model Item {
   marketOrders   MarketOrder[]
   droppedItems   DroppedItem[]   // 掉落物品
   tradeItems     TradeItem[]
+  bankItems      BankItem[]
 }
 
 model InventoryItem {
@@ -577,4 +579,14 @@ model GameMap {
   
   @@index([safetyLevel])
   @@index([type])
+}
+
+model BankItem {
+  id          String    @id @default(uuid())
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id])
+  itemId      String
+  item        Item      @relation(fields: [itemId], references: [id])
+  quantity    Int       @default(1)
+  createdAt   DateTime  @default(now())
 }

@@ -20,6 +20,9 @@ import { npcRoutes } from './npcs'
 import { gatheringRoutes } from './gathering'
 import { craftingRoutes } from './crafting'
 import { dailyQuestRoutes } from './daily-quests'
+import { achievementRoutes } from './achievements'
+import { leaderboardRoutes } from './leaderboard'
+import { bankRoutes } from './bank'
 
 /**
  * 注册所有 HTTP 路由
@@ -100,6 +103,18 @@ export function registerRoutes(fastify: FastifyInstance): void {
   // 每日任务路由
   // @ts-ignore - Fastify type issue
   fastify.register(dailyQuestRoutes, { prefix: '/api/v1' })
+  
+  // 成就路由
+  // @ts-ignore - Fastify type issue
+  fastify.register(achievementRoutes, { prefix: '/api/v1' })
+  
+  // 排行榜路由
+  // @ts-ignore - Fastify type issue
+  fastify.register(leaderboardRoutes, { prefix: '/api/v1' })
+  
+  // 仓库路由
+  // @ts-ignore - Fastify type issue
+  fastify.register(bankRoutes, { prefix: '/api/v1' })
   
   // PVP 路由
   fastify.register(pvpRoutes, { prefix: '/api/v1/pvp' })
