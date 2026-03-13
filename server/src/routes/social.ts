@@ -12,7 +12,27 @@ export async function socialRoutes(fastify: FastifyInstance): Promise<void> {
    * 好友系统
    */
 
-  // 获取好友列表
+  // 获取好友列表 (路径参数版本)
+  fastify.get('/friends/:characterId', async (request, reply) => {
+    try {
+      const params = request.params as { characterId: string }
+      const { characterId } = params
+      
+      const friends = await FriendService.getFriendList(characterId)
+      
+      reply.send({
+        success: true,
+        data: {
+          friends,
+        },
+      })
+    } catch (error: any) {
+      console.error('获取好友列表失败:', error)
+      reply.status(500).send({ success: false, error: '服务器错误' })
+    }
+  })
+
+  // 获取好友列表 (查询参数版本 - 向后兼容)
   fastify.get('/friends', async (request, reply) => {
     try {
       const { characterId } = request.query as { characterId: string }

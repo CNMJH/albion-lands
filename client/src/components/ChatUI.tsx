@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useSocialStore } from '../systems/SocialSystem'
+import { useGameStore } from '../stores/gameStore'
 import './ChatUI-optimized.css'
 
 /**
  * 聊天 UI 组件
  */
 export const ChatUI: React.FC = () => {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const { uiState } = useGameStore()
+  const isExpanded = uiState.chat
   const [inputMessage, setInputMessage] = useState('')
   const [activeChannel, setActiveChannel] = useState<'local' | 'party' | 'global'>('local')
   
@@ -148,7 +150,10 @@ export const ChatUI: React.FC = () => {
       {/* 展开/收起按钮 */}
       <button
         className="chat-toggle-btn"
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          const store = useGameStore.getState()
+          store.setUIState('chat', !isExpanded)
+        }}
       >
         {isExpanded ? '▼' : '▲'}
       </button>

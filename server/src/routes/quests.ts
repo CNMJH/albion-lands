@@ -75,9 +75,9 @@ export async function questRoutes(fastify: FastifyInstance): Promise<void> {
 
   /**
    * 获取角色任务列表
-   * GET /api/v1/quests/character/:characterId
+   * GET /api/v1/quests/by-character/:characterId
    */
-  fastify.get('/character/:characterId', async (request, reply) => {
+  fastify.get('/by-character/:characterId', async (request, reply) => {
     try {
       const { characterId } = request.params as { characterId: string };
       const { status } = request.query as { status?: string };

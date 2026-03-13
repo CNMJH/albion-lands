@@ -598,8 +598,12 @@ export class PlayerControlsSystem {
    * 切换 UI 面板
    */
   private toggleUI(uiType: keyof typeof this.uiState): void {
+    const store = useGameStore.getState()
+    const isVisible = store.uiState[uiType as keyof typeof store.uiState]
+    
     // 如果当前 UI 是激活的，关闭它
-    if (this.uiState[uiType]) {
+    if (isVisible) {
+      store.setUIState(uiType as any, false)
       this.uiState[uiType] = false
       console.log(`❌ 关闭 ${uiType} UI`)
     } else {
@@ -608,6 +612,7 @@ export class PlayerControlsSystem {
         this.uiState[key as keyof typeof this.uiState] = false
       })
       this.uiState[uiType] = true
+      store.setUIState(uiType as any, true)
       console.log(`✅ 打开 ${uiType} UI`)
     }
 

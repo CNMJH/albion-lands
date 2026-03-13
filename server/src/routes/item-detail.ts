@@ -3,7 +3,7 @@ import { prisma } from '../prisma'
 
 /**
  * 获取物品详情
- * GET /api/v1/items/:itemId
+ * GET /api/v1/item-details/:itemId
  */
 async function getItemDetail(fastify: FastifyInstance, request: any, reply: any) {
   try {
@@ -160,6 +160,6 @@ async function compareItems(fastify: FastifyInstance, request: any, reply: any) 
  * 物品详情路由
  */
 export async function itemDetailRoutes(fastify: FastifyInstance) {
-  fastify.get('/items/:itemId', getItemDetail)
-  fastify.get('/items/compare', compareItems)
+  fastify.get('/item-details/:itemId', getItemDetail)
+  fastify.get('/item-details/compare', compareItems)
 }

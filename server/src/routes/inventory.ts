@@ -2,7 +2,56 @@ import { FastifyPluginAsync } from 'fastify'
 import { prisma } from '../prisma'
 
 const inventory: FastifyPluginAsync = async (fastify) => {
-  // 获取角色背包
+  // 获取角色背包 (路径参数版本)
+  fastify.get('/:characterId', async (request, reply) => {
+    try {
+      const { characterId } = request.params
+      
+      const inventoryItems = await prisma.inventoryItem.findMany({
+        where: { characterId },
+        include: {
+          item: true,
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
+      })
+
+      const items = inventoryItems.map((inv, index) => ({
+        id: inv.id,
+        slot: index,
+        itemId: inv.itemId,
+        quantity: inv.quantity,
+        isEquipped: inv.isEquipped,
+        item: {
+          id: inv.item.id,
+          name: inv.item.name,
+          type: inv.item.type,
+          rarity: inv.item.rarity,
+          icon: inv.item.icon,
+          stackSize: inv.item.stackSize,
+          stats: inv.item.stats ? JSON.parse(inv.item.stats) : {},
+        },
+      }))
+
+      reply.send({
+        success: true,
+        data: {
+          items,
+          totalSlots: 20,
+          usedSlots: inventoryItems.length,
+        },
+      })
+    } catch (error: any) {
+      fastify.log.error(`获取背包失败：${error.message}`)
+      reply.status(500).send({
+        success: false,
+        error: '服务器错误',
+      })
+    }
+  })
+
+  // 获取角色背包 (查询参数版本)
   fastify.get('/', async (request, reply) => {
     try {
       const { characterId } = request.query as { characterId: string }

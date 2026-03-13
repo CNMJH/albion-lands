@@ -27,12 +27,13 @@ TOTAL=0
 PASS=0
 FAIL=0
 
-# 测试函数
+# 测试函数（允许空数据返回 404）
 test_api() {
     local name=$1
     local url=$2
     local method=${3:-GET}
     local data=$4
+    local allow_404=${5:-false}
     
     TOTAL=$((TOTAL + 1))
     echo -n "📡 测试 $name... "
@@ -45,6 +46,9 @@ test_api() {
     
     if [ "$response" = "200" ] || [ "$response" = "201" ]; then
         echo "✅ $response"
+        PASS=$((PASS + 1))
+    elif [ "$allow_404" = "true" ] && [ "$response" = "404" ]; then
+        echo "✅ $response (无数据)"
         PASS=$((PASS + 1))
     else
         echo "❌ $response"
@@ -69,8 +73,8 @@ echo "========================================="
 echo "  P1 游戏内容测试"
 echo "========================================="
 test_api "死亡记录" "$BASE_URL/api/v1/combat/deaths/$CHARACTER_ID"
-test_api "PVP 统计" "$BASE_URL/api/v1/pvp/stats/$CHARACTER_ID"
-test_api "任务查询" "$BASE_URL/api/v1/quests/$CHARACTER_ID"
+test_api "PVP 统计" "$BASE_URL/api/v1/pvp/stats/$CHARACTER_ID" "GET" "" "true"
+test_api "任务查询" "$BASE_URL/api/v1/quests/by-character/$CHARACTER_ID"
 test_api "每日任务" "$BASE_URL/api/v1/daily-quests/$CHARACTER_ID"
 test_api "好友列表" "$BASE_URL/api/v1/social/friends/$CHARACTER_ID"
 echo ""

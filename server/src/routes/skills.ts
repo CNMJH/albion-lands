@@ -46,7 +46,7 @@ export async function skillsRoutes(fastify: FastifyInstance) {
   /**
    * 获取角色技能列表
    */
-  fastify.get('/skills/:characterId', async (request: FastifyRequest<{ Params: { characterId: string } }>, reply: FastifyReply) => {
+  fastify.get('/:characterId', async (request: FastifyRequest<{ Params: { characterId: string } }>, reply: FastifyReply) => {
     try {
       const { characterId } = request.params
 

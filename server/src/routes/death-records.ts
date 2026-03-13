@@ -6,7 +6,7 @@ import { prisma } from '../prisma'
  * GET /api/v1/combat/deaths/:characterId
  */
 export async function deathRecordsRoutes(fastify: FastifyInstance) {
-  fastify.get('/combat/deaths/:characterId', async (
+  fastify.get('/deaths/:characterId', async (
     request: FastifyRequest<{ Params: { characterId: string }; Querystring: { limit?: string; offset?: string } }>,
     reply: FastifyReply
   ) => {
