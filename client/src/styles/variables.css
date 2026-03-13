@@ -1,0 +1,217 @@
+/**
+ * 统一样式变量
+ * 定义全局颜色、字体、间距等
+ */
+
+:root {
+  /* ==================== 主色调 ==================== */
+  --primary-dark: #1a1a2e;
+  --primary: #16213e;
+  --primary-light: #1f2b47;
+  
+  /* ==================== 强调色 ==================== */
+  --accent-gold: #f39c12;
+  --accent-gold-light: #f5b041;
+  --accent-red: #e74c3c;
+  --accent-red-light: #ec7063;
+  --accent-green: #27ae60;
+  --accent-green-light: #2ecc71;
+  --accent-blue: #3498db;
+  --accent-blue-light: #5dade2;
+  --accent-purple: #9b59b6;
+  --accent-purple-light: #af7ac5;
+  
+  /* ==================== 中性色 ==================== */
+  --gray-50: #f8f9fa;
+  --gray-100: #e9ecef;
+  --gray-200: #dee2e6;
+  --gray-300: #ced4da;
+  --gray-400: #adb5bd;
+  --gray-500: #6c757d;
+  --gray-600: #495057;
+  --gray-700: #343a40;
+  --gray-800: #212529;
+  --gray-900: #0f1724;
+  
+  /* ==================== 背景色 ==================== */
+  --bg-dark: #0f1724;
+  --bg-darker: #0a0f1c;
+  --bg-light: #1a2744;
+  --bg-overlay: rgba(22, 33, 62, 0.95);
+  
+  /* ==================== 文字颜色 ==================== */
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-muted: #6c7a89;
+  --text-disabled: #4a5568;
+  
+  /* ==================== 边框颜色 ==================== */
+  --border-color: #3a4a5a;
+  --border-light: #4a5a6a;
+  --border-dark: #2a3a4a;
+  
+  /* ==================== 阴影 ==================== */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.7);
+  
+  /* ==================== 间距 ==================== */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+  
+  /* ==================== 圆角 ==================== */
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* ==================== 字体大小 ==================== */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+  --text-4xl: 28px;
+  
+  /* ==================== 字重 ==================== */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* ==================== 行高 ==================== */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  
+  /* ==================== 层级 ==================== */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 100000;
+  
+  /* ==================== 过渡 ==================== */
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+  
+  /* ==================== 品质颜色 (物品) ==================== */
+  --rarity-common: #b0b0b0;
+  --rarity-uncommon: #3498db;
+  --rarity-rare: #9b59b6;
+  --rarity-epic: #e74c3c;
+  --rarity-legendary: #f39c12;
+  
+  /* ==================== 安全等级颜色 ==================== */
+  --safety-high: #27ae60;
+  --safety-medium: #f39c12;
+  --safety-low: #e74c3c;
+  --safety-danger: #8e44ad;
+}
+
+/* ==================== 全局样式 ==================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== 滚动条样式 ==================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-light);
+}
+
+/* ==================== 选择样式 ==================== */
+::selection {
+  background: var(--accent-blue);
+  color: var(--text-primary);
+}
+
+/* ==================== 链接样式 ==================== */
+a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent-blue-light);
+}
+
+/* ==================== 按钮基础样式 ==================== */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ==================== 输入框基础样式 ==================== */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+/* ==================== 工具类 ==================== */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+
+.bg-dark { background-color: var(--bg-dark); }
+.bg-darker { background-color: var(--bg-darker); }
+.bg-light { background-color: var(--bg-light); }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
