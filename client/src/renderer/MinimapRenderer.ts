@@ -30,7 +30,7 @@ export class MinimapRenderer {
     this.canvas.height = this.size
     this.canvas.style.position = 'absolute'
     this.canvas.style.top = '10px'
-    this.canvas.style.right = '10px'
+    this.canvas.style.left = '10px' // ✅ 改到左上角
     this.canvas.style.border = '2px solid #333'
     this.canvas.style.borderRadius = '4px'
     this.canvas.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
