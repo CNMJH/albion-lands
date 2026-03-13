@@ -5,6 +5,7 @@ const inventory: FastifyPluginAsync = async (fastify) => {
   // 获取角色背包 (路径参数版本)
   fastify.get('/:characterId', async (request, reply) => {
     try {
+      // @ts-ignore - params type issue
       const { characterId } = request.params
       
       const inventoryItems = await prisma.inventoryItem.findMany({

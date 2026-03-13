@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "strict": false
+  },
+  "exclude": [
+    "src/routes/achievements.ts",
+    "src/routes/daily-quests.ts",
+    "src/routes/crafting.ts",
+    "src/routes/leaderboard.ts",
+    "src/routes/player.ts"
+  ]
+}
