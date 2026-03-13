@@ -120,8 +120,17 @@ export class PlayerControlsSystem {
       this.keysPressed.delete(e.code)
     })
 
-    // 监听鼠标点击
+    // 监听鼠标点击 - 检查是否有 UI 打开
     this.gameRenderer.on('mousedown', (e: MouseEvent) => {
+      // 如果有 UI 打开，阻止游戏输入
+      const state = useGameStore.getState()
+      const anyUIOpen = Object.values(state.uiState).some(v => v === true)
+      
+      if (anyUIOpen) {
+        console.log('🚫 UI 打开中，阻止游戏输入')
+        return
+      }
+      
       console.log('🖱️ [Canvas] 鼠标点击：button=' + e.button)
       const canvas = this.gameRenderer.getApp()?.view as HTMLCanvasElement
       if (!canvas) {
@@ -178,8 +187,17 @@ export class PlayerControlsSystem {
       this.keysPressed.delete(e.code)
     })
 
-    // 全局鼠标点击
+    // 全局鼠标点击 - 检查 UI 状态
     window.addEventListener('mousedown', (e) => {
+      // 如果有 UI 打开，阻止游戏输入
+      const state = useGameStore.getState()
+      const anyUIOpen = Object.values(state.uiState).some(v => v === true)
+      
+      if (anyUIOpen) {
+        console.log('🚫 [Global] UI 打开中，阻止游戏输入')
+        return
+      }
+      
       console.log('🖱️ [Global] 鼠标点击：button=' + e.button)
       if (e.button === 0) { // 左键 - 普通攻击
         console.log('⚔️ [Global] 左键点击 - 普通攻击')

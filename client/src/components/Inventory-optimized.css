@@ -3,6 +3,15 @@
  * 现代化设计，更好的用户体验
  */
 
+.inventory-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  /* 允许点击穿透到背景，但保留按钮点击 */
+}
+
 .inventory-panel {
   background: rgba(22, 33, 62, 0.98);
   border: 2px solid #3a4a5a;
