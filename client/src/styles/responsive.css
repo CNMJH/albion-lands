@@ -1,0 +1,317 @@
+/**
+ * 响应式布局
+ * 适配不同屏幕尺寸
+ */
+
+/* ==================== 断点定义 ==================== */
+/* 
+  - Mobile: < 768px
+  - Tablet: 768px - 1024px
+  - Desktop: 1024px - 1440px
+  - Large Desktop: > 1440px
+*/
+
+/* ==================== 移动端适配 ==================== */
+@media (max-width: 768px) {
+  /* UI 覆盖层 */
+  #ui-overlay {
+    font-size: 12px;
+  }
+
+  /* 顶部区域 */
+  .ui-top {
+    padding: 10px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ui-top-left,
+  .ui-top-center,
+  .ui-top-right {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: none;
+  }
+
+  /* 角色信息 */
+  .character-info {
+    padding: 8px 12px;
+  }
+
+  .character-name {
+    font-size: 14px;
+  }
+
+  .character-level {
+    font-size: 12px;
+  }
+
+  /* 技能栏 */
+  .skill-bar {
+    gap: 4px;
+  }
+
+  .skill-slot {
+    width: 40px;
+    height: 40px;
+  }
+
+  .skill-icon {
+    font-size: 20px;
+  }
+
+  .skill-key {
+    font-size: 10px;
+  }
+
+  /* 右侧按钮 */
+  .ui-right {
+    padding: 60px 10px 10px 10px;
+  }
+
+  .inventory-toggle-btn,
+  .equipment-toggle-btn,
+  .death-stats-toggle,
+  .respawn-toggle,
+  .friends-toggle-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* 聊天框 */
+  .chat-ui {
+    width: 280px;
+    height: 180px;
+  }
+
+  .chat-messages {
+    font-size: 12px;
+  }
+
+  .chat-input {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  /* 背包窗口 */
+  .inventory-window {
+    width: 95%;
+    max-width: 500px;
+    padding: 12px;
+  }
+
+  .equipment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .inventory-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  /* 装备面板 */
+  .equipment-panel {
+    width: 95%;
+    max-width: 500px;
+  }
+
+  .equipment-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 拍卖行 */
+  .market-panel {
+    width: 95%;
+    max-width: 600px;
+  }
+
+  .market-filters {
+    flex-direction: column;
+  }
+
+  /* 死亡统计 */
+  .death-stats-panel {
+    width: 95%;
+    max-width: 400px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* 快捷键提示 */
+  .shortcut-hints {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .shortcut-content {
+    grid-template-columns: 1fr;
+  }
+
+  /* Toast 通知 */
+  .toast {
+    min-width: 260px;
+    max-width: 90%;
+    padding: 12px;
+  }
+
+  .toast-message {
+    font-size: 13px;
+  }
+}
+
+/* ==================== 平板端适配 ==================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* UI 覆盖层 */
+  #ui-overlay {
+    font-size: 13px;
+  }
+
+  /* 技能栏 */
+  .skill-slot {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* 右侧按钮 */
+  .inventory-toggle-btn,
+  .equipment-toggle-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  /* 聊天框 */
+  .chat-ui {
+    width: 320px;
+    height: 200px;
+  }
+
+  /* 背包窗口 */
+  .inventory-window {
+    width: 85%;
+    max-width: 600px;
+  }
+
+  .inventory-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  /* 装备面板 */
+  .equipment-panel {
+    width: 85%;
+    max-width: 600px;
+  }
+}
+
+/* ==================== 大屏适配 ==================== */
+@media (min-width: 1441px) {
+  /* UI 覆盖层 */
+  #ui-overlay {
+    font-size: 15px;
+  }
+
+  /* 技能栏 */
+  .skill-slot {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* 右侧按钮 */
+  .inventory-toggle-btn,
+  .equipment-toggle-btn {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+
+  /* 聊天框 */
+  .chat-ui {
+    width: 400px;
+    height: 240px;
+  }
+
+  /* 背包窗口 */
+  .inventory-window {
+    max-width: 700px;
+  }
+
+  .inventory-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+/* ==================== 超宽屏适配 ==================== */
+@media (min-width: 1920px) {
+  /* UI 覆盖层 */
+  #ui-overlay {
+    font-size: 16px;
+  }
+
+  /* 技能栏 */
+  .skill-slot {
+    width: 64px;
+    height: 64px;
+  }
+
+  /* 聊天框 */
+  .chat-ui {
+    width: 450px;
+    height: 260px;
+  }
+
+  /* 背包窗口 */
+  .inventory-window {
+    max-width: 800px;
+  }
+
+  .inventory-grid {
+    grid-template-columns: repeat(10, 1fr);
+  }
+}
+
+/* ==================== 横屏/竖屏适配 ==================== */
+@media (orientation: portrait) {
+  /* 竖屏模式优化 */
+  .ui-top {
+    flex-direction: column;
+  }
+
+  .ui-bottom {
+    padding-bottom: 80px; /* 为虚拟键盘留空间 */
+  }
+}
+
+/* ==================== 高对比度模式 ==================== */
+@media (prefers-contrast: high) {
+  :root {
+    --border-color: #ffffff;
+    --text-secondary: #e0e0e0;
+  }
+
+  button,
+  .game-panel {
+    border-width: 3px;
+  }
+}
+
+/* ==================== 减少动画模式 ==================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==================== 打印样式 ==================== */
+@media print {
+  #ui-overlay {
+    display: none;
+  }
+
+  .game-canvas {
+    display: none;
+  }
+}
