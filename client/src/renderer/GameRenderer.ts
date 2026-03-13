@@ -124,7 +124,9 @@ export class GameRenderer extends EventEmitter {
     })
     
     // 启用 zIndex 排序
-    this.app?.stage.sortableChildren = true
+    if (this.app && this.app.stage) {
+      this.app.stage.sortableChildren = true
+    }
     
     console.log('✅ 所有图层已初始化，zIndex 排序已启用')
   }
