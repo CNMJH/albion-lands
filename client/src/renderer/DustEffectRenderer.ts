@@ -15,14 +15,12 @@ interface DustParticle {
 }
 
 export class DustEffectRenderer {
-  private renderer: GameRenderer
   private dustContainer: PIXI.Container
   private particles: DustParticle[] = []
   private lastEmitTime: number = 0
   private emitInterval: number = 100 // 100ms 发射一次
 
   constructor(renderer: GameRenderer) {
-    this.renderer = renderer
     this.dustContainer = new PIXI.Container()
     this.dustContainer.zIndex = 5
     renderer.getStage('effects')?.addChild(this.dustContainer)

@@ -20,8 +20,6 @@ export class CombatRenderer {
   private playerSprite: PIXI.Sprite | null = null
   private playerShadow: PIXI.Graphics | null = null
   private dustRenderer: DustEffectRenderer | null = null
-  private lastPlayerX: number = 0
-  private lastPlayerY: number = 0
 
   constructor(gameRenderer: GameRenderer) {
     this.gameRenderer = gameRenderer
@@ -228,8 +226,6 @@ export class CombatRenderer {
     // 设置初始位置到屏幕中央
     this.playerSprite.x = 0
     this.playerSprite.y = 0
-    this.lastPlayerX = 0
-    this.lastPlayerY = 0
 
     if (layer) {
       layer.addChild(this.playerSprite)
