@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { inventorySystem, InventoryItem } from '../systems/InventorySystem'
-import './Inventory-optimized.css'
+import './Inventory-optimized.css?v=2'
 
 /**
  * 背包窗口组件

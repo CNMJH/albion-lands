@@ -1,6 +1,7 @@
 /**
- * 背包系统样式 - 优化版
+ * 背包系统样式 - 优化版 v2
  * 现代化设计，更好的用户体验
+ * 修复：装备槽横向排列，文字水平显示
  */
 
 .inventory-window {
@@ -12,7 +13,6 @@
   /* 限制最大尺寸，防止占满屏幕 */
   max-width: 90vw;
   max-height: 90vh;
-  /* 允许点击穿透到背景，但保留按钮点击 */
 }
 
 .inventory-panel {
@@ -41,58 +41,117 @@
   align-items: center;
 }
 
-.inventory-title {
+.inventory-header h3 {
   font-size: 18px;
   font-weight: bold;
   color: #ffffff;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.inventory-title::before {
+.inventory-header h3::before {
   content: '🎒';
   font-size: 22px;
 }
 
-.inventory-tabs {
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
-.tab-button {
+.close-btn:hover {
   background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 6px;
-  color: #a0a0a0;
-  padding: 8px 16px;
-  font-size: 14px;
+}
+
+.inventory-content {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(90vh - 80px);
+}
+
+/* 装备区域 - 关键修复 */
+.equipment-section {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(30, 40, 60, 0.5);
+  border-radius: 8px;
+  border: 1px solid #3a4a5a;
+}
+
+.equipment-section h4 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+}
+
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);  /* 横向 3 列 */
+  grid-template-rows: repeat(2, 64px);     /* 2 行 */
+  gap: 10px;                                /* 间隔 10px */
+  justify-content: center;
+}
+
+.equipment-slot {
+  width: 64px;
+  height: 64px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid #4a5568;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;     /* 垂直居中 */
+  justify-content: center; /* 水平居中 */
   cursor: pointer;
   transition: all 0.2s;
-  font-weight: 500;
-}
-
-.tab-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.tab-button.active {
-  background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
-}
-
-.inventory-body {
-  display: flex;
-  flex: 1;
+  position: relative;
   overflow: hidden;
 }
 
-.inventory-main {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
+.equipment-slot:hover {
+  border-color: #3498db;
+  background: rgba(52, 152, 219, 0.2);
+  transform: scale(1.05);
+}
+
+.equipment-slot.has-item {
+  border-color: #3498db;
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+}
+
+/* 槽位文字 - 水平显示 */
+.slot-placeholder {
+  font-size: 14px;        /* 减小字号 */
+  opacity: 0.5;
+  color: #ffffff;
+  text-align: center;
+  writing-mode: horizontal-tb;  /* 强制水平文字 */
+  text-orientation: mixed;
+}
+
+.slot-label {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  font-size: 9px;
+  text-align: center;
+  color: #6c7a89;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* 物品区域 */
@@ -108,23 +167,223 @@
   font-size: 16px;
   font-weight: bold;
   color: #ffffff;
-  margin-bottom: 12px;
+  margin: 0 0 16px 0;
 }
 
-/* 装备区域 */
-.equipment-section {
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 50px);
+  gap: 8px;
+  justify-content: center;
+}
+
+.inventory-slot {
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #4a5568;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.inventory-slot:hover {
+  border-color: #3498db;
+  background: rgba(52, 152, 219, 0.15);
+}
+
+.inventory-slot.has-item {
+  border-color: #3498db;
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+.item-icon {
+  font-size: 28px;
+  position: relative;
+}
+
+.item-quantity {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* 货币区域 */
+.currency-panel {
   margin: 20px;
-  padding: 20px;
+  padding: 16px;
   background: rgba(30, 40, 60, 0.5);
   border-radius: 8px;
   border: 1px solid #3a4a5a;
 }
 
-.equipment-section h4 {
+.currency-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.currency-row:last-child {
+  margin-bottom: 0;
+}
+
+.currency-icon {
+  font-size: 20px;
+}
+
+.currency-amount {
   font-size: 16px;
   font-weight: bold;
+  color: #f1c40f;
+}
+
+.currency-label {
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+/* 物品信息提示 */
+.item-tooltip {
+  position: fixed;
+  background: rgba(22, 33, 62, 0.98);
+  border: 2px solid #3a4a5a;
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 280px;
+  max-width: 320px;
   color: #ffffff;
+  z-index: 10000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #3a4a5a;
+}
+
+.tooltip-header h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.tooltip-level {
+  font-size: 12px;
+  color: #f1c40f;
+}
+
+.tooltip-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.tooltip-type {
+  color: #3498db;
+}
+
+.tooltip-rarity {
+  color: #9b59b6;
+}
+
+.tooltip-stats {
+  margin-bottom: 12px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.stat-name {
+  color: #a0a0a0;
+}
+
+.stat-value {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+.tooltip-description {
+  font-size: 12px;
+  color: #888888;
+  font-style: italic;
+  margin-bottom: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #3a4a5a;
+}
+
+.tooltip-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #a0a0a0;
+}
+
+.tooltip-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 8px 16px;
+  background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .inventory-panel {
+    min-width: 95vw;
+    max-width: 95vw;
+  }
+  
+  .equipment-grid {
+    grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(2, 50px);
+  }
+  
+  .inventory-grid {
+    grid-template-columns: repeat(8, 40px);
+  }
+  
+  .inventory-slot {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .item-icon {
+    font-size: 24px;
+  }
 }
 
 .section-title {
