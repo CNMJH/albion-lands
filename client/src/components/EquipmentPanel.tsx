@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { EquipmentSystem, type EquipmentSlot, type Equipment, type CharacterStats } from '../systems/EquipmentSystem'
 import { useGameStore } from '../stores/gameStore'
+import { DurabilityBar } from './DurabilityBar'
 import './EquipmentPanel.css'
 
 /**
@@ -264,6 +265,9 @@ function EquipmentSlotItem({ slot, itemId, onClick, isSelected }: EquipmentSlotI
     Accessory: '💍'
   }
 
+  // 模拟耐久度（实际应从服务端获取）
+  const durability = itemId ? Math.floor(Math.random() * 40) + 60 : 100
+
   return (
     <div 
       className={`equipment-slot-item ${itemId ? 'equipped' : 'empty'} ${isSelected ? 'selected' : ''}`}
@@ -277,6 +281,9 @@ function EquipmentSlotItem({ slot, itemId, onClick, isSelected }: EquipmentSlotI
           <div className="item-info">
             <div className="item-name">{itemId.substring(0, 8)}...</div>
             <div className="item-tier">T{getItemTier(itemId)}</div>
+          </div>
+          <div className="item-durability">
+            <DurabilityBar current={durability} max={100} showText={false} />
           </div>
         </div>
       ) : (

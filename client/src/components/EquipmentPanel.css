@@ -579,3 +579,16 @@
     font-size: 24px;
   }
 }
+
+/* ==================== 耐久度条 ==================== */
+.item-durability {
+  margin-top: 5px;
+  width: 100%;
+}
+
+.equipped-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
