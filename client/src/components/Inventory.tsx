@@ -85,41 +85,42 @@ export function Inventory() {
 
   return (
     <div className="inventory-window">
-      <div className="inventory-header">
-        <h3>🎒 背包</h3>
-        <button className="close-btn" onClick={() => setIsOpen(false)}>×</button>
-      </div>
-
-      <div className="inventory-content">
-        {/* 装备区域 */}
-        <div className="equipment-panel">
-          <h4>装备</h4>
-          <div className="equipment-grid">
-            <EquipmentSlot 
-              slot="MainHand" 
-              item={equipment.get('MainHand')} 
-              onClick={handleEquipSlotClick}
-            />
-            <EquipmentSlot 
-              slot="Armor" 
-              item={equipment.get('Armor')} 
-              onClick={handleEquipSlotClick}
-            />
-            <EquipmentSlot 
-              slot="Legs" 
-              item={equipment.get('Legs')} 
-              onClick={handleEquipSlotClick}
-            />
-            <EquipmentSlot 
-              slot="Boots" 
-              item={equipment.get('Boots')} 
-              onClick={handleEquipSlotClick}
-            />
-          </div>
+      <div className="inventory-panel">
+        <div className="inventory-header">
+          <h3>🎒 背包</h3>
+          <button className="close-btn" onClick={() => setIsOpen(false)}>×</button>
         </div>
 
+        <div className="inventory-content">
+          {/* 装备区域 */}
+          <div className="equipment-panel">
+            <h4>装备</h4>
+            <div className="equipment-grid">
+              <EquipmentSlot 
+                slot="MainHand" 
+                item={equipment.get('MainHand')} 
+                onClick={handleEquipSlotClick}
+              />
+              <EquipmentSlot 
+                slot="Armor" 
+                item={equipment.get('Armor')} 
+                onClick={handleEquipSlotClick}
+              />
+              <EquipmentSlot 
+                slot="Legs" 
+                item={equipment.get('Legs')} 
+                onClick={handleEquipSlotClick}
+              />
+              <EquipmentSlot 
+                slot="Boots" 
+                item={equipment.get('Boots')} 
+                onClick={handleEquipSlotClick}
+              />
+            </div>
+          </div>
+
         {/* 背包区域 */}
-        <div className="inventory-panel">
+        <div className="inventory-section">
           <h4>物品 ({inventoryItems.length}/50)</h4>
           <div className="inventory-grid">
             {Array.from({ length: 50 }).map((_, index) => {
@@ -152,6 +153,7 @@ export function Inventory() {
           </div>
         </div>
       </div>
+    </div>
 
       {/* 物品信息提示 */}
       {selectedSlot !== null && (
