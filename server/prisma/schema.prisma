@@ -129,6 +129,7 @@ model DeathRecord {
   character   Character @relation(fields: [characterId], references: [id])
   killerId    String?  // 击杀者 (PVP 时)
   mapId       String   // 死亡地图
+  map         GameMap  @relation(fields: [mapId], references: [id])
   safetyLevel Int      // 安全等级
   droppedItems String  // JSON string: [{itemId, itemName, slot}]
   createdAt   DateTime @default(now())
@@ -138,6 +139,7 @@ model DeathRecord {
 model DroppedItem {
   id          String   @id @default(uuid())
   mapId       String   // 掉落地图
+  map         GameMap  @relation(fields: [mapId], references: [id])
   x           Int      // X 坐标
   y           Int      // Y 坐标
   itemId      String
@@ -213,14 +215,19 @@ model GameLog {
 model NPC {
   id          String   @id @default(uuid())
   name        String   // NPC 名称
-  type        String   @default("quest") // quest, merchant, service
+  type        String   @default("quest") // quest, merchant, service, guard, black_market
   zoneId      String   // 所在区域
+  mapId       String?  // 所在地图（新字段）
   x           Float    // X 坐标
   y           Float    // Y 坐标
   dialogue    String?  // JSON 字符串，对话内容
+  shopItems   String?  // JSON 字符串，商店物品
+  quests      String?  // JSON 字符串，可接任务
+  sprite      String?  // 精灵图
+  scale       Float    @default(1.0) // 缩放比例
   givenQuests     Quest[]    @relation("NPCGiver")
   receivedQuests  Quest[]    @relation("NPCReceiver")
-  quests      NPCQuest[]
+  npcQuests   NPCQuest[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -518,4 +525,54 @@ model TransactionHistory {
   @@index([buyerId])
   @@index([sellerId])
   @@index([createdAt])
+}
+
+// 游戏地图配置
+model GameMap {
+  id          String @id @default(uuid())
+  name        String
+  displayName String
+  description String?
+  
+  // 安全等级 (0-10): 0=死亡区，1-3=高危，4-6=中危，7-10=安全区
+  safetyLevel Int    @default(5)
+  
+  // 地图类型
+  type        String @default("open_world") // open_world/dungeon/city/arena
+  
+  // 推荐等级范围
+  minLevel    Int    @default(1)
+  maxLevel    Int    @default(100)
+  
+  // 地图尺寸
+  width       Int    @default(1000)
+  height      Int    @default(1000)
+  
+  // 资源点配置 (JSON)
+  resources   String? // [{type, x, y, respawnTime}]
+  
+  // 怪物配置 (JSON)
+  monsters    String? // [{monsterId, minLevel, maxLevel, spawnRate}]
+  
+  // NPC 配置 (JSON)
+  npcs        String? // [{npcId, x, y, type}]
+  
+  // 传送点配置
+  portals     String? // [{targetMapId, x, y, name}]
+  
+  // 背景音乐
+  bgm         String?
+  
+  // 地砖纹理
+  tileTexture String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // 关系
+  droppedItems DroppedItem[]
+  deathRecords DeathRecord[]
+  
+  @@index([safetyLevel])
+  @@index([type])
 }

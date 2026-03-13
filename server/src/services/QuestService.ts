@@ -99,7 +99,7 @@ export class QuestService {
   public static async getAllNPCs(): Promise<any[]> {
     const npcs = await prisma.nPC.findMany({
       include: {
-        quests: {
+        npcQuests: {
           include: {
             quest: true,
           },
@@ -120,7 +120,7 @@ export class QuestService {
     const npc = await prisma.nPC.findUnique({
       where: { id: npcId },
       include: {
-        quests: {
+        npcQuests: {
           include: {
             quest: true,
           },
@@ -664,7 +664,7 @@ export class QuestService {
     const npcs = await prisma.nPC.findMany({
       where: { zoneId },
       include: {
-        quests: {
+        npcQuests: {
           include: {
             quest: true,
           },
