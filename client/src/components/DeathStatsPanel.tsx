@@ -8,12 +8,7 @@ interface DeathRecord {
   killerCharacterId?: string;
   killerName?: string;
   mapId: string;
-  mapName: string;
   safetyLevel: number;
-  level: number;
-  expLost: number;
-  itemsDropped: number;
-  durabilityLost: number;
   createdAt: string;
 }
 
@@ -21,11 +16,7 @@ interface DeathStats {
   totalDeaths: number;
   deathsByPVP: number;
   deathsByPVE: number;
-  totalExpLost: number;
-  totalItemsDropped: number;
-  totalDurabilityLost: number;
   mostDangerousMap: string;
-  averageLevelAtDeath: number;
 }
 
 export const DeathStatsPanel: React.FC = () => {
@@ -59,32 +50,20 @@ export const DeathStatsPanel: React.FC = () => {
         const totalDeaths = records.length;
         const deathsByPVP = records.filter((r: DeathRecord) => r.killerCharacterId).length;
         const deathsByPVE = totalDeaths - deathsByPVP;
-        const totalExpLost = records.reduce((sum: number, r: DeathRecord) => sum + r.expLost, 0);
-        const totalItemsDropped = records.reduce((sum: number, r: DeathRecord) => sum + r.itemsDropped, 0);
-        const totalDurabilityLost = records.reduce((sum: number, r: DeathRecord) => sum + r.durabilityLost, 0);
         
         // 最危险的地图
         const mapCounts: Record<string, number> = {};
         records.forEach((r: DeathRecord) => {
-          mapCounts[r.mapName] = (mapCounts[r.mapName] || 0) + 1;
+          mapCounts[r.mapId] = (mapCounts[r.mapId] || 0) + 1;
         });
         const mostDangerousMap = Object.entries(mapCounts)
           .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
-        
-        // 平均死亡等级
-        const averageLevelAtDeath = totalDeaths > 0
-          ? Math.round(records.reduce((sum: number, r: DeathRecord) => sum + r.level, 0) / totalDeaths)
-          : 0;
 
         setStats({
           totalDeaths,
           deathsByPVP,
           deathsByPVE,
-          totalExpLost,
-          totalItemsDropped,
-          totalDurabilityLost,
           mostDangerousMap,
-          averageLevelAtDeath,
         });
       }
     } catch (error) {
@@ -151,34 +130,10 @@ export const DeathStatsPanel: React.FC = () => {
               <div className="stat-label">PVE 死亡</div>
             </div>
 
-            <div className="stat-card">
-              <div className="stat-icon">📉</div>
-              <div className="stat-value">{stats.totalExpLost.toLocaleString()}</div>
-              <div className="stat-label">损失经验</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">🎒</div>
-              <div className="stat-value">{stats.totalItemsDropped}</div>
-              <div className="stat-label">掉落物品</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">🔨</div>
-              <div className="stat-value">{stats.totalDurabilityLost}</div>
-              <div className="stat-label">耐久损失</div>
-            </div>
-
             <div className="stat-card danger">
               <div className="stat-icon">☠️</div>
               <div className="stat-value">{stats.mostDangerousMap}</div>
               <div className="stat-label">最危险地图</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-icon">📊</div>
-              <div className="stat-value">Lv.{stats.averageLevelAtDeath}</div>
-              <div className="stat-label">平均死亡等级</div>
             </div>
           </div>
         ) : activeTab === 'records' ? (
@@ -191,19 +146,15 @@ export const DeathStatsPanel: React.FC = () => {
                   <tr>
                     <th>时间</th>
                     <th>地图</th>
-                    <th>等级</th>
                     <th>击杀者</th>
-                    <th>经验损失</th>
-                    <th>物品掉落</th>
-                    <th>耐久损失</th>
+                    <th>类型</th>
                   </tr>
                 </thead>
                 <tbody>
                   {deathRecords.map((record) => (
                     <tr key={record.id}>
                       <td>{formatTime(record.createdAt)}</td>
-                      <td>{record.mapName}</td>
-                      <td>Lv.{record.level}</td>
+                      <td>{record.mapId}</td>
                       <td>
                         {record.killerName ? (
                           <span className="killer-pvp">⚔️ {record.killerName}</span>
@@ -211,9 +162,9 @@ export const DeathStatsPanel: React.FC = () => {
                           <span className="killer-pve">👹 PVE</span>
                         )}
                       </td>
-                      <td className="exp-lost">-{record.expLost.toLocaleString()}</td>
-                      <td>{record.itemsDropped}</td>
-                      <td>-{record.durabilityLost}</td>
+                      <td>
+                        {record.killerCharacterId ? 'PVP' : 'PVE'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
