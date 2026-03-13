@@ -23,6 +23,8 @@ import { dailyQuestRoutes } from './daily-quests'
 import { achievementRoutes } from './achievements'
 import { leaderboardRoutes } from './leaderboard'
 import { bankRoutes } from './bank'
+import { playerRoutes } from './player'
+import { itemDetailRoutes } from './item-detail'
 
 /**
  * 注册所有 HTTP 路由
@@ -115,6 +117,14 @@ export function registerRoutes(fastify: FastifyInstance): void {
   // 仓库路由
   // @ts-ignore - Fastify type issue
   fastify.register(bankRoutes, { prefix: '/api/v1' })
+  
+  // 玩家路由（断线重连）
+  // @ts-ignore - Fastify type issue
+  fastify.register(playerRoutes, { prefix: '/api/v1' })
+  
+  // 物品详情路由
+  // @ts-ignore - Fastify type issue
+  fastify.register(itemDetailRoutes, { prefix: '/api/v1' })
   
   // PVP 路由
   fastify.register(pvpRoutes, { prefix: '/api/v1/pvp' })
