@@ -56,8 +56,18 @@ export class PlayerControlsSystem {
       stopDistance: 5,         // 5 像素内停止
       ...config,
     }
-    this.setupInputHandlers()
+    
     console.log('✅ 玩家操作系统初始化完成（LOL 风格）')
+    console.log('📊 配置:', this.config)
+    
+    // 验证 gameRenderer
+    if (!gameRenderer) {
+      console.error('❌ PlayerControlsSystem: gameRenderer 为 null!')
+    } else {
+      console.log('✅ gameRenderer 存在')
+    }
+    
+    this.setupInputHandlers()
   }
 
   /**
@@ -79,6 +89,8 @@ export class PlayerControlsSystem {
    * 通过 GameRenderer 监听输入
    */
   private setupGameRendererInput(): void {
+    console.log('📥 设置 GameRenderer 输入监听...')
+    
     // 监听键盘按下
     this.gameRenderer.on('keydown', (e: KeyboardEvent) => {
       console.log('⌨️ [Canvas] 键盘按下:', e.code)
@@ -93,30 +105,41 @@ export class PlayerControlsSystem {
 
     // 监听鼠标点击
     this.gameRenderer.on('mousedown', (e: MouseEvent) => {
+      console.log('🖱️ [Canvas] 鼠标点击：button=' + e.button)
       const canvas = this.gameRenderer.getApp()?.view as HTMLCanvasElement
-      if (!canvas) return
+      if (!canvas) {
+        console.error('❌ Canvas 不存在')
+        return
+      }
 
       if (e.button === 0) { // 左键 - 普通攻击
+        console.log('⚔️ 左键点击 - 普通攻击')
         this.performBasicAttack()
       } else if (e.button === 2) { // 右键 - 移动或攻击
         e.preventDefault()
         const rect = canvas.getBoundingClientRect()
         const worldX = e.clientX - rect.left
         const worldY = e.clientY - rect.top
+        console.log('🖱️ 右键点击 - 移动/攻击:', { x: worldX, y: worldY })
         this.handleRightClick(worldX, worldY)
       }
     })
 
     // 阻止右键菜单
     this.gameRenderer.on('contextmenu', (e: MouseEvent) => {
+      console.log('🚫 阻止右键菜单')
       e.preventDefault()
     })
+    
+    console.log('✅ GameRenderer 输入监听设置完成')
   }
 
   /**
    * 全局输入监听（备用方案）
    */
   private setupGlobalInput(): void {
+    console.log('🌍 设置全局输入监听...')
+    
     // 全局键盘按下
     window.addEventListener('keydown', (e) => {
       // 如果事件目标是输入框，忽略
@@ -140,7 +163,9 @@ export class PlayerControlsSystem {
 
     // 全局鼠标点击
     window.addEventListener('mousedown', (e) => {
+      console.log('🖱️ [Global] 鼠标点击：button=' + e.button)
       if (e.button === 0) { // 左键 - 普通攻击
+        console.log('⚔️ [Global] 左键点击 - 普通攻击')
         this.performBasicAttack()
       } else if (e.button === 2) { // 右键 - 移动或攻击
         const canvas = this.gameRenderer.getApp()?.view as HTMLCanvasElement
@@ -148,10 +173,13 @@ export class PlayerControlsSystem {
           const rect = canvas.getBoundingClientRect()
           const worldX = e.clientX - rect.left
           const worldY = e.clientY - rect.top
+          console.log('🖱️ [Global] 右键点击 - 移动/攻击:', { x: worldX, y: worldY })
           this.handleRightClick(worldX, worldY)
         }
       }
     })
+    
+    console.log('✅ 全局输入监听设置完成')
   }
 
   /**
@@ -335,9 +363,17 @@ export class PlayerControlsSystem {
    */
   private handleRightClick(worldX: number, worldY: number): void {
     const state = useGameStore.getState()
-    if (!state.player) return
-
+    
     console.log('🖱️ 右键点击:', { x: worldX, y: worldY })
+    console.log('📊 当前玩家数据:', state.player)
+    
+    if (!state.player) {
+      console.error('❌ 玩家数据不存在，无法移动!')
+      console.error('❌ 请检查登录状态')
+      return
+    }
+
+    console.log('📍 玩家当前位置:', { x: state.player.x, y: state.player.y })
 
     // 检测是否点击到敌人
     const clickedEnemy = this.detectClickedEnemy(worldX, worldY)
