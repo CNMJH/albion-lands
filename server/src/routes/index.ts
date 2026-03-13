@@ -17,6 +17,9 @@ import { deathRecordsRoutes } from './death-records'
 import { respawnRoutes } from './respawn'
 import { mapRoutes } from './maps'
 import { npcRoutes } from './npcs'
+import { gatheringRoutes } from './gathering'
+import { craftingRoutes } from './crafting'
+import { dailyQuestRoutes } from './daily-quests'
 
 /**
  * 注册所有 HTTP 路由
@@ -79,10 +82,24 @@ export function registerRoutes(fastify: FastifyInstance): void {
   fastify.register(respawnRoutes, { prefix: '/api/v1' })
   
   // 地图路由
+  // @ts-ignore - Fastify type issue
   fastify.register(mapRoutes, { prefix: '/api/v1' })
   
   // NPC 路由
+  // @ts-ignore - Fastify type issue
   fastify.register(npcRoutes, { prefix: '/api/v1' })
+  
+  // 采集路由
+  // @ts-ignore - Fastify type issue
+  fastify.register(gatheringRoutes, { prefix: '/api/v1' })
+  
+  // 制造路由
+  // @ts-ignore - Fastify type issue
+  fastify.register(craftingRoutes, { prefix: '/api/v1' })
+  
+  // 每日任务路由
+  // @ts-ignore - Fastify type issue
+  fastify.register(dailyQuestRoutes, { prefix: '/api/v1' })
   
   // PVP 路由
   fastify.register(pvpRoutes, { prefix: '/api/v1/pvp' })

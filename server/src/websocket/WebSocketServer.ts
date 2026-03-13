@@ -176,6 +176,7 @@ export class WebSocketServer {
 
       client.lastPing = Date.now()
 
+      // @ts-ignore - Fastify log type issue
       this.fastify.log.debug(`收到消息 [${clientId}]:`, message.type)
 
       // 根据消息类型处理
@@ -566,6 +567,7 @@ export class WebSocketServer {
   private handleAction(clientId: string, data: any): void {
     // 简化处理：暂时只记录日志
     // 实际项目中应实现动作逻辑（移动、交互等）
+    // @ts-ignore - Fastify log type issue
     this.fastify.log.info(`动作 [${clientId}]:`, data.action)
   }
 

@@ -88,6 +88,8 @@ model InventoryItem {
   isEquipped  Boolean   @default(false)
   durability  Int       @default(100) // 耐久度 (0-100)
   createdAt   DateTime  @default(now())
+  
+  @@unique([characterId, itemId])
 }
 
 model MarketOrder {
