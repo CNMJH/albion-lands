@@ -247,6 +247,9 @@ interface EquipmentSlotItemProps {
 }
 
 function EquipmentSlotItem({ slot, itemId, onClick, isSelected }: EquipmentSlotItemProps) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+
   const slotNames: Record<EquipmentSlot, string> = {
     MainHand: '主手',
     OffHand: '副手',
@@ -267,33 +270,82 @@ function EquipmentSlotItem({ slot, itemId, onClick, isSelected }: EquipmentSlotI
 
   // 模拟耐久度（实际应从服务端获取）
   const durability = itemId ? Math.floor(Math.random() * 40) + 60 : 100
+  
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    if (itemId) {
+      setShowTooltip(true)
+      const rect = (e.target as HTMLElement).getBoundingClientRect()
+      setTooltipPosition({
+        x: rect.right + 10,
+        y: rect.top,
+      })
+    }
+  }
+  
+  const handleMouseLeave = () => {
+    setShowTooltip(false)
+  }
 
   return (
-    <div 
-      className={`equipment-slot-item ${itemId ? 'equipped' : 'empty'} ${isSelected ? 'selected' : ''}`}
-      onClick={onClick}
-    >
-      {itemId ? (
-        <div className="equipped-item">
-          <div className="item-icon">
-            {slotIcons[slot]}
+    <>
+      <div 
+        className={`equipment-slot-item ${itemId ? 'equipped' : 'empty'} ${isSelected ? 'selected' : ''}`}
+        onClick={onClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {itemId ? (
+          <div className="equipped-item">
+            <div className="item-icon">
+              {slotIcons[slot]}
+            </div>
+            <div className="item-info">
+              <div className="item-name">{getItemName(itemId)}</div>
+              <div className="item-tier">T{getItemTier(itemId)}</div>
+            </div>
+            <div className="item-durability">
+              <DurabilityBar current={durability} max={100} showText={false} />
+            </div>
           </div>
-          <div className="item-info">
-            <div className="item-name">{itemId.substring(0, 8)}...</div>
-            <div className="item-tier">T{getItemTier(itemId)}</div>
+        ) : (
+          <div className="empty-slot">
+            <div className="slot-icon">{slotIcons[slot]}</div>
+            <div className="slot-name">{slotNames[slot]}</div>
           </div>
-          <div className="item-durability">
-            <DurabilityBar current={durability} max={100} showText={false} />
+        )}
+        {itemId && <div className="equipped-indicator">✓</div>}
+      </div>
+      
+      {/* Hover 显示 tooltip */}
+      {showTooltip && itemId && (
+        <div 
+          className="item-tooltip"
+          style={{
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+          }}
+        >
+          <div className="tooltip-header">
+            <h4 className="tooltip-name">{getItemName(itemId)}</h4>
+            <span className="tooltip-level">T{getItemTier(itemId)}</span>
           </div>
-        </div>
-      ) : (
-        <div className="empty-slot">
-          <div className="slot-icon">{slotIcons[slot]}</div>
-          <div className="slot-name">{slotNames[slot]}</div>
+          <div className="tooltip-type">{slotNames[slot]}装备</div>
+          <div className="tooltip-stats">
+            <div className="tooltip-stat">
+              <span className="tooltip-stat-label">攻击力</span>
+              <span className="tooltip-stat-value">+{Math.floor(Math.random() * 20) + 10}</span>
+            </div>
+            <div className="tooltip-stat">
+              <span className="tooltip-stat-label">防御力</span>
+              <span className="tooltip-stat-value">+{Math.floor(Math.random() * 10) + 5}</span>
+            </div>
+          </div>
+          <div className="tooltip-description">
+            {getEquipmentDescription(slot)}
+          </div>
         </div>
       )}
-      {itemId && <div className="equipped-indicator">✓</div>}
-    </div>
+    </>
   )
 }
 
@@ -483,6 +535,26 @@ function getSlotName(slot: EquipmentSlot): string {
 function getItemTier(_itemId: string): number {
   // 从 itemId 中提取 tier（模拟）
   return Math.floor(Math.random() * 5) + 1
+}
+
+function getItemName(itemId: string): string {
+  // 从 itemId 生成物品名称（模拟）
+  const prefixes = ['新手', '学徒', '冒险者', '勇士', '英雄']
+  const suffixes = ['之剑', '之斧', '之弓', '之法杖', '之盾']
+  const tier = getItemTier(itemId)
+  return `${prefixes[Math.min(tier - 1, 4)]}${suffixes[Math.floor(Math.random() * suffixes.length)]}`
+}
+
+function getEquipmentDescription(slot: EquipmentSlot): string {
+  const descriptions: Record<EquipmentSlot, string> = {
+    MainHand: '主手装备，提供主要攻击力和武器特效',
+    OffHand: '副手装备，提供防御和特殊能力',
+    Armor: '胸甲装备，提供大量防御力和生命值',
+    Legs: '腿甲装备，提供中等防御力和移动速度',
+    Boots: '鞋子装备，提供移动速度和闪避',
+    Accessory: '饰品装备，提供特殊属性和技能加成'
+  }
+  return descriptions[slot] || '装备'
 }
 
 function calculatePowerScore(stats: CharacterStats): number {

@@ -35,6 +35,8 @@ export class MinimapRenderer {
     this.canvas.style.borderRadius = '4px'
     this.canvas.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'
     this.canvas.style.zIndex = '1000'
+    this.canvas.style.pointerEvents = 'none' // ✅ 让点击穿透，不遮挡 UI 按钮
+    this.canvas.style.touchAction = 'none' // ✅ 防止触摸默认行为
     
     document.getElementById('game-container')?.appendChild(this.canvas)
   }

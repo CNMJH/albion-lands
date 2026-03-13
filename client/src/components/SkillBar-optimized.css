@@ -306,3 +306,40 @@
     box-shadow: 0 0 24px rgba(243, 156, 18, 0.9);
   }
 }
+
+/* ✅ 技能 Tooltip 样式 */
+.skill-tooltip {
+  position: fixed;
+  background: rgba(22, 33, 62, 0.98);
+  border: 2px solid #3a4a5a;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 220px;
+  max-width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  pointer-events: none;
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.skill-tooltip-name {
+  font-size: 15px;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 6px;
+}
+
+.skill-tooltip-key {
+  font-size: 12px;
+  color: #888888;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #3a4a5a;
+}
+
+.skill-tooltip-description {
+  font-size: 13px;
+  color: #ffffff;
+  line-height: 1.5;
+}

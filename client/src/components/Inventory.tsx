@@ -174,6 +174,9 @@ interface EquipmentSlotProps {
 }
 
 function EquipmentSlot({ slot, item, onClick }: EquipmentSlotProps) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+
   const slotNames: Record<string, string> = {
     MainHand: '主手',
     OffHand: '副手',
@@ -186,21 +189,53 @@ function EquipmentSlot({ slot, item, onClick }: EquipmentSlotProps) {
     Necklace: '项链',
   }
 
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    if (item) {
+      setShowTooltip(true)
+      const rect = (e.target as HTMLElement).getBoundingClientRect()
+      setTooltipPosition({
+        x: rect.right + 10,
+        y: rect.top,
+      })
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false)
+  }
+
   return (
-    <div 
-      className={`equipment-slot ${item ? 'has-item' : 'empty'}`}
-      onClick={() => onClick(slot)}
-      title={slotNames[slot] || slot}
-    >
-      {item ? (
-        <div className={`item-icon rarity-${item.item.rarity.toLowerCase()}`}>
-          {getItemIcon(item.item.type)}
-          <span className="item-quantity">{item.quantity}</span>
+    <>
+      <div 
+        className={`equipment-slot ${item ? 'has-item' : 'empty'}`}
+        onClick={() => onClick(slot)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        title={slotNames[slot] || slot}
+      >
+        {item ? (
+          <div className={`item-icon rarity-${item.item.rarity.toLowerCase()}`}>
+            {getItemIcon(item.item.type)}
+            <span className="item-quantity">{item.quantity}</span>
+          </div>
+        ) : (
+          <div className="slot-placeholder">{slotNames[slot] || slot}</div>
+        )}
+      </div>
+      
+      {/* Hover 显示 tooltip */}
+      {showTooltip && item && (
+        <div 
+          className="item-tooltip"
+          style={{
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+          }}
+        >
+          <ItemTooltipContent item={item} />
         </div>
-      ) : (
-        <div className="slot-placeholder">{slotNames[slot] || slot}</div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -216,6 +251,9 @@ interface InventorySlotProps {
 }
 
 function InventorySlot({ slot, item, isSelected, onClick, onItemClick }: InventorySlotProps) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+
   const handleClick = () => {
     onClick(slot)
     if (item) {
@@ -223,37 +261,67 @@ function InventorySlot({ slot, item, isSelected, onClick, onItemClick }: Invento
     }
   }
 
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    if (item) {
+      setShowTooltip(true)
+      // 计算 tooltip 位置（在鼠标右侧显示）
+      const rect = (e.target as HTMLElement).getBoundingClientRect()
+      setTooltipPosition({
+        x: rect.right + 10,
+        y: rect.top,
+      })
+    }
+  }
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false)
+  }
+
   return (
-    <div 
-      className={`inventory-slot ${isSelected ? 'selected' : ''} ${item ? 'has-item' : 'empty'}`}
-      onClick={handleClick}
-    >
-      {item && (
-        <>
-          <div className={`item-icon rarity-${item.item.rarity.toLowerCase()}`}>
-            {getItemIcon(item.item.type)}
-            {item.quantity > 1 && (
-              <span className="item-quantity">{item.quantity}</span>
-            )}
-          </div>
-          {item.isEquipped && <span className="equipped-indicator">★</span>}
-        </>
+    <>
+      <div 
+        className={`inventory-slot ${isSelected ? 'selected' : ''} ${item ? 'has-item' : 'empty'}`}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {item && (
+          <>
+            <div className={`item-icon rarity-${item.item.rarity.toLowerCase()}`}>
+              {getItemIcon(item.item.type)}
+              {item.quantity > 1 && (
+                <span className="item-quantity">{item.quantity}</span>
+              )}
+            </div>
+            {item.isEquipped && <span className="equipped-indicator">★</span>}
+          </>
+        )}
+      </div>
+      
+      {/* Hover 显示 tooltip */}
+      {showTooltip && item && (
+        <div 
+          className="item-tooltip"
+          style={{
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+          }}
+        >
+          <ItemTooltipContent item={item} />
+        </div>
       )}
-    </div>
+    </>
   )
 }
 
 /**
- * 物品信息提示组件
+ * 物品 Tooltip 内容组件（可复用）
  */
-interface ItemTooltipProps {
-  item?: InventoryItem
-  onClose: () => void
+interface ItemTooltipContentProps {
+  item: InventoryItem
 }
 
-function ItemTooltip({ item, onClose }: ItemTooltipProps) {
-  if (!item) return null
-
+function ItemTooltipContent({ item }: ItemTooltipContentProps) {
   const getRarityColor = (rarity: string) => {
     const colors: Record<string, string> = {
       Common: '#b0b0b0',
@@ -278,7 +346,7 @@ function ItemTooltip({ item, onClose }: ItemTooltipProps) {
   }
 
   return (
-    <div className="item-tooltip" onClick={onClose}>
+    <>
       <div className="tooltip-header">
         <h4 style={{ color: getRarityColor(item.item.rarity) }}>
           {item.item.name}
@@ -313,14 +381,34 @@ function ItemTooltip({ item, onClose }: ItemTooltipProps) {
         <div className="tooltip-stack">堆叠：{item.quantity}/{item.item.maxStackSize}</div>
       </div>
 
-      <div className="tooltip-actions">
-        {item.item.slot && (
+      {item.item.slot && (
+        <div className="tooltip-actions">
           <button className="action-btn">装备</button>
-        )}
-        {item.item.type === 'Consumable' && (
+        </div>
+      )}
+      {item.item.type === 'Consumable' && (
+        <div className="tooltip-actions">
           <button className="action-btn">使用</button>
-        )}
-      </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+/**
+ * 物品信息提示组件（点击模式）
+ */
+interface ItemTooltipProps {
+  item?: InventoryItem
+  onClose: () => void
+}
+
+function ItemTooltip({ item, onClose }: ItemTooltipProps) {
+  if (!item) return null
+
+  return (
+    <div className="item-tooltip" onClick={onClose}>
+      <ItemTooltipContent item={item} />
     </div>
   )
 }
