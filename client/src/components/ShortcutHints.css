@@ -1,0 +1,159 @@
+.shortcut-hints-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.shortcut-hints {
+  background: rgba(22, 33, 62, 0.98);
+  border: 2px solid #3a4a5a;
+  border-radius: 12px;
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.8);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.shortcut-header {
+  padding: 20px 24px;
+  border-bottom: 2px solid #3a4a5a;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+.shortcut-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #ffffff;
+}
+
+.shortcut-header p {
+  margin: 0;
+  font-size: 12px;
+  color: #b0b0b0;
+}
+
+.shortcut-header button {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #b0b0b0;
+  font-size: 28px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.shortcut-header button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.shortcut-content {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.shortcut-category h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #f39c12;
+  border-bottom: 1px solid #3a4a5a;
+  padding-bottom: 8px;
+}
+
+.shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.shortcut-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.shortcut-key {
+  background: linear-gradient(180deg, #3a4a5a 0%, #2c3e50 100%);
+  border: 2px solid #4a5a6a;
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  box-shadow: 0 2px 0 #1a2a3a;
+  min-width: 70px;
+  text-align: center;
+}
+
+.shortcut-action {
+  color: #ffffff;
+  font-size: 14px;
+  flex: 1;
+}
+
+.shortcut-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #3a4a5a;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.shortcut-footer p {
+  margin: 0;
+  font-size: 13px;
+  color: #b0b0b0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 响应式布局 */
+@media (max-width: 768px) {
+  .shortcut-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .shortcut-hints {
+    max-width: 95%;
+    max-height: 90vh;
+  }
+}

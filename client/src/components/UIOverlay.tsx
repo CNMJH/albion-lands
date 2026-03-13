@@ -10,6 +10,8 @@ import { MarketPanel } from './MarketPanel'
 import { TradePanel } from './TradePanel'
 import { DeathStatsPanel } from './DeathStatsPanel'
 import { RespawnPanel } from './RespawnPanel'
+import { ToastContainer } from './Toast'
+import { ShortcutHints } from './ShortcutHints'
 import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
 import './UI_Layout.css'
@@ -110,6 +112,12 @@ export function UIOverlay() {
           </div>
         </div>
       )}
+
+      {/* Toast 通知容器 */}
+      <ToastContainer />
+
+      {/* 快捷键提示 */}
+      <ShortcutHints />
     </div>
   )
 }
