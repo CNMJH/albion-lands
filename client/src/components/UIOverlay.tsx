@@ -12,6 +12,7 @@ import { DeathStatsPanel } from './DeathStatsPanel'
 import { RespawnPanel } from './RespawnPanel'
 import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
+import './UI_Layout.css'
 
 /**
  * UI 覆盖层组件
