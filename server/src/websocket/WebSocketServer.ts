@@ -279,10 +279,31 @@ export class WebSocketServer {
   /**
    * 处理认证
    */
-  private handleAuth(_clientId: string, _data: any): void {
+  private handleAuth(clientId: string, data: any): void {
+    const client = this.clients.get(clientId)
+    if (!client) return
+    
     // 简化处理：暂时只记录日志
     // 实际项目中应实现 token 验证逻辑
-    this.fastify.log.info(`客户端认证`)
+    this.fastify.log.info(`客户端认证：${clientId}`)
+    
+    // 发送附近怪物列表
+    const monsterList = Array.from(this.monsters.values()).map(m => ({
+      id: m.id,
+      templateId: m.templateId,
+      x: m.x,
+      y: m.y,
+      zoneId: m.zoneId,
+    }))
+    
+    this.send(clientId, {
+      type: 'monsterList',
+      payload: {
+        monsters: monsterList,
+      },
+    })
+    
+    this.fastify.log.info(`发送 ${monsterList.length} 个怪物到客户端 ${clientId}`)
   }
 
   /**

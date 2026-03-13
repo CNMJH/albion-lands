@@ -6,6 +6,7 @@ import { MonsterRenderer, CombatEffectManager } from './MonsterRenderer'
 import { useGameStore } from '../stores/gameStore'
 import { network } from '../network/NetworkManager'
 import { AttackEffectRenderer } from './AttackEffectRenderer'
+import { DustEffectRenderer } from './DustEffectRenderer'
 
 /**
  * 战斗渲染集成
@@ -17,10 +18,15 @@ export class CombatRenderer {
   private effectManager: CombatEffectManager | null = null
   private attackEffectRenderer: AttackEffectRenderer | null = null
   private playerSprite: PIXI.Sprite | null = null
+  private playerShadow: PIXI.Graphics | null = null
+  private dustRenderer: DustEffectRenderer | null = null
+  private lastPlayerX: number = 0
+  private lastPlayerY: number = 0
 
   constructor(gameRenderer: GameRenderer) {
     this.gameRenderer = gameRenderer
     this.attackEffectRenderer = new AttackEffectRenderer(gameRenderer)
+    this.dustRenderer = new DustEffectRenderer(gameRenderer)
     this.setupEventListeners()
   }
 
@@ -181,6 +187,20 @@ export class CombatRenderer {
     const app = this.gameRenderer.getApp()
     if (!app) return
 
+    // 创建阴影（深色椭圆，在玩家脚下）
+    const shadow = new PIXI.Graphics()
+    shadow.beginFill(0x000000, 0.3) // 黑色，30% 透明度
+    shadow.drawEllipse(0, 0, 25, 12) // 椭圆形
+    shadow.endFill()
+    shadow.zIndex = 0 // 最底层
+    this.playerShadow = shadow
+    
+    const layer = this.gameRenderer.getLayer('characters')
+    if (layer) {
+      layer.addChild(this.playerShadow)
+      console.log('✅ 玩家阴影已添加')
+    }
+
     const graphics = new PIXI.Graphics()
     
     // 绘制玩家（亮蓝色圆形，更明显）
@@ -203,12 +223,14 @@ export class CombatRenderer {
     const texture = app.renderer.generateTexture(graphics)
     this.playerSprite = new PIXI.Sprite(texture)
     this.playerSprite.anchor.set(0.5)
+    this.playerSprite.zIndex = 1 // 在阴影上面
     
     // 设置初始位置到屏幕中央
     this.playerSprite.x = 0
     this.playerSprite.y = 0
+    this.lastPlayerX = 0
+    this.lastPlayerY = 0
 
-    const layer = this.gameRenderer.getLayer('characters')
     if (layer) {
       layer.addChild(this.playerSprite)
       console.log('✅ 玩家精灵已添加到 characters 图层')
@@ -216,7 +238,7 @@ export class CombatRenderer {
       console.error('❌ characters 图层不存在！')
     }
     
-    console.log('⚔️ 玩家精灵已创建（亮蓝色圆形 + 白色轮廓 + 方向指示）')
+    console.log('⚔️ 玩家精灵已创建（亮蓝色圆形 + 白色轮廓 + 方向指示 + 阴影）')
     console.log('📍 玩家初始位置:', { x: this.playerSprite.x, y: this.playerSprite.y })
   }
 
@@ -225,13 +247,28 @@ export class CombatRenderer {
    */
   public updatePlayerPosition(x: number, y: number, rotation?: number): void {
     if (this.playerSprite) {
+      const oldX = this.playerSprite.x
+      const oldY = this.playerSprite.y
+      
       this.playerSprite.x = x
       this.playerSprite.y = y
+      
+      // 更新阴影位置（跟随玩家）
+      if (this.playerShadow) {
+        this.playerShadow.x = x
+        this.playerShadow.y = y + 5 // 阴影稍微偏下一点
+      }
       
       // 应用旋转角度（如果有）
       if (rotation !== undefined) {
         this.playerSprite.rotation = rotation
-        console.log('🔄 玩家旋转:', (rotation * 180 / Math.PI).toFixed(0) + '°')
+        // console.log('🔄 玩家旋转:', (rotation * 180 / Math.PI).toFixed(0) + '°')
+      }
+      
+      // 移动时产生灰尘效果
+      const distance = Math.sqrt((x - oldX) ** 2 + (y - oldY) ** 2)
+      if (distance > 5 && this.dustRenderer) {
+        this.dustRenderer.emit(x, y)
       }
       
       // 更新摄像机目标
@@ -253,6 +290,11 @@ export class CombatRenderer {
     // 更新伤害数字
     if (this.effectManager) {
       this.effectManager.update(deltaTime)
+    }
+
+    // 更新灰尘特效
+    if (this.dustRenderer) {
+      this.dustRenderer.update(deltaTime)
     }
 
     // 更新所有怪物血条和动画（如果有变化）

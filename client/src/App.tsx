@@ -38,6 +38,11 @@ function App() {
         console.log('App: 准备连接 WebSocket...')
         await network.connect('ws://localhost:3002/ws')
         console.log('App: 网络连接完成')
+        
+        // 发送认证消息（触发怪物列表）
+        network.send('auth', { token: 'test-token' })
+        console.log('App: 已发送认证消息')
+        
         setLoadingProgress(40)
 
         // 3. 加载资源配置

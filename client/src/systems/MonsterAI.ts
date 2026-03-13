@@ -147,6 +147,48 @@ export class MonsterAI extends EventEmitter {
     network.onMessage('monsterList', (payload) => {
       this.loadMonsterList(payload.monsters)
     })
+
+    // 监听玩家登录 - 在玩家附近生成怪物
+    network.onMessage('loginSuccess', (payload) => {
+      console.log('👤 玩家登录，准备生成附近怪物...')
+      // 延迟 2 秒生成，确保玩家已渲染
+      setTimeout(() => {
+        this.spawnNearbyMonsters(payload.character.x, payload.character.y)
+      }, 2000)
+    })
+  }
+
+  /**
+   * 在玩家附近生成怪物
+   */
+  public spawnNearbyMonsters(playerX: number, playerY: number): void {
+    console.log('👾 在玩家附近生成怪物...')
+    
+    // 生成 10 只怪物，围绕玩家
+    const monsterTypes = ['slime', 'bat', 'bee', 'goblin', 'wolf']
+    const count = 10
+    
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2
+      const distance = 200 + Math.random() * 300 // 200-500px 距离
+      const x = playerX + Math.cos(angle) * distance
+      const y = playerY + Math.sin(angle) * distance
+      
+      const templateId = monsterTypes[Math.floor(Math.random() * monsterTypes.length)]
+      const monsterId = `monster_${Date.now()}_${i}`
+      
+      this.spawnMonster({
+        id: monsterId,
+        templateId,
+        x,
+        y,
+        zoneId: 'zone_1',
+      })
+      
+      console.log(`👾 生成怪物 ${templateId} 在 (${x.toFixed(0)}, ${y.toFixed(0)})`)
+    }
+    
+    console.log(`✅ 成功生成 ${count} 只怪物`)
   }
 
   /**
