@@ -116,6 +116,9 @@ export function GameCanvas() {
     playerControlsRef.current = controls
 
     // 创建玩家精灵（立即创建，不要延迟）
+    console.log('GameCanvas: 准备创建玩家精灵...')
+    const layer = renderer.getLayer('characters')
+    console.log('GameCanvas: characters 图层存在吗？', !!layer)
     combatRenderer.createPlayerSprite()
     console.log('GameCanvas: 玩家精灵已创建')
 
