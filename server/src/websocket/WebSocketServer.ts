@@ -279,13 +279,60 @@ export class WebSocketServer {
   /**
    * 处理认证
    */
-  private handleAuth(clientId: string, data: any): void {
+  private async handleAuth(clientId: string, data: any): Promise<void> {
     const client = this.clients.get(clientId)
     if (!client) return
     
     // 简化处理：暂时只记录日志
     // 实际项目中应实现 token 验证逻辑
     this.fastify.log.info(`客户端认证：${clientId}`)
+    
+    // 获取角色数据并发送初始状态
+    try {
+      const { prisma } = await import('../prisma')
+      const character = await prisma.character.findUnique({
+        where: { id: client.characterId },
+        include: {
+          inventory: {
+            include: {
+              item: true,
+            },
+          },
+        },
+      })
+      
+      if (character) {
+        // 发送货币数据
+        this.send(clientId, {
+          type: 'currency',
+          payload: {
+            silver: character.silver,
+            gold: character.gold,
+          },
+        })
+        
+        // 发送背包数据
+        const inventoryItems = character.inventory.map(invItem => ({
+          slot: invItem.slot,
+          itemId: invItem.itemId,
+          quantity: invItem.quantity,
+          isEquipped: invItem.isEquipped,
+          durability: invItem.durability,
+          item: invItem.item,
+        }))
+        
+        this.send(clientId, {
+          type: 'inventory',
+          payload: {
+            items: inventoryItems,
+          },
+        })
+        
+        this.fastify.log.info(`发送初始数据到客户端 ${clientId}: 银币=${character.silver}, 金币=${character.gold}, 物品=${inventoryItems.length}`)
+      }
+    } catch (error) {
+      this.fastify.log.error(`发送初始数据失败: ${error}`)
+    }
     
     // 发送附近怪物列表
     const monsterList = Array.from(this.monsters.values()).map(m => ({

@@ -1,3 +1,4 @@
+// @ts-ignore - Fastify type issue
 import { FastifyInstance } from 'fastify'
 import { prisma } from '../prisma'
 
@@ -160,6 +161,8 @@ async function compareItems(fastify: FastifyInstance, request: any, reply: any) 
  * 物品详情路由
  */
 export async function itemDetailRoutes(fastify: FastifyInstance) {
+  // @ts-ignore - Fastify type issue
   fastify.get('/item-details/:itemId', getItemDetail)
+  // @ts-ignore - Fastify type issue
   fastify.get('/item-details/compare', compareItems)
 }

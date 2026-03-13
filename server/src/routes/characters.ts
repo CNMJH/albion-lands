@@ -110,7 +110,7 @@ const characters: FastifyPluginAsync = async (fastify) => {
         })
 
         if (!item) {
-          // @ts-ignore - Item create type issue
+          // @ts-ignore - Item create type issue (stackSize field)
           item = await prisma.item.create({
             data: {
               name: itemData.name,
@@ -118,8 +118,8 @@ const characters: FastifyPluginAsync = async (fastify) => {
               slot: itemData.slot || null,
               tier: String(itemData.tier), // 转为字符串
               rarity: itemData.rarity,
-              price: itemData.price,
-              maxStackSize: itemData.maxStackSize,
+              basePrice: itemData.price || 0, // 使用 basePrice
+              stackSize: itemData.maxStackSize || 99, // 使用 stackSize
               stats: JSON.stringify(itemData.stats), // 转为 JSON 字符串
               description: `新手装备：${itemData.name}`,
             },
