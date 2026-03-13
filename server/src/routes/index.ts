@@ -18,9 +18,9 @@ import { respawnRoutes } from './respawn'
 import { mapRoutes } from './maps'
 import { npcRoutes } from './npcs'
 import { gatheringRoutes } from './gathering'
-// import { craftingRoutes } from './crafting'  // 暂时注释 - TS 错误修复中
-// import { dailyQuestRoutes } from './daily-quests'  // 暂时注释 - TS 错误修复中
-// import { achievementRoutes } from './achievements'  // 暂时注释 - TS 错误修复中
+import { craftingRoutes } from './crafting'
+import { dailyQuestRoutes } from './daily-quests'
+import { achievementRoutes } from './achievements'
 // import { leaderboardRoutes } from './leaderboard'  // 暂时注释 - TS 错误修复中
 import { bankRoutes } from './bank'
 // import { playerRoutes } from './player'  // 暂时注释 - TS 错误修复中
@@ -100,15 +100,15 @@ export function registerRoutes(fastify: FastifyInstance): void {
   
   // 制造路由
   // @ts-ignore - Fastify type issue
-  // fastify.register(craftingRoutes, { prefix: '/api/v1' })  // 暂时禁用 - TS 错误修复中
+  fastify.register(craftingRoutes, { prefix: '/api/v1' })
   
   // 每日任务路由
   // @ts-ignore - Fastify type issue
-  // fastify.register(dailyQuestRoutes, { prefix: '/api/v1' })  // 暂时禁用 - TS 错误修复中
+  fastify.register(dailyQuestRoutes, { prefix: '/api/v1' })
   
   // 成就路由
   // @ts-ignore - Fastify type issue
-  // fastify.register(achievementRoutes, { prefix: '/api/v1' })  // 暂时禁用 - TS 错误修复中
+  fastify.register(achievementRoutes, { prefix: '/api/v1' })
   
   // 排行榜路由
   // @ts-ignore - Fastify type issue
