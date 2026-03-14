@@ -41,26 +41,35 @@ export class MapSystem {
     // 创建地面
     this.createGround()
     
-    // 验证地面是否创建成功
-    const groundLayer = this.renderer.getStage('ground')
-    if (groundLayer) {
-      console.log('✅ MapSystem: ground 图层存在，子元素数量:', groundLayer.children.length)
-      if (groundLayer.children.length > 0) {
-        const sprite = groundLayer.children[0] as any
-        console.log('✅ MapSystem: 地面精灵已添加', {
-          type: sprite.constructor.name,
-          width: sprite.width,
-          height: sprite.height,
-          x: sprite.x,
-          y: sprite.y,
-          anchor: sprite.anchor,
-          visible: sprite.visible,
-          alpha: sprite.alpha,
-        })
+    // 延迟验证地面是否创建成功
+    setTimeout(() => {
+      const groundLayer = this.renderer.getStage('ground')
+      console.log('🔍 MapSystem: 验证 ground 图层...')
+      console.log('🔍 MapSystem: groundLayer =', groundLayer)
+      
+      if (groundLayer) {
+        console.log('✅ MapSystem: ground 图层存在，子元素数量:', groundLayer.children.length)
+        if (groundLayer.children.length > 0) {
+          const sprite = groundLayer.children[0] as any
+          console.log('✅ MapSystem: 地面精灵已添加', {
+            type: sprite.constructor.name,
+            width: sprite.width,
+            height: sprite.height,
+            x: sprite.x,
+            y: sprite.y,
+            anchor: sprite.anchor,
+            visible: sprite.visible,
+            alpha: sprite.alpha,
+          })
+        } else {
+          console.warn('⚠️ MapSystem: ground 图层存在但没有子元素，重新创建地面')
+          this.createGround()
+        }
+      } else {
+        console.error('❌ MapSystem: ground 图层不存在!')
+        console.error('❌ MapSystem: 所有图层:', Array.from(this.renderer['stages'].keys()))
       }
-    } else {
-      console.error('❌ MapSystem: ground 图层不存在!')
-    }
+    }, 500)
     
     console.log('✅ MapSystem: 地图初始化完成')
   }

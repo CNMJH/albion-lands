@@ -57,6 +57,10 @@ export function GameCanvas() {
     // 自动 focus canvas 以接收键盘事件
     setTimeout(() => {
       const canvas = renderer.getApp()?.view as HTMLCanvasElement
+      console.log('🔍 GameCanvas: 尝试获取 Canvas 元素...')
+      console.log('🔍 GameCanvas: renderer.getApp() =', renderer.getApp())
+      console.log('🔍 GameCanvas: canvas =', canvas)
+      
       if (canvas) {
         canvas.focus()
         canvas.tabIndex = 0
@@ -74,8 +78,16 @@ export function GameCanvas() {
         })
       } else {
         console.error('❌ GameCanvas: 无法获取 Canvas 元素')
+        console.error('❌ GameCanvas: renderer =', renderer)
+        console.error('❌ GameCanvas: containerRef.current =', containerRef.current)
+        
+        // 尝试从 container 中查找
+        if (containerRef.current) {
+          const foundCanvas = containerRef.current.querySelector('canvas')
+          console.log('🔍 GameCanvas: 从 container 中找到 canvas =', foundCanvas)
+        }
       }
-    }, 100)
+    }, 200)
 
     // 初始化地图系统
     const mapSystem = new MapSystem(renderer)
