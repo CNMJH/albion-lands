@@ -15,17 +15,30 @@ REM Check Node.js
 echo [1/6] Checking Node.js...
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ERROR: Node.js not found!
     echo.
-    echo Please install Node.js first:
-    echo 1. Visit https://nodejs.org/
-    echo 2. Download LTS version (v18 or v20)
-    echo 3. Double click to install
+    echo ========================================
+    echo   ERROR: Node.js NOT found!
+    echo ========================================
+    echo.
+    echo   Node.js is required to run this game.
+    echo.
+    echo   Installation steps:
+    echo   1. Open browser
+    echo   2. Go to https://nodejs.org/
+    echo   3. Click "Download LTS" (green button)
+    echo   4. Run the installer (node-vXX.XX.X-x64.msi)
+    echo   5. Click Next - Next - Next - Install
+    echo   6. After installation, run this script again
+    echo.
+    echo   IMPORTANT: After installing Node.js,
+    echo   close this window and open a NEW CMD window!
     echo.
     pause
     exit /b 1
 )
-echo OK: Node.js is installed
+for /f "tokens=*" %%i in ('node --version') do set NODE_VERSION=%%i
+echo   Found: %NODE_VERSION%
+echo   OK: Node.js is installed
 
 REM Check npm
 echo [2/6] Checking npm...
