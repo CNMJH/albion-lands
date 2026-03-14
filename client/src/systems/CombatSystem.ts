@@ -1,4 +1,5 @@
 import { network } from '../network/NetworkManager'
+import { useGameStore } from '../stores/gameStore'
 
 /**
  * 简单的事件发射器 (浏览器环境)
@@ -96,8 +97,14 @@ export class CombatSystem extends EventEmitter {
    * 设置网络消息处理器
    */
   private setupNetworkHandlers(): void {
-    // 监听移动确认
+    // 监听移动确认 - 更新玩家位置
     network.onMessage('move', (payload) => {
+      console.log('📍 收到移动确认:', payload)
+      const store = useGameStore.getState()
+      if (payload.x !== undefined && payload.y !== undefined) {
+        store.updatePlayer({ x: payload.x, y: payload.y })
+        console.log('✅ 玩家位置已更新:', { x: payload.x, y: payload.y })
+      }
       this.emit('playerMoved', payload)
     })
 

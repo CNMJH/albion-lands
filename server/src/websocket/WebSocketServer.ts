@@ -358,11 +358,18 @@ export class WebSocketServer {
    */
   private handleMove(clientId: string, data: any): void {
     const client = this.clients.get(clientId)
-    if (!client || !client.position) return
+    if (!client || !client.position) {
+      this.fastify.log.warn(`❌ 客户端 ${clientId} 不存在或位置未初始化`)
+      return
+    }
 
     // 更新位置
+    const oldX = client.position.x
+    const oldY = client.position.y
     client.position.x += data.dx || 0
     client.position.y += data.dy || 0
+
+    this.fastify.log.info(`📍 移动 [${clientId}]: (${oldX.toFixed(0)},${oldY.toFixed(0)}) → (${client.position.x.toFixed(0)},${client.position.y.toFixed(0)})`)
 
     // 发送确认
     this.send(clientId, {
