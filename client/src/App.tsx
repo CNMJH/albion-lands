@@ -132,7 +132,7 @@ function App() {
 // 设置网络消息处理器
 function setupNetworkHandlers() {
   const network = NetworkManager.getInstance()
-  const { setPlayer, addMonster, removeMonster, addCombatLog, updatePlayerHP, setCharacterId } = useGameStore.getState()
+  const { setPlayer, setCharacterId, addCombatLog, updatePlayer, updatePlayerHP } = useGameStore.getState()
   
   console.log('setupNetworkHandlers: 开始设置网络处理器...')
 
@@ -147,7 +147,11 @@ function setupNetworkHandlers() {
     if (data.characterId) {
       setCharacterId(data.characterId)
       localStorage.setItem('characterId', data.characterId)
-      console.log(' characterId 已设置:', data.characterId)
+      console.log('🆔 characterId 已设置:', data.characterId)
+    }
+    if (data.player) {
+      setPlayer(data.player)
+      console.log('👤 玩家数据已设置:', data.player)
     }
   })
 
@@ -157,38 +161,25 @@ function setupNetworkHandlers() {
     if (data.exp || data.silver) {
       addCombatLog(`获得 ${data.exp || 0} 经验，${data.silver || 0} 银币`)
     }
-  })
-
-  // 监听怪物列表
-  network.onMessage('monsterList', (data) => {
-    console.log('收到怪物列表:', data)
-    if (data.monsters) {
-      data.monsters.forEach((m: any) => {
-        addMonster({
-          id: m.id,
-          templateId: m.templateId,
-          name: m.name || '怪物',
-          level: m.level || 1,
-          hp: m.hp || 50,
-          maxHp: m.maxHp || 50,
-          x: m.x || 0,
-          y: m.y || 0,
-          zoneId: m.zoneId || 'zone_1',
-        })
-      })
+    // 更新 HP/MP
+    if (data.hp !== undefined) {
+      updatePlayerHP(data.hp)
     }
-  })
-
-  // 监听怪物死亡
-  network.onMessage('monsterDeath', (data) => {
-    console.log('怪物死亡:', data)
-    removeMonster(data.monsterId)
-    addCombatLog(`击败了 ${data.monsterId}, 获得 ${data.expGained} 经验`)
+    if (data.mp !== undefined) {
+      updatePlayer({ mp: data.mp })
+      console.log('💙 MP 已更新:', data.mp)
+    }
   })
 
   // 监听玩家 HP 更新
   network.onMessage('playerHP', (data) => {
     updatePlayerHP(data.hp)
+  })
+
+  // 监听玩家 MP 更新
+  network.onMessage('playerMP', (data) => {
+    updatePlayer({ mp: data.mp })
+    console.log('💙 MP 已更新:', data.mp)
   })
 
   console.log('setupNetworkHandlers: 网络处理器设置完成')

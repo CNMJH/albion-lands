@@ -1,122 +1,211 @@
-// 简化版 leaderboard 路由 - 移除严格类型注解
+import { FastifyPluginAsync } from 'fastify'
 import { prisma } from '../prisma'
 
 /**
  * 排行榜路由
- * GET /api/v1/leaderboard/pvp - PVP 排行榜
- * GET /api/v1/leaderboard/pve - PVE 排行榜
- * GET /api/v1/leaderboard/wealth - 财富排行榜
+ * 提供排行榜相关 API
  */
-export async function leaderboardRoutes(fastify: any) {
-  // PVP 排行榜
-  fastify.get('/leaderboard/pvp', async (request: any, reply: any) => {
+export const leaderboardRoutes: FastifyPluginAsync = async (fastify) => {
+  // 获取综合排行榜
+  fastify.get('/leaderboard', async (_request, reply) => {
     try {
-      const limit = parseInt(request.query.limit) || 100
+      const characters = await prisma.character.findMany({
+        orderBy: [
+          { level: 'desc' },
+          { exp: 'desc' },
+        ],
+        take: 100,
+        select: {
+          id: true,
+          name: true,
+          level: true,
+          exp: true,
+          silver: true,
+          gold: true,
+          createdAt: true,
+        },
+      })
       
-      const leaderboard = await prisma.pVPStats.findMany({
+      reply.send({
+        success: true,
+        data: characters,
+      })
+    } catch (error) {
+      fastify.log.error(`获取排行榜失败：${error}`)
+      reply.status(500).send({
+        success: false,
+        error: '获取排行榜失败',
+      })
+    }
+  })
+
+  // 获取等级排行榜
+  fastify.get('/leaderboard/level', async (_request, reply) => {
+    try {
+      const characters = await prisma.character.findMany({
+        orderBy: [
+          { level: 'desc' },
+          { exp: 'desc' },
+        ],
+        take: 100,
+        select: {
+          id: true,
+          name: true,
+          level: true,
+          exp: true,
+        },
+      })
+      
+      reply.send({
+        success: true,
+        data: characters,
+      })
+    } catch (error) {
+      fastify.log.error(`获取等级排行榜失败：${error}`)
+      reply.status(500).send({
+        success: false,
+        error: '获取等级排行榜失败',
+      })
+    }
+  })
+
+  // 获取财富排行榜
+  fastify.get('/leaderboard/wealth', async (_request, reply) => {
+    try {
+      const characters = await prisma.character.findMany({
+        orderBy: [
+          { gold: 'desc' },
+          { silver: 'desc' },
+        ],
+        take: 100,
+        select: {
+          id: true,
+          name: true,
+          gold: true,
+          silver: true,
+        },
+      })
+      
+      reply.send({
+        success: true,
+        data: characters,
+      })
+    } catch (error) {
+      fastify.log.error(`获取财富排行榜失败：${error}`)
+      reply.status(500).send({
+        success: false,
+        error: '获取财富排行榜失败',
+      })
+    }
+  })
+
+  // 获取 PVP 排行榜
+  fastify.get('/leaderboard/pvp', async (_request, reply) => {
+    try {
+      const pvpStats = await prisma.pVPStats.findMany({
+        orderBy: { kills: 'desc' },
+        take: 100,
         include: {
           character: {
             select: {
               id: true,
               name: true,
-              level: true
-            }
-          }
+              level: true,
+            },
+          },
         },
-        orderBy: {
-          kills: 'desc'
-        },
-        take: limit
       })
-
-      return reply.send({
+      
+      const data = pvpStats.map(stat => ({
+        characterId: stat.characterId,
+        name: stat.character?.name || 'Unknown',
+        level: stat.character?.level || 1,
+        kills: stat.kills,
+        deaths: stat.deaths,
+        assists: stat.assists || 0,
+        honorPoints: stat.honorPoints || 0,
+      }))
+      
+      reply.send({
         success: true,
-        leaderboard: leaderboard.map((entry: any) => ({
-          characterId: entry.characterId,
-          characterName: entry.character.name,
-          level: entry.character.level,
-          kills: entry.kills,
-          deaths: entry.deaths,
-          assists: entry.assists,
-          honorPoints: entry.honorPoints,
-          kd: entry.deaths > 0 ? (entry.kills / entry.deaths).toFixed(2) : entry.kills
-        }))
+        data,
       })
-    } catch (error: any) {
-      fastify.log.error('获取 PVP 排行榜失败：' + String(error))
-      return reply.status(500).send({
+    } catch (error) {
+      fastify.log.error(`获取 PVP 排行榜失败：${error}`)
+      reply.status(500).send({
         success: false,
-        error: '获取 PVP 排行榜失败'
+        error: '获取 PVP 排行榜失败',
       })
     }
   })
 
-  // PVE 排行榜
-  fastify.get('/leaderboard/pve', async (request: any, reply: any) => {
+  // 获取 PVE 排行榜
+  fastify.get('/leaderboard/pve', async (_request, reply) => {
     try {
-      const limit = parseInt(request.query.limit) || 100
-      
-      const leaderboard = await prisma.character.findMany({
+      const characters = await prisma.character.findMany({
+        orderBy: { stats: 'desc' },
+        take: 100,
         select: {
           id: true,
           name: true,
           level: true,
-          exp: true
+          stats: true,
         },
-        orderBy: {
-          exp: 'desc'
-        },
-        take: limit
       })
-
-      return reply.send({
+      
+      reply.send({
         success: true,
-        leaderboard
+        data: characters,
       })
-    } catch (error: any) {
-      fastify.log.error('获取 PVE 排行榜失败：' + String(error))
-      return reply.status(500).send({
+    } catch (error) {
+      fastify.log.error(`获取 PVE 排行榜失败：${error}`)
+      reply.status(500).send({
         success: false,
-        error: '获取 PVE 排行榜失败'
+        error: '获取 PVE 排行榜失败',
       })
     }
   })
 
-  // 财富排行榜
-  fastify.get('/leaderboard/wealth', async (request: any, reply: any) => {
+  // 获取角色排名
+  fastify.get('/characters/:characterId/rank', async (request, reply) => {
     try {
-      const limit = parseInt(request.query.limit) || 100
+      const { characterId } = request.params as { characterId: string }
       
-      const leaderboard = await prisma.character.findMany({
-        select: {
-          id: true,
-          name: true,
-          level: true,
-          silver: true,
-          gold: true
-        },
-        orderBy: {
-          silver: 'desc'
-        },
-        take: limit
+      const character = await prisma.character.findUnique({
+        where: { id: characterId },
       })
-
-      return reply.send({
+      
+      if (!character) {
+        return reply.status(404).send({
+          success: false,
+          error: '角色不存在',
+        })
+      }
+      
+      // 计算等级排名
+      const levelRank = await prisma.character.count({
+        where: {
+          OR: [
+            { level: { gt: character.level } },
+            { level: character.level, exp: { gt: character.exp } },
+          ],
+        },
+      })
+      
+      reply.send({
         success: true,
-        leaderboard: leaderboard.map((char: any) => ({
-          characterId: char.id,
-          characterName: char.name,
-          level: char.level,
-          silver: char.silver,
-          gold: char.gold,
-          total: char.silver + char.gold * 1000
-        }))
+        data: {
+          characterId,
+          name: character.name,
+          level: character.level,
+          levelRank: levelRank + 1,
+        },
       })
-    } catch (error: any) {
-      fastify.log.error('获取财富排行榜失败：' + String(error))
-      return reply.status(500).send({
+    } catch (error) {
+      fastify.log.error(`获取角色排名失败：${error}`)
+      reply.status(500).send({
         success: false,
-        error: '获取财富排行榜失败'
+        error: '获取角色排名失败',
       })
     }
   })

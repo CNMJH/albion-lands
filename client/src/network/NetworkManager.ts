@@ -255,7 +255,12 @@ export class NetworkManager extends EventEmitter {
   private handleReconnect(url: string): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.log('达到最大重连次数，停止重连')
-      this.emit('disconnected', '达到最大重连次数')
+      this.emit('disconnected', '达到最大重连次数，请刷新页面')
+      
+      // 显示重连失败提示
+      setTimeout(() => {
+        alert('网络连接已断开，请刷新页面重新连接')
+      }, 1000)
       return
     }
 
@@ -266,8 +271,18 @@ export class NetworkManager extends EventEmitter {
     this.emit('reconnecting', this.reconnectAttempts)
 
     setTimeout(() => {
+      console.log('开始重连...')
       this.connectionPromise = null
-      this.connect(url).catch(console.error)
+      this.connect(url)
+        .then(() => {
+          console.log('✅ 重连成功')
+          // 重连成功后重新认证
+          this.send('auth', { token: 'reconnect-token' })
+        })
+        .catch((err) => {
+          console.error('重连失败:', err)
+          this.handleReconnect(url) // 继续尝试重连
+        })
     }, delay)
   }
 

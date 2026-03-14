@@ -162,13 +162,17 @@ export function GameCanvas() {
       }
     })
 
-    // 监听技能释放事件，显示技能特效
-    renderer.on('playerSkill', (data: any) => {
-      if (combatRendererRef.current) {
-        combatRendererRef.current.showSkillEffect(data.skillId, data.x, data.y)
-        console.log(`✨ 技能特效：${data.skillId} at (${data.x.toFixed(0)}, ${data.y.toFixed(0)})`)
-      }
-    })
+    // 监听技能释放事件，显示技能特效（从 PlayerControlsSystem 获取 CombatSystem）
+    const savedControls = playerControlsRef.current
+    if (savedControls && (savedControls as any).combatSystem) {
+      const combatSys = (savedControls as any).combatSystem
+      combatSys.on('playerSkill', (data: any) => {
+        if (combatRendererRef.current) {
+          combatRendererRef.current.showSkillEffect(data.skillId, data.x, data.y)
+          console.log(`✨ 技能特效：${data.skillId} at (${data.x.toFixed(0)}, ${data.y.toFixed(0)})`)
+        }
+      })
+    }
 
     console.log('GameCanvas: 初始化完成')
 

@@ -3,6 +3,39 @@ import { network } from '../network/NetworkManager'
 import { SKILL_CONFIGS, SkillConfig } from '../config/skills'
 
 /**
+ * 简单的事件发射器 (浏览器环境)
+ */
+class EventEmitter {
+  private events: Map<string, Array<(...args: any[]) => void>> = new Map()
+
+  on(event: string, listener: (...args: any[]) => void): void {
+    if (!this.events.has(event)) {
+      this.events.set(event, [])
+    }
+    this.events.get(event)!.push(listener)
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      listeners.forEach(listener => listener(...args))
+      return true
+    }
+    return false
+  }
+
+  off(event: string, listener: (...args: any[]) => void): void {
+    const listeners = this.events.get(event)
+    if (listeners) {
+      const index = listeners.indexOf(listener)
+      if (index !== -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }
+}
+
+/**
  * Buff/Debuff 接口
  */
 export interface Buff {
@@ -27,12 +60,13 @@ export interface SkillCooldown {
  * 技能系统
  * 负责技能释放、冷却管理、Buff 管理
  */
-export class SkillSystem {
+export class SkillSystem extends EventEmitter {
   private buffs: Map<string, Buff[]> = new Map() // playerId -> buffs
   private cooldowns: Map<string, SkillCooldown> = new Map() // skillId -> cooldown
   private skillQueue: Array<{ skillId: string; targetId?: string; x?: number; y?: number }> = []
 
   constructor() {
+    super()
     console.log('技能系统初始化完成')
   }
 
@@ -93,6 +127,9 @@ export class SkillSystem {
     // 消耗能量
     const newMp = Math.max(0, state.player.mp - skillConfig.energyCost)
     state.updatePlayer({ mp: newMp })
+
+    // 触发技能特效事件
+    this.emit('playerSkill', { skillId, x, y })
 
     console.log(`释放技能：${skillConfig.name} (${skillId})`)
     return true
