@@ -31,20 +31,12 @@ class EventEmitter {
   }
 }
 
-// 消息包接口
-export interface GamePacket {
-  seq: number
-  type: string
-  payload: any
-  timestamp: number
-}
-
 // 网络事件类型
 export interface NetworkEvents {
   'connected': () => void
   'disconnected': (reason: string) => void
   'error': (error: Error) => void
-  'message': (packet: GamePacket) => void
+  'message': (packet: any) => void
   'reconnecting': (attempt: number) => void
 }
 
@@ -55,7 +47,6 @@ export interface NetworkEvents {
 export class NetworkManager extends EventEmitter {
   private static instance: NetworkManager | null = null
   private ws: WebSocket | null = null
-  private seq: number = 0
   private reconnectAttempts: number = 0
   private maxReconnectAttempts: number = 5
   private heartbeatInterval: number = 30000
@@ -136,7 +127,7 @@ export class NetworkManager extends EventEmitter {
   /**
    * 发送消息
    */
-  public send(type: string, payload: any = {}, options?: { skipDebounce?: boolean }): void {
+  public send(type: string, data: any = {}, options?: { skipDebounce?: boolean }): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       console.warn('❌ WebSocket 未连接，消息发送失败:', type)
       console.log('WebSocket 状态:', this.ws?.readyState)
@@ -152,15 +143,15 @@ export class NetworkManager extends EventEmitter {
     // 设置 loading 状态
     this.setLoading(type, true)
 
-    const packet: GamePacket = {
-      seq: this.seq++,
+    // 兼容服务端格式：使用 data 而非 payload
+    const packet = {
       type,
-      payload,
+      data,
       timestamp: Date.now(),
     }
 
     this.ws.send(JSON.stringify(packet))
-    console.log(`📡 发送消息 [${type}]:`, payload)
+    console.log(`📡 发送消息 [${type}]:`, data)
     
     // 自动清除 loading（1 秒后）
     setTimeout(() => {
@@ -237,18 +228,18 @@ export class NetworkManager extends EventEmitter {
    */
   private handleMessage(data: string): void {
     try {
-      const packet: GamePacket = JSON.parse(data)
-      const latency = Date.now() - packet.timestamp
+      const packet = JSON.parse(data)
+      const latency = Date.now() - (packet.timestamp || Date.now())
       
       // 记录网络延迟
       recordNetworkLatency(latency)
       
-      console.log(`接收消息 [${packet.type}]:`, packet.payload, `延迟：${latency}ms`)
+      console.log(`接收消息 [${packet.type}]:`, packet.data || packet.payload, `延迟：${latency}ms`)
 
-      // 调用对应的处理器
+      // 调用对应的处理器（兼容 data 和 payload）
       const handlers = this.messageHandlers.get(packet.type)
       if (handlers) {
-        handlers.forEach(handler => handler(packet.payload))
+        handlers.forEach(handler => handler(packet.data || packet.payload))
       }
 
       // 触发通用消息事件

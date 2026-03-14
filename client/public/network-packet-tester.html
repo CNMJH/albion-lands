@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>网络抓包 - 移动测试</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a0a;
+      color: #00ff88;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00d4ff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .panel {
+      background: #1a1a2e;
+      border: 2px solid #00d4ff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .panel h2 {
+      color: #00d4ff;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 4px;
+      margin: 5px;
+      font-weight: bold;
+    }
+    .status.connected {
+      background: #00ff88;
+      color: #000;
+    }
+    .status.disconnected {
+      background: #ff4444;
+      color: #fff;
+    }
+    .messages {
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 10px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .message {
+      padding: 5px;
+      border-bottom: 1px solid #222;
+      word-break: break-all;
+    }
+    .message.sent {
+      border-left: 3px solid #00d4ff;
+      background: rgba(0, 212, 255, 0.1);
+    }
+    .message.received {
+      border-left: 3px solid #00ff88;
+      background: rgba(0, 255, 136, 0.1);
+    }
+    .message.error {
+      border-left: 3px solid #ff4444;
+      color: #ff8888;
+    }
+    .message .time {
+      color: #666;
+      margin-right: 10px;
+    }
+    .message .type {
+      color: #00d4ff;
+      font-weight: bold;
+    }
+    .message .data {
+      color: #ccc;
+    }
+    button {
+      background: #00d4ff;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 5px;
+    }
+    button:hover {
+      background: #00ff88;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .info {
+      color: #888;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📡 网络抓包 - 移动测试</h1>
+    
+    <div class="panel">
+      <h2>连接状态</h2>
+      <div id="connection-status">
+        <span class="status disconnected">未连接</span>
+      </div>
+      <div class="info">
+        WebSocket 地址：ws://localhost:3002/ws<br>
+        测试账号：test1@example.com / password123
+      </div>
+      <button id="btn-connect" onclick="connect()">连接 WebSocket</button>
+      <button id="btn-disconnect" onclick="disconnect()" disabled>断开连接</button>
+      <button onclick="clearMessages()">清空消息</button>
+    </div>
+    
+    <div class="panel">
+      <h2>发送消息</h2>
+      <div style="margin: 10px 0;">
+        <input type="text" id="msg-type" placeholder="消息类型 (如：move)" 
+               style="padding: 8px; width: 150px; margin-right: 10px;" value="move">
+        <input type="text" id="msg-data" placeholder="JSON 数据" 
+               style="padding: 8px; width: 400px; margin-right: 10px;" 
+               value='{"dx":100,"dy":50,"targetX":500,"targetY":300,"timestamp":123456}'>
+        <button onclick="sendMessage()">发送</button>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <h2>消息日志</h2>
+      <div id="messages" class="messages"></div>
+    </div>
+  </div>
+  
+  <script>
+    let ws = null;
+    const messagesDiv = document.getElementById('messages');
+    const statusDiv = document.getElementById('connection-status');
+    const btnConnect = document.getElementById('btn-connect');
+    const btnDisconnect = document.getElementById('btn-disconnect');
+    
+    function updateStatus(connected) {
+      if (connected) {
+        statusDiv.innerHTML = '<span class="status connected">✅ 已连接</span>';
+        btnConnect.disabled = true;
+        btnDisconnect.disabled = false;
+      } else {
+        statusDiv.innerHTML = '<span class="status disconnected">❌ 未连接</span>';
+        btnConnect.disabled = false;
+        btnDisconnect.disabled = true;
+      }
+    }
+    
+    function addMessage(direction, type, data) {
+      const now = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = `message ${direction}`;
+      div.innerHTML = `
+        <span class="time">[${now}]</span>
+        <span class="type">${direction === 'sent' ? '➤' : '➤'} ${type}</span>
+        <span class="data">${JSON.stringify(data)}</span>
+      `;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    
+    function clearMessages() {
+      messagesDiv.innerHTML = '';
+      addMessage('received', 'SYSTEM', { message: '消息已清空' });
+    }
+    
+    function connect() {
+      const wsUrl = 'ws://localhost:3002/ws';
+      addMessage('sent', 'CONNECT', { url: wsUrl });
+      
+      try {
+        ws = new WebSocket(wsUrl);
+        
+        ws.onopen = () => {
+          addMessage('received', 'OPEN', { message: 'WebSocket 连接成功' });
+          updateStatus(true);
+          
+          // 发送认证消息
+          const authMsg = {
+            type: 'auth',
+            data: {
+              email: 'test1@example.com',
+              password: 'password123'
+            }
+          };
+          ws.send(JSON.stringify(authMsg));
+          addMessage('sent', 'auth', authMsg.data);
+        };
+        
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            addMessage('received', msg.type || 'unknown', msg.data || msg);
+          } catch (e) {
+            addMessage('received', 'RAW', { raw: event.data });
+          }
+        };
+        
+        ws.onerror = (error) => {
+          addMessage('error', 'ERROR', { message: 'WebSocket 错误', error: String(error) });
+          updateStatus(false);
+        };
+        
+        ws.onclose = () => {
+          addMessage('received', 'CLOSE', { message: 'WebSocket 连接已关闭' });
+          updateStatus(false);
+        };
+      } catch (e) {
+        addMessage('error', 'ERROR', { message: '连接失败', error: e.message });
+      }
+    }
+    
+    function disconnect() {
+      if (ws) {
+        ws.close();
+        ws = null;
+        addMessage('sent', 'DISCONNECT', { message: '主动断开连接' });
+        updateStatus(false);
+      }
+    }
+    
+    function sendMessage() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        addMessage('error', 'ERROR', { message: '未连接，请先连接 WebSocket' });
+        return;
+      }
+      
+      const type = document.getElementById('msg-type').value;
+      const dataStr = document.getElementById('msg-data').value;
+      
+      let data;
+      try {
+        data = JSON.parse(dataStr);
+      } catch (e) {
+        addMessage('error', 'ERROR', { message: 'JSON 格式错误', error: e.message });
+        return;
+      }
+      
+      const msg = {
+        type: type,
+        data: data
+      };
+      
+      ws.send(JSON.stringify(msg));
+      addMessage('sent', type, data);
+    }
+    
+    // 初始化
+    updateStatus(false);
+    addMessage('received', 'SYSTEM', { 
+      message: '准备就绪。点击"连接 WebSocket"开始测试，然后发送 move 消息测试移动功能。' 
+    });
+  </script>
+</body>
+</html>
