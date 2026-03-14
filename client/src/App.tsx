@@ -132,13 +132,23 @@ function App() {
 // 设置网络消息处理器
 function setupNetworkHandlers() {
   const network = NetworkManager.getInstance()
-  const { setPlayer, addMonster, removeMonster, addCombatLog, updatePlayerHP } = useGameStore.getState()
+  const { setPlayer, addMonster, removeMonster, addCombatLog, updatePlayerHP, setCharacterId } = useGameStore.getState()
   
   console.log('setupNetworkHandlers: 开始设置网络处理器...')
 
   // 监听欢迎消息
   network.onMessage('welcome', (data) => {
     console.log('连接到服务器:', data)
+  })
+
+  // 监听认证响应
+  network.onMessage('auth', (data) => {
+    console.log('✅ 认证成功:', data)
+    if (data.characterId) {
+      setCharacterId(data.characterId)
+      localStorage.setItem('characterId', data.characterId)
+      console.log(' characterId 已设置:', data.characterId)
+    }
   })
 
   // 监听玩家更新
@@ -183,12 +193,17 @@ function setupNetworkHandlers() {
 
   console.log('setupNetworkHandlers: 网络处理器设置完成')
 
+  // 从 localStorage 读取 characterId
+  const storedCharacterId = localStorage.getItem('characterId')
+  console.log('📦 localStorage characterId:', storedCharacterId)
+  
   // 模拟玩家数据（临时）- 延迟执行让渲染器先准备好
   setTimeout(() => {
     try {
       // 使用真实的测试角色 ID（从数据库种子数据）
+      const characterId = storedCharacterId || '1fc5bfa9-a54b-406c-abaa-adb032a3f59a' // 测试玩家 1
       const playerData = {
-        id: '1fc5bfa9-a54b-406c-abaa-adb032a3f59a', // 测试玩家 1
+        id: characterId,
         name: '测试玩家 1',
         level: 10,
         exp: 1000,
@@ -197,14 +212,16 @@ function setupNetworkHandlers() {
         maxHp: 100,
         mp: 50,
         maxMp: 50,
-        x: 400,
-        y: 300,
+        x: 0,
+        y: 0,
         zoneId: 'zone_1',
         isBot: false,
       }
       console.log('👤 setupNetworkHandlers: 设置玩家数据', playerData)
       setPlayer(playerData)
+      setCharacterId(characterId)
       console.log('✅ setupNetworkHandlers: 玩家数据设置完成')
+      console.log('🆔 characterId:', characterId)
     } catch (error) {
       console.error('❌ setupNetworkHandlers: 设置玩家数据失败', error)
     }

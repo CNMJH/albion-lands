@@ -107,6 +107,7 @@ interface GameState {
   setParty: (party: any) => void
   addFriend: (friend: any) => void
   setDeathSystem: (deathSystem: any) => void
+  setCharacterId: (characterId: string) => void
   setUIState: (uiType: keyof GameState['uiState'], visible: boolean) => void
   setUIStateAll: (uiState: GameState['uiState']) => void
   closeUI: (uiType: keyof GameState['uiState']) => void
@@ -247,6 +248,12 @@ export const useGameStore = create<GameState>()(
     // 设置死亡系统
     setDeathSystem: (deathSystem) => {
       set({ deathSystem })
+    },
+    
+    // 设置角色 ID
+    setCharacterId: (characterId) => {
+      set({ characterId })
+      console.log('🆔 characterId 已设置:', characterId)
     },
     
     // 添加怪物

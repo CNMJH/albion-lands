@@ -285,7 +285,16 @@ export class WebSocketServer {
     
     // 简化处理：暂时只记录日志
     // 实际项目中应实现 token 验证逻辑
-    this.fastify.log.info(`客户端认证：${clientId}`)
+    this.fastify.log.info(`客户端认证：${clientId}, characterId: ${client.characterId}`)
+    
+    // 发送认证成功响应（包含 characterId）
+    this.send(clientId, {
+      type: 'auth',
+      payload: {
+        success: true,
+        characterId: client.characterId,
+      },
+    });
     
     // 获取角色数据并发送初始状态
     try {
