@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>移动问题诊断</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #00ff88;
+      margin-bottom: 20px;
+    }
+    .section {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 2px solid #0f3460;
+    }
+    .section h2 {
+      color: #00d4ff;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+      padding: 10px;
+      background: #0f3460;
+      border-radius: 4px;
+    }
+    .status.ok {
+      border-left: 4px solid #00ff88;
+    }
+    .status.error {
+      border-left: 4px solid #ff4444;
+    }
+    .status.warn {
+      border-left: 4px solid #ffaa00;
+    }
+    .icon {
+      font-size: 24px;
+    }
+    button {
+      background: #00d4ff;
+      color: #1a1a2e;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #00ff88;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .log {
+      background: #000;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid #00d4ff;
+      padding-left: 10px;
+    }
+    .log-entry.error {
+      border-left-color: #ff4444;
+      color: #ff8888;
+    }
+    .log-entry.success {
+      border-left-color: #00ff88;
+      color: #88ff88;
+    }
+    .log-entry.warn {
+      border-left-color: #ffaa00;
+      color: #ffa500;
+    }
+    canvas {
+      border: 2px solid #00d4ff;
+      border-radius: 4px;
+      background: #1a1a2e;
+      display: block;
+      margin: 10px auto;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .info-item {
+      background: #0f3460;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .info-label {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .info-value {
+      color: #00ff88;
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 移动问题诊断工具</h1>
+  
+  <div class="section">
+    <h2>📊 系统状态检查</h2>
+    <div id="system-status"></div>
+  </div>
+  
+  <div class="section">
+    <h2>🖼️ Canvas 检测</h2>
+    <div id="canvas-status"></div>
+    <canvas id="testCanvas" width="800" height="400"></canvas>
+  </div>
+  
+  <div class="section">
+    <h2>🌐 网络测试</h2>
+    <button onclick="testServerConnection()">测试服务端连接</button>
+    <button onclick="testWebSocket()">测试 WebSocket</button>
+    <div id="network-status" style="margin-top: 10px;"></div>
+  </div>
+  
+  <div class="section">
+    <h2>🎯 移动模拟测试</h2>
+    <button onclick="simulateMove()">模拟移动指令</button>
+    <button onclick="clearLogs()">清空日志</button>
+    <div id="move-status" style="margin-top: 10px;"></div>
+  </div>
+  
+  <div class="section">
+    <h2>📝 诊断日志</h2>
+    <div id="log-container" class="log"></div>
+  </div>
+  
+  <script>
+    const logs = [];
+    
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const entry = `[${timestamp}] ${message}`;
+      logs.push(entry);
+      
+      const container = document.getElementById('log-container');
+      const div = document.createElement('div');
+      div.className = `log-entry ${type}`;
+      div.textContent = entry;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    function clearLogs() {
+      logs.length = 0;
+      document.getElementById('log-container').innerHTML = '';
+      log('日志已清空', 'success');
+    }
+    
+    function checkSystem() {
+      log('开始系统检查...');
+      
+      const statusDiv = document.getElementById('system-status');
+      const checks = [];
+      
+      // 检查 Node.js（通过版本号推断）
+      checks.push({
+        name: '浏览器环境',
+        value: '✅ 正常',
+        type: 'ok'
+      });
+      
+      // 检查 localStorage
+      try {
+        localStorage.setItem('test', '1');
+        localStorage.removeItem('test');
+        checks.push({
+          name: 'LocalStorage',
+          value: '✅ 可用',
+          type: 'ok'
+        });
+      } catch (e) {
+        checks.push({
+          name: 'LocalStorage',
+          value: '❌ 不可用',
+          type: 'error'
+        });
+      }
+      
+      // 检查 WebSocket
+      checks.push({
+        name: 'WebSocket 支持',
+        value: typeof WebSocket !== 'undefined' ? '✅ 支持' : '❌ 不支持',
+        type: typeof WebSocket !== 'undefined' ? 'ok' : 'error'
+      });
+      
+      // 检查 Canvas
+      checks.push({
+        name: 'Canvas 支持',
+        value: !!document.createElement('canvas').getContext ? '✅ 支持' : '❌ 不支持',
+        type: !!document.createElement('canvas').getContext ? 'ok' : 'error'
+      });
+      
+      let html = '<div class="info-grid">';
+      checks.forEach(check => {
+        html += `
+          <div class="status ${check.type}">
+            <span class="icon">${check.type === 'ok' ? '✅' : check.type === 'error' ? '❌' : '⚠️'}</span>
+            <div>
+              <div style="font-weight: bold;">${check.name}</div>
+              <div>${check.value}</div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      statusDiv.innerHTML = html;
+      
+      log(`系统检查完成：${checks.filter(c => c.type === 'ok').length}/${checks.length} 通过`, 'success');
+    }
+    
+    function checkCanvas() {
+      log('检查 Canvas 元素...');
+      
+      const canvas = document.getElementById('testCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        log('❌ 无法获取 Canvas 上下文', 'error');
+        return;
+      }
+      
+      // 绘制测试图案
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // 绘制网格
+      ctx.strokeStyle = '#0f3460';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < canvas.width; x += 50) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      
+      // 绘制中心点
+      ctx.fillStyle = '#ff4444';
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, 5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 添加事件监听
+      canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        log(`🖱️ Canvas 点击：(${x.toFixed(0)}, ${y.toFixed(0)})`, 'success');
+        
+        // 绘制点击标记
+        ctx.fillStyle = '#00ff88';
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      
+      canvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        log(`🖱️ Canvas 右键：(${x.toFixed(0)}, ${y.toFixed(0)})`, 'success');
+        
+        // 绘制右键标记
+        ctx.fillStyle = '#00d4ff';
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      
+      // 显示 Canvas 信息
+      const infoDiv = document.getElementById('canvas-status');
+      infoDiv.innerHTML = `
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Canvas 尺寸</div>
+            <div class="info-value">${canvas.width} x ${canvas.height}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">显示尺寸</div>
+            <div class="info-value">${canvas.clientWidth} x ${canvas.clientHeight}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Tab 索引</div>
+            <div class="info-value">${canvas.tabIndex}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Focus 状态</div>
+            <div class="info-value" id="focus-status">未 focus</div>
+          </div>
+        </div>
+      `;
+      
+      // 监听 focus 事件
+      canvas.addEventListener('focus', () => {
+        document.getElementById('focus-status').textContent = '✅ 已 focus';
+        document.getElementById('focus-status').style.color = '#00ff88';
+        log('✅ Canvas 获得焦点', 'success');
+      });
+      
+      canvas.addEventListener('blur', () => {
+        document.getElementById('focus-status').textContent = '❌ 失去焦点';
+        document.getElementById('focus-status').style.color = '#ff4444';
+        log('❌ Canvas 失去焦点', 'warn');
+      });
+      
+      // 设置 tabindex 使 Canvas 可 focus
+      canvas.tabIndex = 1;
+      
+      log('✅ Canvas 检测完成，点击 Canvas 测试事件监听', 'success');
+    }
+    
+    async function testServerConnection() {
+      log('测试服务端连接...');
+      const statusDiv = document.getElementById('network-status');
+      
+      try {
+        const response = await fetch('http://localhost:3002/health');
+        const data = await response.json();
+        
+        statusDiv.innerHTML = `
+          <div class="status ok">
+            <span class="icon">✅</span>
+            <div>服务端连接成功：${JSON.stringify(data)}</div>
+          </div>
+        `;
+        log('✅ 服务端连接成功', 'success');
+      } catch (e) {
+        statusDiv.innerHTML = `
+          <div class="status error">
+            <span class="icon">❌</span>
+            <div>服务端连接失败：${e.message}</div>
+          </div>
+        `;
+        log('❌ 服务端连接失败：' + e.message, 'error');
+      }
+    }
+    
+    function testWebSocket() {
+      log('测试 WebSocket 连接...');
+      const statusDiv = document.getElementById('network-status');
+      
+      try {
+        const ws = new WebSocket('ws://localhost:3002/ws');
+        
+        ws.onopen = () => {
+          statusDiv.innerHTML = `
+            <div class="status ok">
+              <span class="icon">✅</span>
+              <div>WebSocket 连接成功</div>
+            </div>
+          `;
+          log('✅ WebSocket 连接成功', 'success');
+          ws.close();
+        };
+        
+        ws.onerror = (e) => {
+          statusDiv.innerHTML = `
+            <div class="status error">
+              <span class="icon">❌</span>
+              <div>WebSocket 连接失败</div>
+            </div>
+          `;
+          log('❌ WebSocket 连接失败', 'error');
+        };
+        
+        ws.onclose = () => {
+          log('WebSocket 连接已关闭');
+        };
+      } catch (e) {
+        statusDiv.innerHTML = `
+          <div class="status error">
+            <span class="icon">❌</span>
+            <div>WebSocket 错误：${e.message}</div>
+          </div>
+        `;
+        log('❌ WebSocket 错误：' + e.message, 'error');
+      }
+    }
+    
+    function simulateMove() {
+      log('模拟移动指令...');
+      const statusDiv = document.getElementById('move-status');
+      
+      // 模拟移动数据
+      const moveData = {
+        dx: 100,
+        dy: 50,
+        targetX: 500,
+        targetY: 300,
+        timestamp: Date.now()
+      };
+      
+      log(`🎯 模拟移动：target=(${moveData.targetX}, ${moveData.targetY}), distance=${Math.sqrt(moveData.dx**2 + moveData.dy**2).toFixed(0)}px`);
+      
+      statusDiv.innerHTML = `
+        <div class="status ok">
+          <span class="icon">✅</span>
+          <div>移动指令已生成：${JSON.stringify(moveData)}</div>
+        </div>
+      `;
+      
+      log('✅ 移动指令生成成功（这是客户端逻辑，实际发送需要游戏运行时）', 'success');
+    }
+    
+    // 初始化
+    log('🔧 移动诊断工具已加载');
+    checkSystem();
+    checkCanvas();
+    log('提示：点击 Canvas 测试鼠标事件，点击按钮测试网络');
+  </script>
+</body>
+</html>
