@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { GameCanvas } from './renderer/GameCanvas'
 import { UIOverlay } from './components/UIOverlay'
 import { GatheringUI } from './components/GatheringUI'
@@ -105,24 +106,26 @@ function App() {
   }
 
   return (
-    <div id="game-container">
-      {/* 游戏渲染画布 */}
-      <GameCanvas />
-      
-      {/* UI 覆盖层 */}
-      <UIOverlay />
-      
-      {/* 采集 UI */}
-      <GatheringUI />
-      
-      {/* 制造 UI */}
-      <CraftingUI />
-      
-      {/* 任务系统 UI */}
-      <QuestTracker />
-      <QuestPanel />
-      <AchievementPanel />
-    </div>
+    <ErrorBoundary>
+      <div id="game-container">
+        {/* 游戏渲染画布 */}
+        <GameCanvas />
+        
+        {/* UI 覆盖层 */}
+        <UIOverlay />
+        
+        {/* 采集 UI */}
+        <GatheringUI />
+        
+        {/* 制造 UI */}
+        <CraftingUI />
+        
+        {/* 任务系统 UI */}
+        <QuestTracker />
+        <QuestPanel />
+        <AchievementPanel />
+      </div>
+    </ErrorBoundary>
   )
 }
 

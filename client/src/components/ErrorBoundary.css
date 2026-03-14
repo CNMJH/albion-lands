@@ -1,0 +1,170 @@
+.error-boundary {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+  padding: 20px;
+}
+
+.error-content {
+  max-width: 600px;
+  width: 100%;
+  background: rgba(22, 33, 62, 0.95);
+  border: 2px solid #e74c3c;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(231, 76, 60, 0.3);
+}
+
+.error-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.error-title {
+  font-size: 32px;
+  color: #ffffff;
+  margin: 0 0 20px 0;
+  font-weight: 700;
+}
+
+.error-message {
+  font-size: 16px;
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  word-break: break-all;
+}
+
+.error-details {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-details p {
+  color: #94a3b8;
+  font-size: 12px;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.error-details pre {
+  color: #64748b;
+  font-size: 11px;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.error-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.btn-retry,
+.btn-home {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-retry {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: #ffffff;
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.btn-home {
+  background: linear-gradient(135deg, #27ae60, #229954);
+  color: #ffffff;
+}
+
+.btn-home:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+}
+
+.error-tips {
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.3);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: left;
+}
+
+.error-tips h3 {
+  color: #3498db;
+  font-size: 16px;
+  margin: 0 0 15px 0;
+}
+
+.error-tips ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.error-tips li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .error-content {
+    padding: 25px;
+  }
+
+  .error-title {
+    font-size: 24px;
+  }
+
+  .error-icon {
+    font-size: 60px;
+  }
+
+  .error-actions {
+    flex-direction: column;
+  }
+
+  .btn-retry,
+  .btn-home {
+    width: 100%;
+  }
+}
