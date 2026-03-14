@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useGameStore } from '../stores/gameStore'
 import { network } from '../network/NetworkManager'
 import './CraftingUI.css'
@@ -32,6 +32,7 @@ export function CraftingUI() {
   const [crafting, setCrafting] = useState(false)
   const [craftProgress, setCraftProgress] = useState(0)
   const inventory = useGameStore((state) => state.inventory)
+  const craftIntervalRef = React.useRef<number | null>(null)
 
   // 监听快捷键
   useEffect(() => {
@@ -42,7 +43,13 @@ export function CraftingUI() {
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      // 清理定时器
+      if (craftIntervalRef.current) {
+        clearInterval(craftIntervalRef.current)
+      }
+    }
   }, [])
 
   // 获取配方列表
@@ -138,10 +145,13 @@ export function CraftingUI() {
     })
 
     // 模拟制造进度
-    const interval = setInterval(() => {
+    craftIntervalRef.current = window.setInterval(() => {
       setCraftProgress(prev => {
         if (prev >= 100) {
-          clearInterval(interval)
+          if (craftIntervalRef.current) {
+            clearInterval(craftIntervalRef.current)
+            craftIntervalRef.current = null
+          }
           return 100
         }
         return prev + 10

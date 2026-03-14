@@ -311,16 +311,20 @@ export class MonsterRenderer {
     } else {
       PIXI.Assets.load(texturePath).then(texture => {
         this.textureCache.set(texturePath, texture)
-        this.sprite!.texture = texture
-        
-        // 应用颜色调整
-        if (this.colorAdjustment) {
-          this.applyColorAdjustment()
+        if (this.sprite) {
+          this.sprite.texture = texture
+          
+          // 应用颜色调整
+          if (this.colorAdjustment) {
+            this.applyColorAdjustment()
+          }
         }
       }).catch(error => {
         console.warn(`加载纹理失败：${texturePath}`, error)
         // 使用占位符
-        this.sprite!.texture = this.createPlaceholderTexture()
+        if (this.sprite) {
+          this.sprite.texture = this.createPlaceholderTexture()
+        }
       })
     }
   }
@@ -374,10 +378,12 @@ export class MonsterRenderer {
       attackConfig.frameHeight
     ).then(() => {
       // 播放一次，不循环
-      this.animator!.play(false, () => {
-        // 动画完成后回到 idle
-        this.playIdle()
-      })
+      if (this.animator) {
+        this.animator.play(false, () => {
+          // 动画完成后回到 idle
+          this.playIdle()
+        })
+      }
     })
   }
 

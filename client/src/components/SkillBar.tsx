@@ -67,7 +67,9 @@ export function SkillBar() {
               // 图片加载失败时显示默认图标
               const target = e.target as HTMLImageElement
               target.style.display = 'none'
-              target.parentElement!.textContent = skill.key
+              if (target.parentElement) {
+                target.parentElement.textContent = skill.key
+              }
             }} />
           </div>
             <div className="skill-key">{skill.key}</div>
