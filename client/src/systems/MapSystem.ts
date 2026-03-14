@@ -46,6 +46,7 @@ export class MapSystem {
       const groundLayer = this.renderer.getStage('ground')
       console.log('🔍 MapSystem: 验证 ground 图层...')
       console.log('🔍 MapSystem: groundLayer =', groundLayer)
+      console.log('🔍 MapSystem: renderer.stages =', Array.from(this.renderer['stages'].keys()))
       
       if (groundLayer) {
         console.log('✅ MapSystem: ground 图层存在，子元素数量:', groundLayer.children.length)
@@ -62,14 +63,14 @@ export class MapSystem {
             alpha: sprite.alpha,
           })
         } else {
-          console.warn('⚠️ MapSystem: ground 图层存在但没有子元素，重新创建地面')
-          this.createGround()
+          console.warn('⚠️ MapSystem: ground 图层存在但没有子元素')
+          // 不要自动重试，避免无限循环
         }
       } else {
         console.error('❌ MapSystem: ground 图层不存在!')
         console.error('❌ MapSystem: 所有图层:', Array.from(this.renderer['stages'].keys()))
       }
-    }, 500)
+    }, 1000) // 增加到 1 秒延迟
     
     console.log('✅ MapSystem: 地图初始化完成')
   }

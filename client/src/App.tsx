@@ -136,6 +136,15 @@ function setupNetworkHandlers() {
   
   console.log('setupNetworkHandlers: 开始设置网络处理器...')
 
+  // 先从 localStorage 读取 characterId（如果有）
+  const storedCharacterId = localStorage.getItem('characterId')
+  console.log('📦 setupNetworkHandlers: localStorage characterId =', storedCharacterId)
+  
+  if (storedCharacterId) {
+    setCharacterId(storedCharacterId)
+    console.log('✅ setupNetworkHandlers: 已从 localStorage 恢复 characterId')
+  }
+
   // 监听欢迎消息
   network.onMessage('welcome', (data) => {
     console.log('连接到服务器:', data)
@@ -183,10 +192,6 @@ function setupNetworkHandlers() {
   })
 
   console.log('setupNetworkHandlers: 网络处理器设置完成')
-
-  // 从 localStorage 读取 characterId
-  const storedCharacterId = localStorage.getItem('characterId')
-  console.log('📦 localStorage characterId:', storedCharacterId)
   
   // 模拟玩家数据（临时）- 延迟执行让渲染器先准备好
   setTimeout(() => {

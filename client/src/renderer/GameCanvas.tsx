@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import * as PIXI from 'pixi.js'
 import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
 import { CombatRenderer } from './CombatRenderer'
@@ -53,13 +54,20 @@ export function GameCanvas() {
 
     // 初始化 Pixi 应用
     renderer.init(containerRef.current)
+    
+    console.log('🔍 GameCanvas: renderer.init() 已完成')
+    console.log('🔍 GameCanvas: renderer.app =', (renderer as any).app)
 
     // 自动 focus canvas 以接收键盘事件
+    // 使用更长的延迟确保 Pixi 完全初始化
     setTimeout(() => {
-      const canvas = renderer.getApp()?.view as HTMLCanvasElement
+      // 直接从 renderer 内部获取 app
+      const app = (renderer as any).app as PIXI.Application | null
       console.log('🔍 GameCanvas: 尝试获取 Canvas 元素...')
-      console.log('🔍 GameCanvas: renderer.getApp() =', renderer.getApp())
-      console.log('🔍 GameCanvas: canvas =', canvas)
+      console.log('🔍 GameCanvas: app =', app)
+      console.log('🔍 GameCanvas: app?.view =', app?.view)
+      
+      const canvas = app?.view as HTMLCanvasElement
       
       if (canvas) {
         canvas.focus()
@@ -85,9 +93,15 @@ export function GameCanvas() {
         if (containerRef.current) {
           const foundCanvas = containerRef.current.querySelector('canvas')
           console.log('🔍 GameCanvas: 从 container 中找到 canvas =', foundCanvas)
+          
+          if (foundCanvas) {
+            console.log('✅ GameCanvas: 找到 Canvas，手动使用')
+            foundCanvas.focus()
+            foundCanvas.tabIndex = 0
+          }
         }
       }
-    }, 200)
+    }, 500)
 
     // 初始化地图系统
     const mapSystem = new MapSystem(renderer)
