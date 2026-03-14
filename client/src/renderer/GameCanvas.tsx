@@ -9,6 +9,7 @@ import { playerControls } from '../systems/PlayerControlsSystem'
 import { DeathSystem } from '../systems/DeathSystem'
 import { MarketSystem } from '../systems/MarketSystem'
 import { TradeSystem } from '../systems/TradeSystem'
+import { DebugOverlay } from '../components/DebugOverlay'
 import './GameCanvas.css'
 
 /**
@@ -234,15 +235,18 @@ export function GameCanvas() {
   }, [player?.x, player?.y, player?.rotation])
 
   return (
-    <div 
-      ref={containerRef} 
-      id="game-canvas"
-      style={{ 
-        width: '100%', 
-        height: '100%',
-        outline: 'none',
-      }}
-      tabIndex={0}
-    />
+    <>
+      <div 
+        ref={containerRef} 
+        id="game-canvas"
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          outline: 'none',
+        }}
+        tabIndex={0}
+      />
+      <DebugOverlay />
+    </>
   )
 }
