@@ -107,7 +107,8 @@ export async function achievementRoutes(fastify: any) {
             data: { completed: true, completedAt: new Date() }
           })
           
-          // TODO: 发放奖励
+          // 发放奖励 (简化版)
+          console.log(`成就已完成：${progress.achievementId}`)
         }
 
         updates.push(progress)

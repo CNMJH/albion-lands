@@ -10,7 +10,7 @@ export async function craftingRoutes(fastify: any) {
   // 获取所有配方
   fastify.get('/crafting/recipes', async (request: any, reply: any) => {
     try {
-      // TODO: 实现配方系统
+      // 临时返回空列表，等待配方系统实现
       return reply.send({
         success: true,
         recipes: []
@@ -36,10 +36,10 @@ export async function craftingRoutes(fastify: any) {
         })
       }
 
-      // TODO: 实现制造逻辑
+      // 临时返回成功，等待配方系统实现
       return reply.send({
         success: true,
-        message: '制造功能开发中'
+        message: '制造功能开发中，请稍后'
       })
     } catch (error: any) {
       fastify.log.error('制造物品失败：' + String(error))
