@@ -74,6 +74,12 @@ export class EquipmentSystem {
       console.log('📡 请求装备:', url)
       const response = await fetch(url)
       console.log('📬 装备响应状态:', response.status)
+      
+      if (!response.ok) {
+        console.error('❌ 装备响应错误:', response.status)
+        return
+      }
+      
       const data = await response.json()
       console.log('📦 装备响应数据:', data)
 
@@ -97,6 +103,12 @@ export class EquipmentSystem {
       console.log('📡 请求属性:', url)
       const response = await fetch(url)
       console.log('📬 属性响应状态:', response.status)
+      
+      if (!response.ok) {
+        console.error('❌ 属性响应错误:', response.status)
+        return
+      }
+      
       const data = await response.json()
       console.log('📦 属性响应数据:', data)
 

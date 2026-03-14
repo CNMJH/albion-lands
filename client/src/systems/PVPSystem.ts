@@ -49,6 +49,11 @@ export class PVPSystem extends SimpleEventEmitter {
         }),
       });
 
+      if (!response.ok) {
+        console.error('🗡️ PVP 攻击响应错误:', response.status);
+        return { success: false, message: '攻击失败' };
+      }
+
       const result = await response.json();
 
       if (result.success) {
@@ -117,6 +122,12 @@ export class PVPSystem extends SimpleEventEmitter {
   async getPVPStats(): Promise<any> {
     try {
       const response = await fetch(`http://localhost:3002/api/v1/pvp/stats/${this.characterId}`);
+      
+      if (!response.ok) {
+        console.error('获取 PVP 统计响应错误:', response.status);
+        return null;
+      }
+      
       const result = await response.json();
 
       if (result.success) {
@@ -138,6 +149,12 @@ export class PVPSystem extends SimpleEventEmitter {
       const response = await fetch(
         `http://localhost:3002/api/v1/pvp/leaderboard?type=${type}&limit=${limit}`
       );
+      
+      if (!response.ok) {
+        console.error('获取排行榜响应错误:', response.status);
+        return [];
+      }
+      
       const result = await response.json();
 
       if (result.success) {
@@ -159,6 +176,12 @@ export class PVPSystem extends SimpleEventEmitter {
       const response = await fetch(
         `http://localhost:3002/api/v1/pvp/history/${this.characterId}?limit=${limit}`
       );
+      
+      if (!response.ok) {
+        console.error('获取击杀记录响应错误:', response.status);
+        return [];
+      }
+      
       const result = await response.json();
 
       if (result.success) {

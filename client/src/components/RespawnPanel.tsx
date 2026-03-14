@@ -20,6 +20,12 @@ export const RespawnPanel: React.FC = () => {
     
     try {
       const response = await fetch(`http://localhost:3002/api/v1/respawn/${characterId}`);
+      
+      if (!response.ok) {
+        console.error('加载复活点响应错误:', response.status);
+        return;
+      }
+      
       const data = await response.json();
       
       if (data.success) {
@@ -52,6 +58,12 @@ export const RespawnPanel: React.FC = () => {
           y: player.y
         })
       });
+      
+      if (!response.ok) {
+        console.error('绑定复活点响应错误:', response.status);
+        showMessage('error', '绑定失败，请重试');
+        return;
+      }
 
       const data = await response.json();
       
@@ -80,6 +92,12 @@ export const RespawnPanel: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ characterId })
       });
+      
+      if (!response.ok) {
+        console.error('重置复活点响应错误:', response.status);
+        showMessage('error', '重置失败，请重试');
+        return;
+      }
 
       const data = await response.json();
       

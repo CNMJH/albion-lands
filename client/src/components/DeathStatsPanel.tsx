@@ -40,6 +40,12 @@ export const DeathStatsPanel: React.FC = () => {
     try {
       // 加载死亡记录
       const recordsResponse = await fetch(`http://localhost:3002/api/v1/combat/deaths/${characterId}?limit=50`);
+      
+      if (!recordsResponse.ok) {
+        console.error('加载死亡记录响应错误:', recordsResponse.status);
+        return;
+      }
+      
       const recordsData = await recordsResponse.json();
       
       if (recordsData.success) {
