@@ -13,6 +13,7 @@ import { RespawnPanel } from './RespawnPanel'
 import { ToastContainer } from './Toast'
 import { ShortcutHints } from './ShortcutHints'
 import { PerformanceMonitorPanel } from './PerformanceMonitor'
+import { DebugConsoleComponent } from './DebugConsole'
 import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
 import './UI_Layout.css'
@@ -122,6 +123,9 @@ export function UIOverlay() {
 
       {/* 性能监控 */}
       <PerformanceMonitorPanel />
+
+      {/* 调试控制台 */}
+      <DebugConsoleComponent />
     </div>
   )
 }
