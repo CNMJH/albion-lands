@@ -1,63 +1,61 @@
 @echo off
-title Hulu Lands - 强制清除缓存并重启
+title Hulu Lands - Force Restart
 color 0C
 
 echo.
 echo ========================================
-echo   呼噜大陆 - 强制清除缓存
+echo   Hulu Lands - Force Restart
 echo ========================================
 echo.
 
-echo [1/5] 停止所有进程...
+echo [1/5] Stopping all processes...
 taskkill /F /IM node.exe >nul 2>&1
 timeout /t 1 /nobreak >nul
-echo   ✅ 完成
+echo   OK: Processes stopped
 echo.
 
-echo [2/5] 删除 Vite 缓存...
+echo [2/5] Deleting Vite cache...
 if exist client\node_modules\.vite (
     rmdir /s /q client\node_modules\.vite
-    echo   ✅ Vite 缓存已删除
+    echo   OK: Vite cache deleted
 )
 if exist client\dist (
     rmdir /s /q client\dist
-    echo   ✅ 构建目录已删除
+    echo   OK: Build directory deleted
 )
 echo.
 
-echo [3/5] 删除服务端缓存...
+echo [3/5] Deleting server cache...
 if exist server\.tsx (
     rmdir /s /q server\.tsx
-    echo   ✅ TSX 缓存已删除
+    echo   OK: TSX cache deleted
 )
 echo.
 
-echo [4/5] 重新构建...
+echo [4/5] Rebuilding...
 cd client
 call npm run build >nul 2>&1
 if errorlevel 1 (
-    echo   ❌ 构建失败！
+    echo   ERROR: Build failed!
     pause
     exit /b 1
 )
-echo   ✅ 构建完成
+echo   OK: Build complete
 cd ..
 echo.
 
-echo [5/5] 启动游戏...
+echo [5/5] Starting game...
 start "Hulu Lands Server" cmd /k "cd /d %~dp0server && npm run dev"
 timeout /t 2 /nobreak >nul
 start "Hulu Lands Client" cmd /k "cd /d %~dp0client && npm run dev"
-timeout /t 5 /nobreak >nul
 
 echo.
 echo ========================================
-echo        启动完成！
+echo   Game Starting...
 echo ========================================
 echo.
-echo ⚠️  重要：请按 Ctrl+F5 强制刷新浏览器！
+echo Server: http://localhost:3002
+echo Client: http://localhost:3001
 echo.
-echo 游戏地址：http://localhost:3001
-echo.
-echo 按任意键关闭此窗口
+echo Press any key to exit this window...
 pause >nul

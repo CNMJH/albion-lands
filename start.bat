@@ -4,57 +4,57 @@ color 0A
 
 echo.
 echo ========================================
-echo     呼噜大陆 - 快速启动工具
+echo     Hulu Lands - Quick Start
 echo ========================================
 echo.
 
-:: Kill old processes
-echo [1/4] 停止旧进程...
+REM Kill old processes
+echo [1/4] Stopping old processes...
 taskkill /F /IM node.exe >nul 2>&1
 timeout /t 1 /nobreak >nul
-echo   ✅ 完成
+echo   OK: Processes stopped
 echo.
 
-:: Start server
-echo [2/4] 启动服务端...
+REM Start server
+echo [2/4] Starting server...
 start "Hulu Lands Server" cmd /k "cd /d %~dp0server && npm run dev"
 timeout /t 2 /nobreak >nul
-echo   ✅ 服务端启动中
+echo   OK: Server starting
 echo.
 
-:: Start client
-echo [3/4] 启动客户端...
+REM Start client
+echo [3/4] Starting client...
 start "Hulu Lands Client" cmd /k "cd /d %~dp0client && npm run dev"
 timeout /t 2 /nobreak >nul
-echo   ✅ 客户端启动中
+echo   OK: Client starting
 echo.
 
-:: Open browser
-echo [4/4] 打开浏览器...
+REM Open browser
+echo [4/4] Opening browser...
 timeout /t 3 /nobreak >nul
 start http://localhost:3001
-echo   ✅ 浏览器已打开
+echo   OK: Browser opened
 echo.
 
 echo ========================================
-echo        启动完成！
+echo        Start Complete!
 echo ========================================
 echo.
-echo 游戏地址：http://localhost:3001
+echo Game URL: http://localhost:3001
 echo.
-echo 测试账号:
-echo   邮箱：test1@example.com
-echo   密码：password123
+echo Test Account:
+echo   Email: test1@example.com
+echo   Password: password123
 echo.
-echo 快捷键:
-echo   右键 - 移动/攻击
-echo   左键 - 普通攻击
-echo   B - 背包
-echo   C - 装备
-echo   M - 拍卖行
-echo   Enter - 聊天
-echo   Escape - 关闭 UI
+echo Controls:
+echo   Right Click - Move/Attack
+echo   WASD - Move
+echo   QWERAS - Skills
+echo   B - Backpack
+echo   C - Equipment
+echo   E - Pick up
+echo   F10 - Shortcuts
+echo   Escape - Close UI
 echo.
-echo 按任意键关闭此窗口
-echo ========================================
+echo Press any key to exit...
 pause >nul
