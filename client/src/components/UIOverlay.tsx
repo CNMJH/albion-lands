@@ -12,6 +12,7 @@ import { DeathStatsPanel } from './DeathStatsPanel'
 import { RespawnPanel } from './RespawnPanel'
 import { ToastContainer } from './Toast'
 import { ShortcutHints } from './ShortcutHints'
+import { PerformanceMonitorPanel } from './PerformanceMonitor'
 import { useGameStore } from '../stores/gameStore'
 import './UIOverlay-optimized.css'
 import './UI_Layout.css'
@@ -118,6 +119,9 @@ export function UIOverlay() {
 
       {/* 快捷键提示 */}
       <ShortcutHints />
+
+      {/* 性能监控 */}
+      <PerformanceMonitorPanel />
     </div>
   )
 }

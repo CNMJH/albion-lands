@@ -1,3 +1,5 @@
+import { recordNetworkLatency } from '../utils/performanceMonitor'
+
 // 简单的事件发射器 (浏览器环境)
 class EventEmitter {
   private events: Map<string, Array<(...args: any[]) => void>> = new Map()
@@ -236,7 +238,12 @@ export class NetworkManager extends EventEmitter {
   private handleMessage(data: string): void {
     try {
       const packet: GamePacket = JSON.parse(data)
-      console.log(`接收消息 [${packet.type}]:`, packet.payload)
+      const latency = Date.now() - packet.timestamp
+      
+      // 记录网络延迟
+      recordNetworkLatency(latency)
+      
+      console.log(`接收消息 [${packet.type}]:`, packet.payload, `延迟：${latency}ms`)
 
       // 调用对应的处理器
       const handlers = this.messageHandlers.get(packet.type)
