@@ -41,37 +41,6 @@ export class MapSystem {
     // 创建地面
     this.createGround()
     
-    // 延迟验证地面是否创建成功
-    setTimeout(() => {
-      const groundLayer = this.renderer.getStage('ground')
-      console.log('🔍 MapSystem: 验证 ground 图层...')
-      console.log('🔍 MapSystem: groundLayer =', groundLayer)
-      console.log('🔍 MapSystem: renderer.stages =', Array.from(this.renderer['stages'].keys()))
-      
-      if (groundLayer) {
-        console.log('✅ MapSystem: ground 图层存在，子元素数量:', groundLayer.children.length)
-        if (groundLayer.children.length > 0) {
-          const sprite = groundLayer.children[0] as any
-          console.log('✅ MapSystem: 地面精灵已添加', {
-            type: sprite.constructor.name,
-            width: sprite.width,
-            height: sprite.height,
-            x: sprite.x,
-            y: sprite.y,
-            anchor: sprite.anchor,
-            visible: sprite.visible,
-            alpha: sprite.alpha,
-          })
-        } else {
-          console.warn('⚠️ MapSystem: ground 图层存在但没有子元素')
-          // 不要自动重试，避免无限循环
-        }
-      } else {
-        console.error('❌ MapSystem: ground 图层不存在!')
-        console.error('❌ MapSystem: 所有图层:', Array.from(this.renderer['stages'].keys()))
-      }
-    }, 1000) // 增加到 1 秒延迟
-    
     console.log('✅ MapSystem: 地图初始化完成')
   }
   

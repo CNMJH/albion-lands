@@ -43,25 +43,10 @@ export function EquipmentPanel() {
     // 从 gameStore 获取 characterId（优先）
     const charId = player?.id || localStorage.getItem('characterId') || ''
     
-    console.log('🔍 EquipmentPanel: characterId =', charId)
-    console.log('🔍 EquipmentPanel: player =', player)
-    console.log('🔍 EquipmentPanel: localStorage.characterId =', localStorage.getItem('characterId'))
-    
     // 如果 characterId 为空，不初始化装备系统
     if (!charId) {
-      console.warn('⚠️ EquipmentPanel: characterId 为空，等待登录')
-      
-      // 等待 2 秒后重试
-      const timer = setTimeout(() => {
-        const retryCharId = player?.id || localStorage.getItem('characterId') || ''
-        if (retryCharId) {
-          console.log('✅ EquipmentPanel: 重试成功，characterId =', retryCharId)
-        } else {
-          console.warn('⚠️ EquipmentPanel: 重试失败，characterId 仍为空')
-        }
-      }, 2000)
-      
-      return () => clearTimeout(timer)
+      // 静默等待，不显示警告
+      return
     }
     
     const system = new EquipmentSystem(charId)

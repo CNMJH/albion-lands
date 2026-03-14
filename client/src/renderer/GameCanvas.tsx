@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import * as PIXI from 'pixi.js'
 import { useGameStore } from '../stores/gameStore'
 import { GameRenderer } from '../renderer/GameRenderer'
 import { CombatRenderer } from './CombatRenderer'
@@ -15,23 +14,23 @@ import './GameCanvas.css'
 
 /**
  * 游戏画布组件
- * 负责初始化和运行 Pixi.js 渲染器
  */
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const rendererRef = useRef<GameRenderer | null>(null)
+  const rendererInstance = useRef<GameRenderer | null>(null)
   const combatRendererRef = useRef<CombatRenderer | null>(null)
-  const playerControlsRef = useRef<ReturnType<typeof playerControls.init> | null>(null)
   const minimapRef = useRef<MinimapRenderer | null>(null)
   const deathSystemRef = useRef<DeathSystem | null>(null)
-  const { player, characterId, setDeathSystem } = useGameStore()
-  
-  // 使用 useRef 存储渲染器，避免闭包问题
-  const rendererInstance = useRef<GameRenderer | null>(null)
+  const playerControlsRef = useRef<ReturnType<typeof playerControls.init> | null>(null)
+
+  const { player, characterId } = useGameStore()
 
   useEffect(() => {
+    console.log('===== GameCanvas useEffect 开始 =====')
+    
     if (!containerRef.current) {
-      console.log('GameCanvas: 容器未就绪，跳过初始化')
+      console.error('❌ GameCanvas: containerRef.current 为空')
       return
     }
 
@@ -46,7 +45,7 @@ export function GameCanvas() {
       width: window.innerWidth,
       height: window.innerHeight,
       resolution: window.devicePixelRatio,
-      backgroundColor: 0x2d5016, // 深绿色背景（确保能看到）
+      backgroundColor: 0x2d5016,
     })
 
     rendererRef.current = renderer
@@ -55,53 +54,8 @@ export function GameCanvas() {
     // 初始化 Pixi 应用
     renderer.init(containerRef.current)
     
-    console.log('🔍 GameCanvas: renderer.init() 已完成')
-    console.log('🔍 GameCanvas: renderer.app =', (renderer as any).app)
-
-    // 自动 focus canvas 以接收键盘事件
-    // 使用更长的延迟确保 Pixi 完全初始化
-    setTimeout(() => {
-      // 直接从 renderer 内部获取 app
-      const app = (renderer as any).app as PIXI.Application | null
-      console.log('🔍 GameCanvas: 尝试获取 Canvas 元素...')
-      console.log('🔍 GameCanvas: app =', app)
-      console.log('🔍 GameCanvas: app?.view =', app?.view)
-      
-      const canvas = app?.view as HTMLCanvasElement
-      
-      if (canvas) {
-        canvas.focus()
-        canvas.tabIndex = 0
-        console.log('🎮 GameCanvas: Canvas 已 focus，可以接收键盘事件')
-        
-        // 添加点击事件，确保点击 Canvas 时获得焦点
-        canvas.addEventListener('click', () => {
-          canvas.focus()
-          console.log('🖱️ Canvas 被点击，重新获得焦点')
-        })
-        
-        // 测试键盘事件
-        canvas.addEventListener('keydown', (e) => {
-          console.log('⌨️ [Canvas 原生] 键盘按下:', e.code)
-        })
-      } else {
-        console.error('❌ GameCanvas: 无法获取 Canvas 元素')
-        console.error('❌ GameCanvas: renderer =', renderer)
-        console.error('❌ GameCanvas: containerRef.current =', containerRef.current)
-        
-        // 尝试从 container 中查找
-        if (containerRef.current) {
-          const foundCanvas = containerRef.current.querySelector('canvas')
-          console.log('🔍 GameCanvas: 从 container 中找到 canvas =', foundCanvas)
-          
-          if (foundCanvas) {
-            console.log('✅ GameCanvas: 找到 Canvas，手动使用')
-            foundCanvas.focus()
-            foundCanvas.tabIndex = 0
-          }
-        }
-      }
-    }, 500)
+    console.log('✅ GameCanvas: renderer.init() 已完成')
+    console.log('✅ GameCanvas: renderer.app =', (renderer as any).app)
 
     // 初始化地图系统
     const mapSystem = new MapSystem(renderer)
@@ -113,7 +67,7 @@ export function GameCanvas() {
     const combatRenderer = new CombatRenderer(renderer)
     combatRendererRef.current = combatRenderer
 
-    // 创建攻击效果渲染器（攻击反馈）
+    // 创建攻击效果渲染器
     new AttackEffectRenderer(renderer)
     console.log('⚔️ 攻击效果渲染器已创建')
 
@@ -125,49 +79,31 @@ export function GameCanvas() {
     // 初始化死亡系统
     const deathSystem = new DeathSystem(renderer, characterId || 'unknown')
     deathSystemRef.current = deathSystem
-    setDeathSystem(deathSystem)
-    console.log('💀 死亡系统已创建 (characterId:', characterId + ')')
+    console.log('💀 死亡系统已创建')
 
     // 初始化市场系统
     const marketSystem = new MarketSystem(characterId || 'unknown')
     useGameStore.getState().marketSystem = marketSystem
-    console.log('🏪 市场系统已创建 (characterId:', characterId + ')')
+    console.log('🏪 市场系统已创建')
 
     // 初始化交易系统
     const tradeSystem = new TradeSystem(characterId || 'unknown')
     useGameStore.getState().tradeSystem = tradeSystem
-    console.log('🤝 交易系统已创建 (characterId:', characterId + ')')
+    console.log('🤝 交易系统已创建')
 
     // 初始化玩家操作系统
     const controls = playerControls.init(renderer)
     playerControlsRef.current = controls
 
-    // 创建玩家精灵（立即创建，不要延迟）
+    // 创建玩家精灵
     console.log('GameCanvas: 准备创建玩家精灵...')
-    const layer = renderer.getLayer('characters')
-    console.log('GameCanvas: characters 图层存在吗？', !!layer)
     combatRenderer.createPlayerSprite()
     console.log('GameCanvas: 玩家精灵已创建')
-
-    // 处理窗口大小变化（使用防抖）
-    let resizeTimeout: ReturnType<typeof setTimeout> | null = null
-    const handleResize = () => {
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout)
-      }
-      resizeTimeout = setTimeout(() => {
-        if (rendererInstance.current) {
-          rendererInstance.current.resize(window.innerWidth, window.innerHeight)
-        }
-      }, 100) // 100ms 防抖
-    }
-
-    window.addEventListener('resize', handleResize)
 
     // 启动游戏循环
     renderer.start()
 
-    // 监听渲染器更新事件，处理玩家输入
+    // 监听渲染器更新事件
     const handleUpdate = (deltaTime: number) => {
       if (playerControlsRef.current) {
         playerControlsRef.current.update(deltaTime)
@@ -181,14 +117,14 @@ export function GameCanvas() {
     }
     renderer.on('update', handleUpdate)
 
-    // 监听交互事件，显示交互范围
+    // 监听交互事件
     renderer.on('playerInteract', (data: any) => {
       if (combatRendererRef.current) {
         combatRendererRef.current.showInteractRange(data.x, data.y, data.range)
       }
     })
 
-    // 监听技能释放事件，显示技能特效（从 PlayerControlsSystem 获取 CombatSystem）
+    // 监听技能释放事件
     const savedControls = playerControlsRef.current
     if (savedControls && (savedControls as any).combatSystem) {
       const combatSys = (savedControls as any).combatSystem
@@ -200,67 +136,32 @@ export function GameCanvas() {
       })
     }
 
-    console.log('GameCanvas: 初始化完成')
+    console.log('✅ GameCanvas: 初始化完成')
 
     // 清理函数
     return () => {
-      console.log('GameCanvas: 清理函数被调用')
-      
-      // 先移除事件监听
-      window.removeEventListener('resize', handleResize)
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout)
-      }
-      
-      // 移除渲染器更新监听
+      console.log('===== GameCanvas useEffect 清理 =====')
       if (rendererRef.current) {
-        rendererRef.current.off('update', handleUpdate)
+        rendererRef.current = null
       }
-      
-      // 清理渲染器
-      try {
-        if (playerControlsRef.current) {
-          console.log('GameCanvas: 清理玩家操作系统...')
-          playerControlsRef.current = null
-        }
-        
-        if (combatRendererRef.current) {
-          console.log('GameCanvas: 清理战斗渲染器...')
-          combatRendererRef.current.clear()
-          combatRendererRef.current = null
-        }
-        
-        if (minimapRef.current) {
-          console.log('GameCanvas: 清理小地图...')
-          minimapRef.current.destroy()
-          minimapRef.current = null
-        }
-        
-        if (rendererRef.current) {
-          console.log('GameCanvas: 清理游戏渲染器...')
-          rendererRef.current.destroy()
-          rendererRef.current = null
-          rendererInstance.current = null
-        }
-      } catch (error) {
-        console.error('GameCanvas: 清理时出错', error)
+      if (playerControlsRef.current) {
+        playerControlsRef.current = null
       }
-      
-      console.log('GameCanvas: 清理完成')
     }
-  }, []) // 空依赖数组，只运行一次
+  }, [])
 
-  // 当玩家位置更新时，更新摄像机和旋转
+  // 监听玩家位置变化
   useEffect(() => {
-    if (rendererInstance.current && player) {
-      console.log('📍 玩家位置更新:', { x: player.x, y: player.y })
-      
+    if (!player) return
+    
+    console.log('📍 玩家位置更新:', { x: player.x, y: player.y })
+    
+    if (rendererInstance.current) {
       rendererInstance.current.setCameraTarget(player.x, player.y)
-      
-      // 更新玩家精灵位置和旋转
-      if (combatRendererRef.current) {
-        combatRendererRef.current.updatePlayerPosition(player.x, player.y, player.rotation)
-      }
+    }
+    
+    if (combatRendererRef.current) {
+      combatRendererRef.current.updatePlayerPosition(player.x, player.y, player.rotation)
     }
   }, [player?.x, player?.y, player?.rotation])
 

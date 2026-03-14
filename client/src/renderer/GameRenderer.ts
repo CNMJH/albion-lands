@@ -63,6 +63,8 @@ export class GameRenderer extends EventEmitter {
    * 初始化渲染器
    */
   public init(container: HTMLElement): void {
+    console.log('🎨 GameRenderer: 开始初始化...')
+    
     // 创建 Pixi 应用
     this.app = new PIXI.Application({
       width: this.config.width,
@@ -74,19 +76,26 @@ export class GameRenderer extends EventEmitter {
       autoDensity: true,
     })
 
+    console.log('✅ GameRenderer: Pixi Application 已创建')
+
     // 添加到 DOM
     container.appendChild(this.app.view as HTMLCanvasElement)
+    console.log('✅ GameRenderer: Canvas 已添加到 DOM')
 
     // 设置 Canvas 可 focus
     const canvas = this.app.view as HTMLCanvasElement
     canvas.tabIndex = 0
     canvas.style.outline = 'none'
     
-    // 自动 focus
+    // 立即 focus
+    canvas.focus()
+    console.log('✅ GameRenderer: Canvas 已立即 focus')
+    
+    // 再次 focus 确保（某些浏览器需要）
     setTimeout(() => {
       canvas.focus()
-      console.log('✅ Canvas 已自动 focus')
-    }, 100)
+      console.log('✅ GameRenderer: Canvas 延时 focus 确认')
+    }, 50)
 
     // 初始化图层
     this.initLayers()
@@ -94,9 +103,10 @@ export class GameRenderer extends EventEmitter {
     // 绑定输入事件
     this.bindInputEvents()
 
-    console.log('游戏渲染器初始化完成')
+    console.log('✅ 游戏渲染器初始化完成')
     console.log('🖼️ Canvas 尺寸:', this.config.width, 'x', this.config.height)
     console.log('🎯 Canvas tabindex:', canvas.tabIndex)
+    console.log('🎯 Canvas 元素:', canvas)
   }
 
   /**
